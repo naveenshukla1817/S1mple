@@ -1387,6 +1387,59 @@ h3{font-size:17px;color:var(--ink)}
 </div>
 
 
+<!-- BRAINSTORM BOARDS -->
+<div id="boardPickerModal" class="modal" style="display:none;position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.58);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px">
+  <div class="command-card board-picker-v2">
+    <div class="panel-head" style="background:#211f1b;border-color:#3a342c">
+      <div><p class="kicker">BRAINSTORM</p><h2 style="color:#f1e7d8;font-size:26px">Your Boards</h2></div>
+      <button class="top-btn" id="closeBoards">×</button>
+    </div>
+    <div id="boardListV2" class="board-list-v2"></div>
+  </div>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div id="commandPalette" class="modal" style="display:none;position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.58);backdrop-filter:blur(8px);padding:12vh 18px 18px;align-items:flex-start;justify-content:center">
+  <div class="command-card">
+    <div class="command-search">
+      <span>⌘</span>
+      <input id="commandInput" placeholder="Search or jump to…" autocomplete="off">
+      <kbd>ESC</kbd>
+    </div>
+    <div id="commandResults" class="command-results"></div>
+  </div>
+</div>
+
+<!-- FOCUS MODE -->
+<div id="focusModal" class="modal" style="display:none;position:fixed;inset:0;z-index:125;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:18px">
+  <div class="focus-card">
+    <p class="kicker">FOCUS MODE</p>
+    <h2 id="focusTitle">Focus</h2>
+    <p id="focusDescription" class="focus-description"></p>
+    <div id="focusTimer" class="focus-timer">25:00</div>
+    <div class="focus-actions">
+      <button class="btn-dark" id="focusStart">Start</button>
+      <button class="btn-light" id="focusReset">Reset</button>
+      <button class="btn-light" id="focusClose">Exit Focus</button>
+    </div>
+  </div>
+</div>
+
+<!-- STICKY COLOR MENU -->
+<div id="stickyColorMenu" class="sticky-color-menu hidden">
+  <button data-note-color="note-yellow" title="Ideas">Yellow</button>
+  <button data-note-color="note-blue" title="Research">Blue</button>
+  <button data-note-color="note-green" title="Action">Green</button>
+  <button data-note-color="note-pink" title="Problem">Pink</button>
+  <button data-note-color="note-purple" title="Important">Purple</button>
+</div>
+
+<!-- TOASTS -->
+<div id="toastStack" class="toast-stack"></div>
+
+
+
+
 <script>
 
 /* ============================================================
@@ -3571,57 +3624,6 @@ document.querySelectorAll(".modal").forEach(modal=>{
 })();
 </script>
 
-
-
-<!-- BRAINSTORM BOARDS -->
-<div id="boardPickerModal" class="modal" style="display:none;position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.58);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px">
-  <div class="command-card board-picker-v2">
-    <div class="panel-head" style="background:#211f1b;border-color:#3a342c">
-      <div><p class="kicker">BRAINSTORM</p><h2 style="color:#f1e7d8;font-size:26px">Your Boards</h2></div>
-      <button class="top-btn" id="closeBoards">×</button>
-    </div>
-    <div id="boardListV2" class="board-list-v2"></div>
-  </div>
-</div>
-
-<!-- COMMAND PALETTE -->
-<div id="commandPalette" class="modal" style="display:none;position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.58);backdrop-filter:blur(8px);padding:12vh 18px 18px;align-items:flex-start;justify-content:center">
-  <div class="command-card">
-    <div class="command-search">
-      <span>⌘</span>
-      <input id="commandInput" placeholder="Search or jump to…" autocomplete="off">
-      <kbd>ESC</kbd>
-    </div>
-    <div id="commandResults" class="command-results"></div>
-  </div>
-</div>
-
-<!-- FOCUS MODE -->
-<div id="focusModal" class="modal" style="display:none;position:fixed;inset:0;z-index:125;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:18px">
-  <div class="focus-card">
-    <p class="kicker">FOCUS MODE</p>
-    <h2 id="focusTitle">Focus</h2>
-    <p id="focusDescription" class="focus-description"></p>
-    <div id="focusTimer" class="focus-timer">25:00</div>
-    <div class="focus-actions">
-      <button class="btn-dark" id="focusStart">Start</button>
-      <button class="btn-light" id="focusReset">Reset</button>
-      <button class="btn-light" id="focusClose">Exit Focus</button>
-    </div>
-  </div>
-</div>
-
-<!-- STICKY COLOR MENU -->
-<div id="stickyColorMenu" class="sticky-color-menu hidden">
-  <button data-note-color="note-yellow" title="Ideas">Yellow</button>
-  <button data-note-color="note-blue" title="Research">Blue</button>
-  <button data-note-color="note-green" title="Action">Green</button>
-  <button data-note-color="note-pink" title="Problem">Pink</button>
-  <button data-note-color="note-purple" title="Important">Purple</button>
-</div>
-
-<!-- TOASTS -->
-<div id="toastStack" class="toast-stack"></div>
 
 
 <script>
