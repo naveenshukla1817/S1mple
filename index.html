@@ -642,15 +642,6 @@ h3{font-size:17px;color:var(--ink)}
 .brain-ref-color-menu .brain-ref-yellow{background:var(--yellow)} .brain-ref-color-menu .brain-ref-pink{background:var(--pink)}
 .brain-ref-color-menu .brain-ref-green{background:var(--green)} .brain-ref-color-menu .brain-ref-blue{background:var(--blue)}
 .brain-ref-color-menu .brain-ref-purple{background:var(--purple)}
-/* Requested: larger Create Task modal typography, approximately 2x the original body/UI size. */
-#taskModal > div{font-size:22px!important}
-#taskModal .kicker{font-size:16px!important;line-height:1.2}
-#taskModal h2{font-size:38px!important}
-#taskModal label{font-size:22px!important;gap:10px!important}
-#taskModal input,#taskModal textarea,#taskModal select{font-size:25px!important;padding:18px!important;line-height:1.35}
-#taskModal .btn-light,#taskModal .btn-dark{font-size:22px!important;padding:14px 20px!important}
-#taskModal form{margin-top:22px!important}
-#taskModal p{font-size:18px!important}
 @media(max-width:760px){
   .brain-ref-workspace{height:calc(100vh - 250px);min-height:620px}
   .brain-ref-sticky{width:190px}
@@ -659,6 +650,103 @@ h3{font-size:17px;color:var(--ink)}
   .brain-ref-header-title p{font-size:10px}
 }
 
+
+/* ============================================================
+   WORKSPACE V2 — PRODUCTIVITY UPGRADE
+============================================================ */
+.v2-dashboard-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin:14px 0}
+.v2-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.v2-card-head h3{margin-top:3px}
+.v2-card-head>strong{font:600 30px Georgia,serif;color:#f1e6d6}
+.v2-progress-track{height:10px;border-radius:999px;background:#151412;border:1px solid #3b352d;overflow:hidden;margin:16px 0 9px}
+.v2-progress-track span{display:block;height:100%;width:0;border-radius:999px;background:var(--accent);transition:width .4s ease}
+.v2-progress-meta{display:flex;justify-content:space-between;gap:10px;color:#9d9386;font-size:10px}
+.v2-big-stat{font:600 28px Georgia,serif;color:#f0e6d6}
+.v2-focus-btn{width:100%;margin-top:14px;padding:11px;border:1px solid #4a4034;border-radius:10px;background:#29241d;color:#f4eadb;font-size:11px}
+.v2-focus-btn:hover{transform:translateY(-1px);border-color:#655646}
+.v2-chart-card{min-height:175px}
+.v2-bars{height:108px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:14px}
+.v2-bar-col{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}
+.v2-bar{width:100%;max-width:28px;min-height:4px;border-radius:6px 6px 2px 2px;background:#8e795b;transition:height .4s ease}
+.v2-bar-col.today .v2-bar{background:var(--accent)}
+.v2-bar-col span{font-size:8px;color:#8f877b}
+.v2-badge{padding:5px 8px;border:1px solid #40372e;border-radius:999px;color:#b9a991;font-size:9px}
+.achievement-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.achievement{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#2a251f;border:1px solid #3b332a;font-size:20px;opacity:.35;filter:grayscale(1)}
+.achievement.unlocked{opacity:1;filter:none;box-shadow:0 5px 16px rgba(0,0,0,.16)}
+.task-toolbar-v2{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.task-search-wrap{display:flex;align-items:center;gap:7px;flex:1;min-width:220px;border:1px solid #3a342d;border-radius:9px;padding:0 10px;background:#1b1916}
+.task-search-wrap span{color:#8d8377}
+.task-search-wrap input{width:100%;border:0;background:transparent;color:#eee5d8;padding:10px 0;font-size:11px}
+.task-select-v2{border:1px solid #3a342d;border-radius:9px;background:#1b1916;color:#d9d0c3;padding:9px;font-size:10px}
+.task-category{border-color:#4a4035!important;color:#c7b99f!important}
+.subtask-list-v2{display:grid;gap:5px;margin-top:10px;padding:9px;border-radius:9px;background:#1b1916;border:1px solid #332e27}
+.subtask-v2{display:flex;align-items:center;gap:7px;color:#aaa093;font-size:10px}
+.subtask-v2 input{accent-color:var(--accent)}
+.subtask-v2.done{text-decoration:line-through;color:#6f685f}
+.notes-layout-v2{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px}
+.notes-list-v2{overflow:hidden}
+.note-list-item-v2{padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.note-list-item-v2:hover,.note-list-item-v2.active{background:var(--panel-soft)}
+.note-list-item-v2 strong{display:block;color:var(--ink);font-size:12px}
+.note-list-item-v2 small{display:block;color:var(--muted);font-size:9px;margin-top:4px}
+.note-editor-v2{min-height:600px}
+.note-title-input{width:100%;border:0;background:transparent;color:var(--ink);font:600 28px Georgia,serif;outline:0}
+.note-tags-v2 input{width:100%;margin-top:7px;border:0;background:transparent;color:var(--muted);outline:0;font-size:10px}
+.note-editor-body{display:grid;grid-template-columns:1fr 1fr;min-height:500px}
+.note-editor-body textarea{width:100%;min-height:500px;border:0;border-right:1px solid var(--line);padding:18px;background:#fffaf2;color:var(--ink);font:14px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;resize:none;outline:0}
+.note-preview-v2{padding:18px;background:var(--panel);color:var(--ink);font-size:13px;line-height:1.7;white-space:pre-wrap;overflow:auto}
+.note-preview-v2 h3{font-family:Georgia,serif;margin:0 0 8px}
+.note-preview-v2 code{background:#eadfce;padding:2px 4px;border-radius:4px}
+.proof-extra-v2{margin-top:8px;color:#9d9386;font-size:9px}
+@media(max-width:900px){
+  .v2-dashboard-grid{grid-template-columns:1fr}
+  .notes-layout-v2{grid-template-columns:1fr}
+  .note-editor-body{grid-template-columns:1fr}
+  .note-preview-v2{display:none}
+}
+@media(max-width:760px){
+  .task-toolbar-v2{display:grid;grid-template-columns:1fr 1fr}
+  .task-search-wrap{grid-column:1/-1;min-width:0}
+  .task-select-v2{width:100%}
+  .v2-progress-meta{flex-direction:column}
+  .note-editor-v2{min-height:500px}
+  .note-editor-body textarea{min-height:400px;border-right:0}
+}
+
+/* Final Add Task modal typography: keep the existing layout, reduce oversized text. */
+#taskModal > div{
+  width:min(672px,100%)!important;
+  padding:23px!important;
+}
+#taskModal > div h2{font-size:32px!important}
+#taskModal .kicker{font-size:10px!important}
+#taskModal label{font-size:12px!important}
+#taskModal input,#taskModal textarea,#taskModal select{font-size:15px!important;padding:13px 14px!important}
+#taskModal .btn-light,#taskModal .btn-dark{font-size:11px!important;padding:11px 15px!important}
+#taskModal form{margin-top:18px!important}
+#taskModal p{font-size:11px!important}
+
+
+.board-picker-v2{width:min(620px,100%)}
+.board-list-v2{padding:10px;max-height:60vh;overflow:auto}
+.board-item-v2{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;border-radius:10px;color:#eee5d7}
+.board-item-v2:hover{background:#2a251f}
+.board-item-v2 small{display:block;color:#948a7d;margin-top:3px}
+.board-item-v2 button{border:1px solid #443b31;background:#211e19;color:#ddd1c1;border-radius:8px;padding:7px 9px;font-size:10px}
+.brain-attachment-v2{position:absolute;left:12px;bottom:10px;z-index:7;max-width:90px;border-radius:7px;border:1px solid #bcae99;background:rgba(250,245,236,.92);padding:4px;font-size:8px;color:#4c4337}
+.brain-attachment-v2 img{display:block;width:70px;height:45px;object-fit:cover;border-radius:4px;margin-bottom:3px}
+
+
+@media print{
+  body{background:#fff!important;color:#111!important;overflow:visible!important}
+  .sidebar,.topbar,.mobile-nav,.content>section:not(#view-brainstorm),.brain-ref-topbar .brain-ref-top-actions,.brain-ref-toolbar,.brain-ref-minimap,.brain-ref-board-menu,.brain-ref-zoom,.brain-ref-tip{display:none!important}
+  .main{background:#fff!important;overflow:visible!important}
+  .content{padding:0!important;max-width:none!important}
+  #view-brainstorm{display:block!important}
+  .brain-ref-shell{border:0!important;box-shadow:none!important}
+  .brain-ref-workspace{height:100vh!important;min-height:0!important}
+}
 </style>
 </head>
 
@@ -692,6 +780,9 @@ h3{font-size:17px;color:var(--ink)}
       </button>
       <button class="nav-btn" data-view="calendar">
         <span class="nav-icon">□</span> Calendar
+      </button>
+      <button class="nav-btn" data-view="notes">
+        <span class="nav-icon">▤</span> Knowledge
       </button>
       <button class="nav-btn" data-view="settings">
         <span class="nav-icon">⚙</span> Settings
@@ -777,6 +868,56 @@ h3{font-size:17px;color:var(--ink)}
           </div>
         </div>
 
+        <div class="v2-dashboard-grid">
+          <section class="dark-card v2-progress-card">
+            <div class="v2-card-head">
+              <div>
+                <p class="kicker">TODAY'S PROGRESS</p>
+                <h3>Keep the streak alive</h3>
+              </div>
+              <strong id="dashCompletion">0%</strong>
+            </div>
+            <div class="v2-progress-track"><span id="dashProgressBar"></span></div>
+            <div class="v2-progress-meta">
+              <span id="dashProgressText">0 / 0 completed</span>
+              <span>🔥 <b id="dashStreak">0</b> day streak</span>
+            </div>
+          </section>
+
+          <section class="dark-card">
+            <div class="v2-card-head">
+              <div>
+                <p class="kicker">FOCUS</p>
+                <h3>Today's focus time</h3>
+              </div>
+              <span class="v2-big-stat" id="dashFocusTime">0m</span>
+            </div>
+            <button class="v2-focus-btn" id="dashboardFocus">▶ Start 25 min focus</button>
+          </section>
+
+          <section class="dark-card v2-chart-card">
+            <div class="v2-card-head">
+              <div>
+                <p class="kicker">THIS WEEK</p>
+                <h3>Productivity</h3>
+              </div>
+              <span class="muted" id="dashWeekRate">0%</span>
+            </div>
+            <div class="v2-bars" id="weeklyChart"></div>
+          </section>
+
+          <section class="dark-card">
+            <div class="v2-card-head">
+              <div>
+                <p class="kicker">ACHIEVEMENTS</p>
+                <h3>Milestones</h3>
+              </div>
+              <span class="v2-badge" id="achievementCount">0 / 5</span>
+            </div>
+            <div class="achievement-row" id="achievementRow"></div>
+          </section>
+        </div>
+
         <div class="grid-2">
 
           <section class="dark-card">
@@ -843,6 +984,25 @@ h3{font-size:17px;color:var(--ink)}
         </div>
 
         <section class="dark-card">
+          <div class="task-toolbar-v2">
+            <div class="task-search-wrap">
+              <span>⌕</span>
+              <input id="taskSearch" placeholder="Search tasks..." autocomplete="off">
+            </div>
+            <select id="taskCategoryFilter" class="task-select-v2">
+              <option value="all">All categories</option>
+              <option value="College">College</option>
+              <option value="Coding">Coding</option>
+              <option value="Personal">Personal</option>
+              <option value="Project">Project</option>
+            </select>
+            <select id="taskPriorityFilter" class="task-select-v2">
+              <option value="all">All priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
             <div class="filters" style="display:flex;gap:6px">
               <button class="top-btn task-filter active" data-filter="all">All</button>
@@ -872,8 +1032,13 @@ h3{font-size:17px;color:var(--ink)}
 
             <div class="brain-ref-top-actions">
               <button class="brain-ref-chrome-btn" id="howButton">ⓘ How to use</button>
+              <button class="brain-ref-chrome-btn" id="boardsButton">▦ Boards</button>
+              <button class="brain-ref-chrome-btn" id="attachBrainButton">＋ Attach</button>
+              <button class="brain-ref-chrome-btn" id="exportBrainPng">PNG</button>
+              <button class="brain-ref-chrome-btn" id="exportBrainPdf">PDF</button>
               <button class="brain-ref-chrome-btn" id="shareButton">⌘ Share</button>
               <button class="brain-ref-chrome-btn dark" id="newBoardButton">▣ New Board</button>
+              <input id="brainAttachmentInput" type="file" accept="image/*,.pdf" hidden>
             </div>
           </header>
 
@@ -968,6 +1133,42 @@ h3{font-size:17px;color:var(--ink)}
 
       </section>
 
+
+      <!-- KNOWLEDGE VAULT -->
+      <section class="view" id="view-notes">
+        <div class="hero-row">
+          <div>
+            <p class="kicker">KNOWLEDGE VAULT</p>
+            <h1>Notes</h1>
+            <p class="hero-note">Keep study notes, ideas and snippets in one calm place.</p>
+          </div>
+          <button class="btn-dark" id="saveNoteButton">Save Note</button>
+        </div>
+
+        <div class="notes-layout-v2">
+          <aside class="panel-light notes-list-v2">
+            <div class="panel-head">
+              <div><h2 style="font-size:22px">Your notes</h2><p class="panel-desc">Local to this browser.</p></div>
+              <button class="btn-light" id="newNoteButton">+ New</button>
+            </div>
+            <div id="notesListV2"></div>
+          </aside>
+          <section class="panel-light note-editor-v2">
+            <div class="panel-head">
+              <div style="flex:1">
+                <input id="noteTitleV2" class="note-title-input" placeholder="Untitled note">
+                <div class="note-tags-v2">
+                  <input id="noteTagsV2" placeholder="Tags: DSA, C, exams">
+                </div>
+              </div>
+            </div>
+            <div class="note-editor-body">
+              <textarea id="noteBodyV2" placeholder="# My notes&#10;&#10;Write your notes here..."></textarea>
+              <div class="note-preview-v2" id="notePreviewV2"></div>
+            </div>
+          </section>
+        </div>
+      </section>
 
       <!-- SETTINGS -->
       <section class="view" id="view-settings">
@@ -1071,6 +1272,16 @@ h3{font-size:17px;color:var(--ink)}
         </label>
 
         <label style="display:grid;gap:6px;margin-bottom:12px;font-size:11px;color:#766c60">
+          Category
+          <select id="taskCategory" style="padding:11px;border:1px solid #d0bea4;border-radius:9px;background:#fff9ef;color:#2b271f">
+            <option value="College">College</option>
+            <option value="Coding" selected>Coding</option>
+            <option value="Personal">Personal</option>
+            <option value="Project">Project</option>
+          </select>
+        </label>
+
+        <label style="display:grid;gap:6px;margin-bottom:12px;font-size:11px;color:#766c60">
           Reminder date
           <input type="date" id="taskReminderDate" style="padding:11px;border:1px solid #d0bea4;border-radius:9px;background:#fff9ef;color:#2b271f">
         </label>
@@ -1080,6 +1291,20 @@ h3{font-size:17px;color:var(--ink)}
           <input type="time" id="taskReminderTime" style="padding:11px;border:1px solid #d0bea4;border-radius:9px;background:#fff9ef;color:#2b271f">
         </label>
       </div>
+
+      <label style="display:grid;gap:6px;margin-bottom:12px;font-size:11px;color:#766c60">
+        Recurring task
+        <select id="taskRecurring" style="padding:11px;border:1px solid #d0bea4;border-radius:9px;background:#fff9ef;color:#2b271f">
+          <option value="none">Does not repeat</option>
+          <option value="daily">Every day</option>
+          <option value="weekly">Every week</option>
+        </select>
+      </label>
+
+      <label style="display:grid;gap:6px;margin-bottom:12px;font-size:11px;color:#766c60">
+        Subtasks <span style="font-weight:400;color:#9a8c7d">(one per line)</span>
+        <textarea id="taskSubtasks" rows="3" placeholder="Solve 5 questions&#10;Review mistakes&#10;Push code" style="padding:11px;border:1px solid #d0bea4;border-radius:9px;background:#fff9ef;color:#2b271f;resize:vertical"></textarea>
+      </label>
 
       <p style="font-size:11px;color:#806f5e;line-height:1.5">
         Set Reminder on the task to create a pre-filled Google Calendar event.
@@ -1498,6 +1723,7 @@ const viewNames = {
   brainstorm:"Brainstorming",
   proofs:"Proofs",
   calendar:"Calendar",
+  notes:"Knowledge",
   settings:"Settings"
 };
 
@@ -1942,6 +2168,17 @@ $("submitProof").onclick=() => {
   renderAll();
   toast("Proof submitted. Task completed.");
 };
+$("submitProof").addEventListener("click",()=>{
+  setTimeout(()=>{
+    const done=tasks.find(t=>t.id===proofTaskId);
+    if(!done || done.status!=="completed" || done.recurring==="none")return;
+    const base=new Date(done.dueDate||todayKey()+"T00:00:00");
+    base.setDate(base.getDate()+(done.recurring==="weekly"?7:1));
+    const nextDate=`${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,"0")}-${String(base.getDate()).padStart(2,"0")}`;
+    const next={...done,id:crypto.randomUUID(),title:done.title,status:"pending",proofDataUrl:null,completedAt:null,remindedAt:null,dueDate:nextDate,reminderDate:nextDate,createdAt:new Date().toISOString(),subtasks:(done.subtasks||[]).map(s=>({...s,done:false}))};
+    tasks.unshift(next);save(KEYS.TASKS,tasks);renderAll();toast(`Next ${done.recurring} task scheduled.`);
+  },30);
+});
 
 function openProofViewer(task) {
   if (!task.proofDataUrl) return;
@@ -2872,7 +3109,473 @@ document.querySelectorAll(".modal").forEach(modal=>{
   });
 });
 
+
 </script>
+
+<script>
+/* ============================================================
+   WORKSPACE V2 BEHAVIOUR
+   Adds dashboard analytics, richer tasks, notes, achievements,
+   focus tracking and task search without removing the original app.
+============================================================ */
+(function(){
+  const V2 = {
+    FOCUS:"naveen_focus_sessions_v1",
+    NOTES:"naveen_knowledge_notes_v1",
+    STREAK:"naveen_productivity_streak_v1"
+  };
+  const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(f))}catch{return f}};
+  const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  let v2Notes=read(V2.NOTES,[]);
+  let activeV2Note=null;
+  let searchTerm="";
+  let categoryFilter="all";
+  let priorityFilter="all";
+  let focusStartedAt=null;
+
+  function esc(v){return escapeHtml(v==null?"":v)}
+
+  /* -------- Rich task fields -------- */
+  const originalOpenTaskModal=window.openTaskModal;
+  window.openTaskModal=function(task=null){
+    originalOpenTaskModal(task);
+    setTimeout(()=>{
+      if($("taskCategory")) $("taskCategory").value=task?.category||"Coding";
+      if($("taskRecurring")) $("taskRecurring").value=task?.recurring||"none";
+      if($("taskSubtasks")) $("taskSubtasks").value=(task?.subtasks||[]).map(s=>typeof s==="string"?s:s.text).join("\n");
+    },0);
+  };
+
+  const taskForm=$("taskForm");
+  if(taskForm){
+    taskForm.addEventListener("submit",()=>{
+      setTimeout(()=>{
+        const id=window.editingTaskId || $("taskId")?.value || tasks[0]?.id;
+        const t=tasks.find(x=>x.id===id);
+        if(!t)return;
+        const lines=($("taskSubtasks")?.value||"").split("\n").map(x=>x.trim()).filter(Boolean);
+        const previous=t.subtasks||[];
+        t.category=$("taskCategory")?.value||"Coding";
+        t.recurring=$("taskRecurring")?.value||"none";
+        t.subtasks=lines.map((s,i)=>{
+          const old=previous[i];
+          return typeof old==="object"?{...old,text:s}:{id:crypto.randomUUID(),text:s,done:false};
+        });
+        save(KEYS.TASKS,tasks);
+        renderAll();
+        renderV2Dashboard();
+      },20);
+    });
+  }
+
+  /* -------- Search + filters -------- */
+  const search=$("taskSearch"), cat=$("taskCategoryFilter"), pri=$("taskPriorityFilter");
+  search?.addEventListener("input",()=>{searchTerm=search.value.toLowerCase();renderTasks()});
+  cat?.addEventListener("change",()=>{categoryFilter=cat.value;renderTasks()});
+  pri?.addEventListener("change",()=>{priorityFilter=pri.value;renderTasks()});
+
+  window.filteredTasks=function(){
+    return tasks.filter(task=>{
+      if(taskFilter==="pending" && task.status==="completed")return false;
+      if(taskFilter==="completed" && task.status!=="completed")return false;
+      if(searchTerm && !(`${task.title} ${task.description||""} ${task.category||""}`.toLowerCase().includes(searchTerm)))return false;
+      if(categoryFilter!=="all" && (task.category||"Coding")!==categoryFilter)return false;
+      if(priorityFilter!=="all" && (task.priority||"medium")!==priorityFilter)return false;
+      return true;
+    }).sort((a,b)=>{
+      if(a.status!==b.status)return a.status==="completed"?1:-1;
+      const pa={high:0,medium:1,low:2}; const p=(pa[a.priority]??1)-(pa[b.priority]??1);
+      if(p)return p;
+      return (reminderDate(a)?.getTime()||Infinity)-(reminderDate(b)?.getTime()||Infinity);
+    });
+  };
+
+  window.taskCard=function(task){
+    const overdue=isOverdue(task);
+    const subs=task.subtasks||[];
+    const doneSubs=subs.filter(s=>s.done).length;
+    return `<article class="task-card ${task.status==="completed"?"completed":""}">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+        <div>
+          <h3 class="task-title">${esc(task.title)}</h3>
+          ${task.description?`<p class="task-desc">${esc(task.description)}</p>`:""}
+        </div>
+        <span class="badge ${priorityClass(task.priority)}">${task.priority||"medium"}</span>
+      </div>
+      <div class="task-meta">
+        <span class="badge task-category">● ${esc(task.category||"Coding")}</span>
+        <span class="badge">Due: ${task.dueDate?formatShortDate(task.dueDate):"—"}</span>
+        <span class="badge">${task.recurring&&task.recurring!=="none"?"↻ "+task.recurring:"One time"}</span>
+        ${task.status==="completed"?`<span class="badge done">✓ ${formatTime(task.completedAt)}</span>`:`<span class="badge ${overdue?"overdue":""}">${countdown(task)}</span>`}
+        ${overdue?`<span class="badge overdue">OVERDUE</span>`:""}
+      </div>
+      ${subs.length?`<div class="subtask-list-v2"><div class="subtask-v2" style="font-weight:700;margin-bottom:2px">${doneSubs}/${subs.length} subtasks</div>
+        ${subs.map((s,i)=>`<label class="subtask-v2 ${s.done?"done":""}"><input type="checkbox" data-subtask="${task.id}" data-sub-index="${i}" ${s.done?"checked":""}>${esc(s.text)}</label>`).join("")}
+      </div>`:""}
+      ${task.proofDataUrl?`<div style="display:flex;align-items:center;gap:8px;margin-top:9px;color:#8f877b;font-size:9px">Proof:
+        <img class="task-thumb" src="${task.proofDataUrl}" data-proof-view="${task.id}" alt="Proof">
+        <span class="proof-extra-v2">${task.completedAt?new Date(task.completedAt).toLocaleDateString():"Saved"}</span>
+      </div>`:""}
+      <div class="task-actions">
+        ${task.status==="completed"?`<button class="task-action proof" data-action="view-proof" data-id="${task.id}">View Proof</button>`:`<button class="task-action proof" data-action="proof" data-id="${task.id}">Upload Proof</button>`}
+        <button class="task-action" data-action="focus" data-id="${task.id}">Focus</button>
+        <button class="task-action" data-action="calendar" data-id="${task.id}">Set Reminder</button>
+        <button class="task-action" data-action="duplicate" data-id="${task.id}">Duplicate</button>
+        <button class="task-action" data-action="edit" data-id="${task.id}">Edit</button>
+        <button class="task-action danger" data-action="delete" data-id="${task.id}">Delete</button>
+      </div>
+    </article>`;
+  };
+
+  const oldRenderTaskList=window.renderTaskList;
+  window.renderTaskList=function(targetId,list){
+    oldRenderTaskList(targetId,list);
+    const el=$(targetId); if(!el)return;
+    el.querySelectorAll("[data-subtask]").forEach(cb=>{
+      cb.onchange=()=>{
+        const t=tasks.find(x=>x.id===cb.dataset.subtask); if(!t)return;
+        t.subtasks=t.subtasks||[];
+        if(t.subtasks[Number(cb.dataset.subIndex)])t.subtasks[Number(cb.dataset.subIndex)].done=cb.checked;
+        save(KEYS.TASKS,tasks); renderTasks(); renderDashboard(); renderV2Dashboard();
+      };
+    });
+  };
+
+  /* Re-render with the upgraded card renderer. */
+  window.renderTasks=function(){
+    renderTaskList("mainTaskList",filteredTasks());
+    const today=todayKey();
+    $("taskToday").textContent=tasks.filter(t=>t.dueDate===today||t.reminderDate===today).length;
+    $("taskPending").textContent=tasks.filter(t=>t.status!=="completed").length;
+    $("taskOverdue").textContent=tasks.filter(isOverdue).length;
+    $("taskCompleted").textContent=tasks.filter(t=>t.status==="completed").length;
+  };
+
+  /* -------- Dashboard analytics -------- */
+  function dayKeyOffset(offset){
+    const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+offset);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+  function streak(){
+    const completedDates=new Set(tasks.filter(t=>t.status==="completed"&&t.completedAt).map(t=>todayKeyFromDate(t.completedAt)));
+    let cursor=new Date(); cursor.setHours(0,0,0,0);
+    let count=0;
+    while(completedDates.has(`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,"0")}-${String(cursor.getDate()).padStart(2,"0")}`)){
+      count++; cursor.setDate(cursor.getDate()-1);
+    }
+    return count;
+  }
+  function todayKeyFromDate(iso){
+    const d=new Date(iso); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+  function focusMinutes(){
+    const sessions=read(V2.FOCUS,[]);
+    const today=todayKey();
+    return Math.round(sessions.filter(s=>todayKeyFromDate(s.date)===today).reduce((a,s)=>a+(s.minutes||0),0));
+  }
+  function weeklyCounts(){
+    const arr=[];
+    for(let i=6;i>=0;i--){
+      const key=dayKeyOffset(-i);
+      arr.push({key,count:tasks.filter(t=>t.status==="completed"&&t.completedAt&&todayKeyFromDate(t.completedAt)===key).length});
+    }
+    return arr;
+  }
+  function achievements(){
+    const completed=tasks.filter(t=>t.status==="completed").length;
+    const proofs=tasks.filter(t=>t.proofDataUrl).length;
+    const focus=read(V2.FOCUS,[]).reduce((a,s)=>a+(s.minutes||0),0);
+    const streakVal=streak();
+    return [
+      {icon:"🎯",ok:completed>=10,title:"10 tasks"},
+      {icon:"🔥",ok:streakVal>=7,title:"7-day streak"},
+      {icon:"⚡",ok:completed>=50,title:"50 tasks"},
+      {icon:"🧠",ok:focus>=100,title:"100 focus hours"},
+      {icon:"📸",ok:proofs>=30,title:"30 proofs"}
+    ];
+  }
+  function renderV2Dashboard(){
+    const total=tasks.length, completed=tasks.filter(t=>t.status==="completed").length;
+    const pct=total?Math.round(completed/total*100):0;
+    if($("dashCompletion"))$("dashCompletion").textContent=pct+"%";
+    if($("dashProgressBar"))$("dashProgressBar").style.width=pct+"%";
+    if($("dashProgressText"))$("dashProgressText").textContent=`${completed} / ${total} completed`;
+    if($("dashStreak"))$("dashStreak").textContent=streak();
+    if($("dashFocusTime"))$("dashFocusTime").textContent=focusMinutes()>=60?`${Math.floor(focusMinutes()/60)}h ${focusMinutes()%60}m`:`${focusMinutes()}m`;
+
+    const week=weeklyCounts(), max=Math.max(1,...week.map(x=>x.count));
+    if($("weeklyChart")){
+      $("weeklyChart").innerHTML=week.map((x,i)=>{
+        const d=new Date(); d.setDate(d.getDate()-(6-i));
+        return `<div class="v2-bar-col ${i===6?"today":""}" title="${x.count} completed"><div class="v2-bar" style="height:${Math.max(5,x.count/max*88)}%"></div><span>${d.toLocaleDateString(undefined,{weekday:"short"}).slice(0,2)}</span></div>`;
+      }).join("");
+    }
+    const rate=total?Math.round(completed/total*100):0;
+    if($("dashWeekRate"))$("dashWeekRate").textContent=rate+"% overall";
+    const ach=achievements();
+    if($("achievementCount"))$("achievementCount").textContent=`${ach.filter(a=>a.ok).length} / ${ach.length}`;
+    if($("achievementRow"))$("achievementRow").innerHTML=ach.map(a=>`<div class="achievement ${a.ok?"unlocked":""}" title="${a.title}">${a.icon}</div>`).join("");
+    $("dashToday") && ($("dashToday").textContent=tasks.filter(t=>t.dueDate===todayKey()||t.reminderDate===todayKey()).length);
+    $("dashPending") && ($("dashPending").textContent=tasks.filter(t=>t.status!=="completed").length);
+    $("dashOverdue") && ($("dashOverdue").textContent=tasks.filter(isOverdue).length);
+    $("dashCompleted") && ($("dashCompleted").textContent=completed);
+  }
+  window.renderDashboard=function(){ renderV2Dashboard(); const upcoming=tasks.filter(t=>t.status!=="completed").sort((a,b)=>(reminderDate(a)?.getTime()||Infinity)-(reminderDate(b)?.getTime()||Infinity)).slice(0,4); renderTaskList("dashboardTaskList",upcoming); };
+
+  $("dashboardFocus")?.addEventListener("click",()=>startFocusFromTask());
+
+  /* -------- Focus session tracking -------- */
+  const originalStartFocus=window.startFocus, originalPauseFocus=window.pauseFocus;
+  window.startFocus=function(){
+    if(!focusStartedAt)focusStartedAt=Date.now();
+    originalStartFocus();
+  };
+  window.pauseFocus=function(){
+    if(focusStartedAt){
+      const elapsed=Math.max(0,Math.floor((Date.now()-focusStartedAt)/60000));
+      if(elapsed>0){
+        const sessions=read(V2.FOCUS,[]);
+        sessions.push({date:new Date().toISOString(),minutes:elapsed});
+        write(V2.FOCUS,sessions);
+      }
+      focusStartedAt=null;
+    }
+    originalPauseFocus();
+    renderV2Dashboard();
+  };
+
+  /* -------- Knowledge vault -------- */
+  function notePreview(md){
+    let s=esc(md);
+    s=s.replace(/^### (.*)$/gm,"<h3>$1</h3>").replace(/^## (.*)$/gm,"<h3>$1</h3>").replace(/^# (.*)$/gm,"<h3>$1</h3>");
+    s=s.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/`([^`]+)`/g,"<code>$1</code>");
+    return s;
+  }
+  function ensureNote(){
+    if(!v2Notes.length){
+      v2Notes=[{id:crypto.randomUUID(),title:"DSA — Quick Notes",tags:"DSA, Coding",body:"# Arrays\n\nWrite concepts, patterns and mistakes here."}];
+      write(V2.NOTES,v2Notes);
+    }
+    if(!activeV2Note)activeV2Note=v2Notes[0].id;
+  }
+  function renderNotes(){
+    ensureNote();
+    const list=$("notesListV2"); if(!list)return;
+    list.innerHTML=v2Notes.map(n=>`<div class="note-list-item-v2 ${n.id===activeV2Note?"active":""}" data-note-v2="${n.id}"><strong>${esc(n.title||"Untitled")}</strong><small>${esc(n.tags||"No tags")}</small></div>`).join("");
+    const n=v2Notes.find(x=>x.id===activeV2Note)||v2Notes[0];
+    $("noteTitleV2").value=n.title||"";
+    $("noteTagsV2").value=n.tags||"";
+    $("noteBodyV2").value=n.body||"";
+    $("notePreviewV2").innerHTML=notePreview(n.body||"");
+    list.querySelectorAll("[data-note-v2]").forEach(el=>el.onclick=()=>{activeV2Note=el.dataset.noteV2;renderNotes()});
+  }
+  function saveActiveNote(){
+    const n=v2Notes.find(x=>x.id===activeV2Note); if(!n)return;
+    n.title=$("noteTitleV2").value.trim()||"Untitled";
+    n.tags=$("noteTagsV2").value.trim();
+    n.body=$("noteBodyV2").value;
+    write(V2.NOTES,v2Notes); renderNotes(); toast("Note saved.");
+  }
+  $("noteBodyV2")?.addEventListener("input",()=>{$("notePreviewV2").innerHTML=notePreview($("noteBodyV2").value)});
+  $("noteTitleV2")?.addEventListener("input",()=>{});
+  $("saveNoteButton")?.addEventListener("click",saveActiveNote);
+  $("newNoteButton")?.addEventListener("click",()=>{
+    const n={id:crypto.randomUUID(),title:"New Note",tags:"",body:""};
+    v2Notes.unshift(n);activeV2Note=n.id;write(V2.NOTES,v2Notes);renderNotes();toast("New note created.");
+  });
+
+  /* -------- Proof metadata / timeline -------- */
+  const oldRenderProofs=window.renderProofs;
+  window.renderProofs=function(){
+    oldRenderProofs();
+    $("proofGrid")?.querySelectorAll(".proof-card").forEach(card=>{
+      const title=card.querySelector("h3")?.textContent;
+      const t=tasks.find(x=>x.title===title);
+      if(t){
+        const extra=document.createElement("p"); extra.className="proof-extra-v2";
+        extra.textContent=`${t.category||"Coding"} · ${t.completedAt?new Date(t.completedAt).toLocaleString():"Completed"}`;
+        card.appendChild(extra);
+      }
+    });
+  };
+
+  /* -------- View hook -------- */
+  const oldSwitchView=window.switchView;
+  window.switchView=function(view){
+    oldSwitchView(view);
+    if(view==="notes")renderNotes();
+    if(view==="dashboard")renderV2Dashboard();
+  };
+
+  /* -------- Command palette additions -------- */
+  if(typeof commandItems!=="undefined"){
+    commandItems.push(
+      {label:"Open Knowledge Vault",detail:"Notes",action:()=>switchView("notes")},
+      {label:"Start Focus Session",detail:"25 minutes",action:()=>startFocusFromTask()},
+      {label:"Add Task",detail:"Create",action:()=>{switchView("tasks");openTaskModal()}}
+    );
+  }
+
+  /* -------- Keyboard shortcuts -------- */
+  document.addEventListener("keydown",e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openCommandPalette();return;}
+    if(e.key==="Escape"){ if($("notes")?.style.display==="block"){} }
+  });
+
+
+  /* -------- Multiple brainstorm boards + attachments + exports -------- */
+  const BOARD_KEY="naveen_brainstorm_boards_v2";
+  let v2Boards=read(BOARD_KEY,[]);
+  let currentBoardId=localStorage.getItem("naveen_current_board_v2")||"main";
+
+  function saveCurrentBoardSnapshot(nameOverride){
+    const name=nameOverride||v2Boards.find(b=>b.id===currentBoardId)?.name||"Main Board";
+    const existing=v2Boards.find(b=>b.id===currentBoardId);
+    const data={id:currentBoardId,name,notes:brainNotes,connectors:brainConnectors,updatedAt:new Date().toISOString()};
+    if(existing)Object.assign(existing,data); else v2Boards.push(data);
+    write(BOARD_KEY,v2Boards);
+  }
+  function ensureBoards(){
+    if(!v2Boards.length){
+      v2Boards=[{id:"main",name:"Main Board",notes:brainNotes,connectors:brainConnectors,updatedAt:new Date().toISOString()}];
+      write(BOARD_KEY,v2Boards);
+    }
+    if(!v2Boards.some(b=>b.id===currentBoardId))currentBoardId=v2Boards[0].id;
+    localStorage.setItem("naveen_current_board_v2",currentBoardId);
+  }
+  function renderBoardPicker(){
+    ensureBoards();
+    const box=$("boardListV2"); if(!box)return;
+    box.innerHTML=v2Boards.map(b=>`<div class="board-item-v2">
+      <div><strong>${esc(b.name)}</strong><small>${(b.notes||[]).length} ideas · ${new Date(b.updatedAt||Date.now()).toLocaleDateString()}</small></div>
+      <div style="display:flex;gap:6px">
+        <button data-load-board="${b.id}">Open</button>
+        <button data-rename-board="${b.id}">Rename</button>
+        ${v2Boards.length>1?`<button data-delete-board="${b.id}">Delete</button>`:""}
+      </div>
+    </div>`).join("");
+    box.querySelectorAll("[data-load-board]").forEach(b=>b.onclick=()=>{
+      saveCurrentBoardSnapshot();
+      const board=v2Boards.find(x=>x.id===b.dataset.loadBoard); if(!board)return;
+      currentBoardId=board.id; localStorage.setItem("naveen_current_board_v2",currentBoardId);
+      brainNotes=JSON.parse(JSON.stringify(board.notes||[])); brainConnectors=JSON.parse(JSON.stringify(board.connectors||[]));
+      saveBrainScene(); render(); setZoom(1); $("boardPickerModal").style.display="none"; toast(`Opened ${board.name}.`);
+    });
+    box.querySelectorAll("[data-rename-board]").forEach(b=>b.onclick=()=>{
+      const board=v2Boards.find(x=>x.id===b.dataset.renameBoard); if(!board)return;
+      const name=prompt("Board name",board.name); if(!name)return;
+      board.name=name.trim(); board.updatedAt=new Date().toISOString(); write(BOARD_KEY,v2Boards); renderBoardPicker();
+    });
+    box.querySelectorAll("[data-delete-board]").forEach(b=>b.onclick=()=>{
+      if(v2Boards.length<=1)return;
+      const board=v2Boards.find(x=>x.id===b.dataset.deleteBoard); if(!board)return;
+      if(!confirm(`Delete "${board.name}"?`))return;
+      v2Boards=v2Boards.filter(x=>x.id!==board.id); write(BOARD_KEY,v2Boards);
+      if(currentBoardId===board.id){
+        currentBoardId=v2Boards[0].id; const next=v2Boards[0];
+        brainNotes=JSON.parse(JSON.stringify(next.notes||[])); brainConnectors=JSON.parse(JSON.stringify(next.connectors||[]));
+        saveBrainScene(); render();
+      }
+      renderBoardPicker();
+    });
+  }
+  ensureBoards();
+  $("boardsButton")?.addEventListener("click",()=>{$("boardPickerModal").style.display="flex";renderBoardPicker()});
+  $("closeBoards")?.addEventListener("click",()=>{$("boardPickerModal").style.display="none"});
+  $("boardPickerModal")?.addEventListener("click",e=>{if(e.target===$("boardPickerModal"))$("boardPickerModal").style.display="none"});
+
+  const originalNewBoard=$("newBoardButton")?.onclick;
+  $("newBoardButton")?.addEventListener("click",()=>{
+    saveCurrentBoardSnapshot();
+    const name=prompt("New board name","Untitled Board");
+    if(!name)return;
+    const b={id:crypto.randomUUID(),name:name.trim(),notes:[],connectors:[],updatedAt:new Date().toISOString()};
+    v2Boards.push(b);write(BOARD_KEY,v2Boards);
+    currentBoardId=b.id;localStorage.setItem("naveen_current_board_v2",currentBoardId);
+    brainNotes=[];brainConnectors=[];selectedId=null;history=[];historyIndex=-1;pushHistory();saveBrainScene();render();renderBoardPicker();
+    toast(`Created ${b.name}.`);
+  });
+  /* Disable the original destructive New Board click handler when V2 listener is used. */
+  if($("newBoardButton") && originalNewBoard)$("newBoardButton").onclick=null;
+
+  $("attachBrainButton")?.addEventListener("click",()=>{
+    if(!selectedId){toast("Select a sticky first.","error");return}
+    $("brainAttachmentInput").click();
+  });
+  $("brainAttachmentInput")?.addEventListener("change",e=>{
+    const file=e.target.files?.[0], n=brainNotes.find(x=>x.id===selectedId);
+    if(!file||!n)return;
+    if(file.size>4*1024*1024){toast("Keep attachments below 4 MB.","error");return}
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      n.attachment={name:file.name,type:file.type,data:ev.target.result};
+      pushHistory();saveBrainScene();saveCurrentBoardSnapshot();render();toast("Attachment added.");
+    };
+    reader.readAsDataURL(file);
+    e.target.value="";
+  });
+
+  const oldRenderBrain=window.render;
+  window.render=function(){
+    oldRenderBrain();
+    document.querySelectorAll("#stickyLayer .brain-ref-sticky").forEach(el=>{
+      const n=brainNotes.find(x=>x.id===el.dataset.id); if(!n?.attachment)return;
+      const a=document.createElement("div"); a.className="brain-attachment-v2";
+      if(n.attachment.type?.startsWith("image/"))a.innerHTML=`<img src="${n.attachment.data}" alt="">${esc(n.attachment.name)}`;
+      else a.textContent=`📎 ${n.attachment.name}`;
+      el.appendChild(a);
+    });
+  };
+
+  function exportBrainPNG(){
+    const board=$("board"); if(!board)return;
+    const canvas=document.createElement("canvas"), rect=board.getBoundingClientRect();
+    canvas.width=Math.max(1000,Math.round(rect.width)); canvas.height=Math.max(650,Math.round(rect.height));
+    const c=canvas.getContext("2d"); c.fillStyle="#f6eddc"; c.fillRect(0,0,canvas.width,canvas.height);
+    c.strokeStyle="#d6cab4"; c.globalAlpha=.5;
+    for(let x=0;x<canvas.width;x+=24){c.beginPath();c.moveTo(x,0);c.lineTo(x,canvas.height);c.stroke()}
+    for(let y=0;y<canvas.height;y+=24){c.beginPath();c.moveTo(0,y);c.lineTo(canvas.width,y);c.stroke()}
+    const colors={"brain-ref-yellow":"#f0cf67","brain-ref-pink":"#efb0ad","brain-ref-green":"#b9d77e","brain-ref-blue":"#9ccbe7","brain-ref-purple":"#cdb5de"};
+    c.globalAlpha=1;
+    brainConnectors.forEach(link=>{
+      const a=brainNotes.find(n=>n.id===link.a),b=brainNotes.find(n=>n.id===link.b);if(!a||!b)return;
+      c.strokeStyle="#5b5247";c.lineWidth=2;c.beginPath();c.moveTo(a.x+110,a.y+78);c.lineTo(b.x+110,b.y+78);c.stroke();
+    });
+    brainNotes.forEach(n=>{
+      c.fillStyle=colors[n.color]||"#f0cf67";c.fillRect(n.x,n.y,220,160);
+      const lines=n.text.split("\n"); c.fillStyle="#342e25"; c.font="bold 18px Georgia"; c.fillText(lines[0]||"Idea",n.x+18,n.y+28);
+      c.font="13px sans-serif"; lines.slice(1,8).forEach((line,i)=>c.fillText(line,n.x+18,n.y+52+i*18));
+    });
+    const a=document.createElement("a");a.download=`${(v2Boards.find(b=>b.id===currentBoardId)?.name||"brainstorm").replace(/\s+/g,"-")}.png`;a.href=canvas.toDataURL("image/png");a.click();toast("Brainstorm exported as PNG.");
+  }
+  $("exportBrainPng")?.addEventListener("click",exportBrainPNG);
+  $("exportBrainPdf")?.addEventListener("click",()=>{saveCurrentBoardSnapshot();window.print();});
+
+  /* -------- Init -------- */
+  setTimeout(()=>{
+    renderAll();
+    renderV2Dashboard();
+    if(activeView==="notes")renderNotes();
+    if($("focusStart"))$("focusStart").onclick=()=>{
+      if(focusRunning) window.pauseFocus(); else window.startFocus();
+    };
+    if($("focusReset"))$("focusReset").onclick=()=>{ focusStartedAt=null; resetFocus(); };
+  },50);
+})();
+</script>
+
+
+
+<!-- BRAINSTORM BOARDS -->
+<div id="boardPickerModal" class="modal" style="display:none;position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.58);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px">
+  <div class="command-card board-picker-v2">
+    <div class="panel-head" style="background:#211f1b;border-color:#3a342c">
+      <div><p class="kicker">BRAINSTORM</p><h2 style="color:#f1e7d8;font-size:26px">Your Boards</h2></div>
+      <button class="top-btn" id="closeBoards">×</button>
+    </div>
+    <div id="boardListV2" class="board-list-v2"></div>
+  </div>
+</div>
 
 <!-- COMMAND PALETTE -->
 <div id="commandPalette" class="modal" style="display:none;position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.58);backdrop-filter:blur(8px);padding:12vh 18px 18px;align-items:flex-start;justify-content:center">
@@ -2912,6 +3615,14 @@ document.querySelectorAll(".modal").forEach(modal=>{
 
 <!-- TOASTS -->
 <div id="toastStack" class="toast-stack"></div>
+
+
+<script>
+document.getElementById("clearAllData")?.addEventListener("click",()=>{
+  localStorage.removeItem("naveen_focus_sessions_v1");
+  localStorage.removeItem("naveen_knowledge_notes_v1");
+});
+</script>
 
 </body>
 </html>
