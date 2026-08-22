@@ -619,7 +619,7 @@ h3{font-size:17px;color:var(--ink)}
   position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none
 }
 #stickyLayer{position:absolute;inset:0;z-index:3}
-#drawLayer{position:absolute;left:0;top:0;z-index:4;pointer-events:none;transform-origin:0 0}
+#drawLayer{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;transform:none;transform-origin:0 0}
 #drawLayer.brain-draw-active{pointer-events:auto;cursor:crosshair}
 #drawLayer.brain-draw-active.brain-draw-erase{cursor:cell}
 .brain-draw-toolbar{
@@ -687,9 +687,10 @@ h3{font-size:17px;color:var(--ink)}
 .brain-ref-board-menu button:hover{background:#24211b}
 .brain-ref-board-menu button:last-child{border-bottom:0}
 .brain-ref-tip{
-  position:absolute;left:50%;bottom:15px;transform:translateX(-50%);z-index:7;
-  color:#82786b;background:rgba(250,245,236,.86);border:1px solid #e0d1ba;
-  border-radius:9px;padding:7px 12px;font-size:10px;white-space:nowrap
+  position:absolute;left:18px;top:14px;bottom:auto;transform:none;z-index:7;
+  color:#6f665b;background:rgba(250,245,236,.92);border:1px solid #d9c9af;
+  border-radius:9px;padding:7px 12px;font-size:10px;white-space:nowrap;
+  box-shadow:0 6px 16px rgba(53,41,22,.08);pointer-events:none
 }
 .brain-ref-zoom{
   position:absolute;right:18px;bottom:14px;z-index:10;
@@ -770,6 +771,7 @@ h3{font-size:17px;color:var(--ink)}
   .brain-ref-topbar{padding:0 14px!important}
   .brain-ref-header-title h1{font-size:20px}
   .brain-ref-header-title p{font-size:10px}
+  .brain-ref-tip{display:none}
 }
 
 
@@ -869,36 +871,12 @@ h3{font-size:17px;color:var(--ink)}
   .brain-ref-shell{border:0!important;box-shadow:none!important}
   .brain-ref-workspace{height:100vh!important;min-height:0!important}
 }
-</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-window.NAVEEN_SUPABASE = {
-  url: "https://yjpbnqpyhznpqusvqhsh.supabase.co",
-  key: "sb_publishable_8Ofnl8zfDmQ78wX5UyR9tw_mZ2g2daF"
-};
-</script>
-
-<style id="supabase-auth-css">
-#authGate{position:fixed;inset:0;z-index:99999;display:none;place-items:center;background:rgba(15,13,11,.94);backdrop-filter:blur(12px)}
-#authGate .auth-card{width:min(420px,calc(100% - 28px));background:#211e19;border:1px solid #3d362e;border-radius:18px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
-#authGate h2{margin:0 0 7px;color:#f0e6d6;font-size:26px}.auth-muted{color:#9e9589;font-size:11px;line-height:1.5;margin:0 0 18px}.auth-input{width:100%;box-sizing:border-box;margin:6px 0;padding:12px;border-radius:9px;border:1px solid #433b32;background:#181613;color:#eee5d8;outline:none}.auth-row{display:flex;gap:8px;margin-top:10px}.auth-row button{flex:1}.auth-status{min-height:18px;margin-top:10px;font-size:10px;color:#cbbca7}.auth-user-btn{cursor:pointer}
+.brain-space-pan #view-brainstorm .brain-ref-workspace{cursor:grab}
+.brain-space-pan #view-brainstorm .brain-ref-workspace:active{cursor:grabbing}
 </style>
 </head>
 
 <body>
-<div id="authGate">
-  <div class="auth-card">
-    <p class="kicker">NAVEEN WORKSPACE · CLOUD</p>
-    <h2 id="authTitle">Sign in</h2>
-    <p class="auth-muted">Your workspace syncs privately to Supabase. Each account gets its own protected data.</p>
-    <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email">
-    <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password">
-    <div class="auth-row"><button class="btn-accent" id="authSubmit">Sign in</button><button class="btn-light" id="authGoogle">Google</button></div>
-    <div class="auth-row"><button class="btn-light" id="authToggle">Create account</button><button class="btn-light" id="authReset">Reset password</button></div>
-    <div class="auth-status" id="authStatus"></div>
-  </div>
-</div>
-
 
 <div class="app">
 
@@ -946,8 +924,8 @@ window.NAVEEN_SUPABASE = {
     <div class="profile">
       <div class="avatar">N</div>
       <div>
-        <strong id="profileName">Naveen</strong>
-        <small id="profileCloud">Cloud workspace</small>
+        <strong>Naveen</strong>
+        <small>Keep Building.</small>
       </div>
     </div>
   </aside>
@@ -1382,7 +1360,7 @@ window.NAVEEN_SUPABASE = {
             <h3>Local workspace</h3>
             <p>Tasks, proof images and brainstorming notes are stored locally in this browser using localStorage.</p>
             <div class="theme-row">
-              <button class="theme-choice" id="clearAllData">Clear all data</button> <button class="theme-choice" id="supabaseSignOut">Sign out</button>
+              <button class="theme-choice" id="clearAllData">Clear all data</button>
             </div>
           </div>
 
@@ -1776,81 +1754,6 @@ function startFocusFromTaskId(id){
    DATA
 ============================================================ */
 
-/* ============================================================
-   SUPABASE CLOUD BACKEND
-============================================================ */
-const supabase = window.supabase.createClient(NAVEEN_SUPABASE.url, NAVEEN_SUPABASE.key);
-const CLOUD_KEYS = ["tasks","brain_notes","brain_connectors","v2_notes","v2_boards","focus","streak","draw_strokes","theme","current_board"];
-let cloudReady = false;
-let cloudUser = null;
-let cloudSaveTimer = null;
-let cloudHydrating = false;
-
-async function cloudGet(key){
-  if(!cloudUser) return null;
-  const {data,error}=await supabase.from("workspace_state").select("data").eq("user_id",cloudUser.id).eq("state_key",key).maybeSingle();
-  if(error){ console.error("Cloud read",key,error); return null; }
-  return data?.data ?? null;
-}
-async function cloudSet(key,value){
-  if(!cloudUser || cloudHydrating) return;
-  const {error}=await supabase.from("workspace_state").upsert({user_id:cloudUser.id,state_key:key,data:value},{onConflict:"user_id,state_key"});
-  if(error) console.error("Cloud write",key,error);
-}
-function scheduleCloudSet(key,value){
-  if(!cloudReady || cloudHydrating) return;
-  clearTimeout(cloudSaveTimer);
-  cloudSaveTimer=setTimeout(()=>cloudSet(key,value),250);
-}
-async function hydrateCloud(){
-  if(!cloudUser) return;
-  cloudHydrating=true;
-  const rows=await supabase.from("workspace_state").select("state_key,data").eq("user_id",cloudUser.id);
-  if(rows.error){ console.error(rows.error); cloudHydrating=false; return; }
-  const map=Object.fromEntries((rows.data||[]).map(r=>[r.state_key,r.data]));
-  const migrate=(key,local)=>{ if(map[key]!==undefined) return map[key]; if(local!==undefined){ cloudSet(key,local); return local; } return undefined; };
-  tasks=migrate("tasks",tasks)||[]; notes=migrate("brain_notes",notes)||[]; connectors=migrate("brain_connectors",connectors)||[];
-  const localMap={v2_notes:"naveen_knowledge_notes_v1",v2_boards:"naveen_brainstorm_boards_v2",focus:"naveen_focus_sessions_v1",streak:"naveen_productivity_streak_v1",draw_strokes:"naveen_spa_draw_v3",theme:"naveen_spa_theme_v3"};
-  for(const [ck,lk] of Object.entries(localMap)){ if(map[ck]!==undefined) localStorage.setItem(lk,JSON.stringify(map[ck])); else { try { const local=JSON.parse(localStorage.getItem(lk)||"null"); if(local!==null) await cloudSet(ck,local); } catch{} } }
-  cloudHydrating=false;
-  cloudReady=true;
-  renderAll();
-}
-async function initSupabaseBackend(){
-  const gate=document.getElementById("authGate"), status=document.getElementById("authStatus");
-  let signup=false;
-  const showGate=()=>{gate.style.display="grid"}; const hideGate=()=>{gate.style.display="none"};
-  const msg=t=>{if(status)status.textContent=t};
-  document.getElementById("authToggle").onclick=()=>{signup=!signup;document.getElementById("authTitle").textContent=signup?"Create account":"Sign in";document.getElementById("authSubmit").textContent=signup?"Create account":"Sign in";document.getElementById("authToggle").textContent=signup?"Back to sign in":"Create account";};
-  document.getElementById("authSubmit").onclick=async()=>{
-    const email=document.getElementById("authEmail").value.trim(), password=document.getElementById("authPassword").value;
-    if(!email||password.length<6){msg("Enter a valid email and a password of at least 6 characters.");return;}
-    msg("Working…");
-    const r=signup?await supabase.auth.signUp({email,password}):await supabase.auth.signInWithPassword({email,password});
-    if(r.error){msg(r.error.message);return;}
-    msg(signup?"Account created. Check your email if confirmation is enabled.":"Signed in.");
-  };
-  document.getElementById("authGoogle").onclick=async()=>{
-    const r=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
-    if(r.error)msg(r.error.message);
-  };
-  document.getElementById("authReset").onclick=async()=>{
-    const email=document.getElementById("authEmail").value.trim(); if(!email){msg("Enter your email first.");return;}
-    const r=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname}); msg(r.error?r.error.message:"Password reset email sent.");
-  };
-  const {data,error}=await supabase.auth.getSession();
-  if(error){console.error("Supabase auth",error);msg(error.message);showGate();return;}
-  cloudUser=data.session?.user||null;
-  if(cloudUser){hideGate();await hydrateCloud();}
-  else showGate();
-  supabase.auth.onAuthStateChange(async (_event,session)=>{
-    cloudUser=session?.user||null;
-    if(cloudUser){hideGate();await hydrateCloud();} else {cloudReady=false;showGate();}
-  });
-}
-
-window.naveenCloud={supabase,initSupabaseBackend,getUser:()=>cloudUser};
-
 const KEYS = {
   TASKS: "naveen_spa_tasks_v3",
   NOTES: "naveen_spa_notes_v3",
@@ -1930,17 +1833,12 @@ function load(key, fallback) {
 function save(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
-    const cloudMap={
-      [KEYS.TASKS]:"tasks",[KEYS.NOTES]:"brain_notes",[KEYS.CONNECTORS]:"brain_connectors",
-      "naveen_knowledge_notes_v1":"v2_notes","naveen_brainstorm_boards_v2":"v2_boards",
-      "naveen_focus_sessions_v1":"focus","naveen_productivity_streak_v1":"streak",
-      "naveen_spa_draw_v3":"draw_strokes",[KEYS.THEME]:"theme"
-    };
-    if(cloudMap[key]) scheduleCloudSet(cloudMap[key],data);
     return true;
   } catch (error) {
     console.error("Storage save failed:", error);
-    if (typeof toast === "function") toast("Local storage save failed.", "error");
+    if (typeof toast === "function") {
+      toast("Storage is full. Remove old proof images or data.", "error");
+    }
     return false;
   }
 }
@@ -2787,9 +2685,13 @@ function editBrainNote(n){
 }
 
 function addSticky(){
+  const r=$("board").getBoundingClientRect();
+  const z=Math.max(zoom,.01);
+  const centerX=(r.width/2-panX)/z;
+  const centerY=(r.height/2-panY)/z;
   const n=createBrainNote(
-    100+Math.random()*360,
-    90+Math.random()*260,
+    centerX-110+(Math.random()*120-60),
+    centerY-80+(Math.random()*100-50),
     ["brain-ref-yellow","brain-ref-pink","brain-ref-green","brain-ref-blue","brain-ref-purple"][brainNotes.length%5]
   );
   brainNotes.push(n);
@@ -2866,7 +2768,7 @@ function drawMinimap(){
 }
 
 function setZoom(value){
-  zoom=Math.max(.35,Math.min(2.5,value));
+  zoom=Math.max(.05,Math.min(6,value));
   $("zoomValue").textContent=Math.round(zoom*100)+"%";
   const worldTransform=`translate(${panX}px,${panY}px) scale(${zoom})`;
   $("stickyLayer").style.transform=worldTransform;
@@ -2877,6 +2779,7 @@ function setZoom(value){
     grid.style.backgroundSize=`${24*zoom}px ${24*zoom}px`;
   }
   drawWires();
+  window.__renderInfiniteDraw?.();
 }
 
 function closeText(){
@@ -2932,8 +2835,14 @@ $("panButton").onclick=()=>{
 };
 
 let lastPan=null;
+let spaceDown=false;
+let panPointerId=null;
 $("workspace").addEventListener("pointerdown",e=>{
-  if(!panMode)return;
+  const wantsPan=panMode || spaceDown || e.button===1;
+  if(!wantsPan)return;
+  e.preventDefault();
+  panPointerId=e.pointerId;
+  e.currentTarget.setPointerCapture?.(e.pointerId);
   lastPan={x:e.clientX,y:e.clientY};
 });
 window.addEventListener("pointermove",e=>{
@@ -2946,7 +2855,7 @@ window.addEventListener("pointermove",e=>{
       render();
     }
   }
-  if(!panMode||!lastPan)return;
+  if(!lastPan)return;
   panX+=e.clientX-lastPan.x;
   panY+=e.clientY-lastPan.y;
   lastPan={x:e.clientX,y:e.clientY};
@@ -2957,6 +2866,7 @@ window.addEventListener("pointermove",e=>{
     grid.style.backgroundSize=`${24*zoom}px ${24*zoom}px`;
   }
   drawWires();
+  window.__renderInfiniteDraw?.();
 });
 window.addEventListener("pointerup",()=>{
   if(dragging){
@@ -2965,13 +2875,38 @@ window.addEventListener("pointerup",()=>{
     saveBrainScene();
   }
   lastPan=null;
+  panPointerId=null;
 });
 
 $("workspace").addEventListener("wheel",e=>{
   if(activeView!=="brainstorm")return;
   e.preventDefault();
-  setZoom(zoom+(e.deltaY<0?.08:-.08));
+  const r=$("board").getBoundingClientRect();
+  const beforeX=(e.clientX-r.left-panX)/Math.max(zoom,.01);
+  const beforeY=(e.clientY-r.top-panY)/Math.max(zoom,.01);
+  const next=Math.max(.05,Math.min(6,zoom+(e.deltaY<0?.1:-.1)));
+  zoom=next;
+  panX=e.clientX-r.left-beforeX*zoom;
+  panY=e.clientY-r.top-beforeY*zoom;
+  setZoom(zoom);
 },{passive:false});
+
+document.addEventListener("keydown",e=>{
+  if(activeView!=="brainstorm")return;
+  const tag=(e.target?.tagName||"").toLowerCase();
+  if(tag==="input"||tag==="textarea"||tag==="select")return;
+  if(e.code==="Space"){
+    spaceDown=true;
+    document.body.classList.add("brain-space-pan");
+    e.preventDefault();
+  }
+});
+document.addEventListener("keyup",e=>{
+  if(e.code==="Space"){
+    spaceDown=false;
+    document.body.classList.remove("brain-space-pan");
+  }
+});
 
 $("workspace").addEventListener("dblclick",e=>{
   if(activeTool!=="text")return;
@@ -3490,9 +3425,6 @@ function renderAll() {
 }
 
 renderAll();
-initSupabaseBackend();
-document.getElementById("supabaseSignOut")?.addEventListener("click",()=>supabase.auth.signOut());
-supabase.auth.getUser().then(({data})=>{if(data.user){const name=data.user.user_metadata?.full_name||data.user.email?.split("@")[0]||"Naveen";document.getElementById("profileName").textContent=name;document.getElementById("profileCloud").textContent=data.user.email||"Cloud workspace";}});
 
 if(location.hash==="#brainstorm"){
   switchView("brainstorm");
@@ -3527,7 +3459,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     STREAK:"naveen_productivity_streak_v1"
   };
   const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(f))}catch{return f}};
-  const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v)); const m={"naveen_knowledge_notes_v1":"v2_notes","naveen_brainstorm_boards_v2":"v2_boards","naveen_focus_sessions_v1":"focus","naveen_productivity_streak_v1":"streak"}; if(m[k]) scheduleCloudSet(m[k],v);};
+  const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
   let v2Notes=read(V2.NOTES,[]);
   let activeV2Note=null;
   let searchTerm="";
@@ -3990,7 +3922,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
 ============================================================ */
 (function(){
   const DRAW_KEY = "naveen_spa_draw_v3";
-  const BOARD_W = 6000, BOARD_H = 4000;
+  let canvasW = 1, canvasH = 1, dpr = 1;
   const SHAPE_TOOLS = ["pen","line","rect","ellipse","arrow"];
   const ERASE_TOOL = "drawEraser";
 
@@ -4007,30 +3939,42 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
 
   /* ---------- setup ---------- */
+  function resizeDrawLayer(force=false){
+    const canvas = document.getElementById("drawLayer");
+    const workspace = document.getElementById("workspace");
+    if(!canvas || !workspace) return;
+    const rect=workspace.getBoundingClientRect();
+    const nextW=Math.max(1,Math.round(rect.width));
+    const nextH=Math.max(1,Math.round(rect.height));
+    const nextDpr=window.devicePixelRatio||1;
+    if(!force && nextW===canvasW && nextH===canvasH && nextDpr===dpr) return;
+    canvasW=nextW; canvasH=nextH; dpr=nextDpr;
+    canvas.style.width=canvasW+"px";
+    canvas.style.height=canvasH+"px";
+    canvas.width=Math.max(1,Math.round(canvasW*dpr));
+    canvas.height=Math.max(1,Math.round(canvasH*dpr));
+    drawCtx=canvas.getContext("2d");
+    renderDrawStrokes();
+  }
+
   function initDrawLayer(){
     const canvas = document.getElementById("drawLayer");
     if(!canvas) return;
-    const dpr = 1;
-    canvas.style.width = BOARD_W+"px";
-    canvas.style.height = BOARD_H+"px";
-    canvas.width = Math.round(BOARD_W*dpr);
-    canvas.height = Math.round(BOARD_H*dpr);
-    drawCtx = canvas.getContext("2d");
-    drawCtx.setTransform(dpr,0,0,dpr,0,0);
-    applyDrawTransform();
-    renderDrawStrokes();
-
+    resizeDrawLayer(true);
     canvas.addEventListener("pointerdown", onDrawPointerDown);
     canvas.addEventListener("pointermove", onDrawPointerMove);
-    canvas.addEventListener("pointerleave", ()=>{ if(activeStroke){ /* keep drawing until pointerup outside is fine via capture */ } });
     window.addEventListener("pointerup", onDrawPointerUp);
+    window.addEventListener("resize", ()=>resizeDrawLayer(true));
+    if("ResizeObserver" in window){
+      const ro=new ResizeObserver(()=>resizeDrawLayer());
+      const ws=document.getElementById("workspace");
+      if(ws) ro.observe(ws);
+    }
   }
 
   function applyDrawTransform(){
-    const canvas = document.getElementById("drawLayer");
-    if(!canvas || typeof panX==="undefined") return;
-    canvas.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
-    canvas.style.transformOrigin = "0 0";
+    resizeDrawLayer();
+    renderDrawStrokes();
   }
 
   function syncDrawToolUI(){
@@ -4177,11 +4121,26 @@ document.querySelectorAll(".modal").forEach(modal=>{
 
   /* ---------- rendering ---------- */
   function renderDrawStrokes(previewStroke){
-    if(!drawCtx) return;
-    drawCtx.clearRect(0,0,BOARD_W,BOARD_H);
+    const canvas=document.getElementById("drawLayer");
+    if(!drawCtx || !canvas) return;
+    const rect=document.getElementById("workspace")?.getBoundingClientRect();
+    if(!rect) return;
+    const w=Math.max(1,Math.round(rect.width));
+    const h=Math.max(1,Math.round(rect.height));
+    if(w!==canvasW || h!==canvasH || (window.devicePixelRatio||1)!==dpr){
+      resizeDrawLayer(true);
+      return;
+    }
+    drawCtx.setTransform(dpr,0,0,dpr,0,0);
+    drawCtx.clearRect(0,0,canvasW,canvasH);
+    drawCtx.save();
+    drawCtx.translate(panX,panY);
+    drawCtx.scale(zoom,zoom);
     drawStrokes.forEach(s=>paintStroke(drawCtx,s));
     if(previewStroke) paintStroke(drawCtx, previewStroke);
+    drawCtx.restore();
   }
+  window.__renderInfiniteDraw=renderDrawStrokes;
 
   function paintStroke(ctx, s){
     if(!s.points || !s.points.length) return;
