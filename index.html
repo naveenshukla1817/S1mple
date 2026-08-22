@@ -32,6 +32,10 @@
   --red:#b96e69;
   --success:#68885d;
   --shadow:0 18px 40px rgba(31,24,15,.11);
+  /* Brainstorm / canvas chrome */
+  --chrome:#171512;
+  --chrome-2:#1e1b17;
+  --canvas:#24211d;
 }
 body{
   min-height:100vh;
@@ -54,6 +58,9 @@ body.light{
   --dark-line:#494138;
   --accent:#8b6c45;
   --shadow:0 18px 45px rgba(81,57,32,.12);
+  --chrome:#f0e7d8;
+  --chrome-2:#f7efe3;
+  --canvas:#e8ddcb;
 }
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
@@ -570,30 +577,43 @@ h3{font-size:17px;color:var(--ink)}
   border-radius:9px;padding:9px 12px;font-size:11px
 }
 .brain-ref-chrome-btn.dark{background:var(--accent);border-color:var(--accent);color:#fff7eb}
-.brain-ref-chrome-btn:hover{transform:translateY(-1px)}
+.brain-ref-chrome-btn:hover{transform:translateY(-1px);border-color:#8f795d;background:#28231d}
+
+/* Coffee/dark brainstorm contrast polish */
+.brain-ref-topbar,
+.brain-ref-toolbar,
+.brain-draw-toolbar{color:#e5d8c5}
+.brain-ref-header-title h1{color:#eee2cf!important;text-shadow:0 1px 14px rgba(201,157,84,.08)}
+.brain-ref-header-title p{color:#a99a86!important}
+.brain-ref-bulb{filter:drop-shadow(0 2px 8px rgba(242,198,97,.16))}
+.brain-ref-chrome-btn{color:#d9ccb9;background:#201d19;border-color:#675946;box-shadow:0 3px 12px rgba(0,0,0,.14)}
+.brain-ref-chrome-btn.dark{color:#201a13}
 
 .brain-ref-toolbar{
   min-height:60px;height:auto;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 25px;
   background:var(--chrome-2);border-bottom:1px solid var(--line)
 }
 .brain-ref-tool{
-  height:37px;padding:0 12px;border:1px solid var(--line);
-  background:transparent;color:#4f463b;border-radius:9px;font-size:11px
+  height:37px;padding:0 12px;border:1px solid #665743;
+  background:#201d19;color:#d9ccb9;border-radius:9px;font-size:11px;
+  box-shadow:0 2px 8px rgba(0,0,0,.10);transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease
 }
-.brain-ref-tool.active{background:#24211d;border-color:#24211d;color:white}
+.brain-ref-tool:hover{background:#2a251f;border-color:#8d7658;color:#fff3df;transform:translateY(-1px)}
+.brain-ref-tool.active{background:#c99d54;border-color:#c99d54;color:#211a12;box-shadow:0 6px 18px rgba(201,157,84,.16)}
 .brain-ref-tool:disabled{opacity:.4;cursor:not-allowed}
-.brain-ref-divider{width:1px;height:28px;background:var(--line);margin:0 5px}
+.brain-ref-divider{width:1px;height:28px;background:#5c4d3d;margin:0 5px}
 
 .brain-ref-workspace{
   flex:1;min-height:0;position:relative;background:var(--canvas);overflow:hidden
 }
 .brain-ref-canvas-grid{
   position:absolute;inset:0;
-  background-image:radial-gradient(circle,#d6cab4 1px,transparent 1px);
-  background-size:24px 24px
+  background-image:radial-gradient(circle,#665845 1px,transparent 1px);
+  background-size:24px 24px;
+  background-color:#24211d;opacity:.95
 }
 .brain-ref-board{
-  position:absolute;inset:0;overflow:hidden
+  position:absolute;inset:0;overflow:visible
 }
 .brain-ref-wires{
   position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none
@@ -623,7 +643,7 @@ h3{font-size:17px;color:var(--ink)}
   user-select:none;cursor:grab;transform:rotate(var(--rot));
   transition:box-shadow .18s ease,transform .18s ease
 }
-.brain-ref-sticky:hover{box-shadow:0 18px 32px rgba(53,41,22,.18);transform:rotate(var(--rot)) translateY(-2px)}
+.brain-ref-sticky:hover{box-shadow:0 22px 38px rgba(20,14,8,.28);transform:rotate(var(--rot)) translateY(-8px) scale(1.012);z-index:20}
 .brain-ref-sticky:active{cursor:grabbing}
 .brain-ref-sticky.selected{outline:2px solid rgba(73,61,46,.35);outline-offset:4px}
 .brain-ref-sticky.brain-ref-yellow{background:var(--yellow)}
@@ -723,6 +743,10 @@ h3{font-size:17px;color:var(--ink)}
 .color-menu .brain-ref-yellow{background:var(--yellow)}.color-menu .brain-ref-pink{background:var(--pink)}
 .color-menu .brain-ref-green{background:var(--green)}.color-menu .brain-ref-blue{background:var(--blue)}.color-menu .brain-ref-purple{background:var(--purple)}
 .brain-ref-shell{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--chrome);box-shadow:var(--shadow);}
+.brain-ref-shell:fullscreen{width:100vw;height:100vh;border-radius:0;border:0;display:flex;flex-direction:column}
+.brain-ref-shell:fullscreen .brain-ref-workspace{flex:1;height:auto;min-height:0}
+.brain-ref-shell:fullscreen .brain-ref-board{overflow:visible}
+.brain-ref-shell:fullscreen .brain-ref-tip{display:none}
 .brain-ref-workspace{height:calc(100vh - 310px);min-height:560px;}
 .brain-ref-topbar{position:relative!important;height:78px!important;}
 .brain-ref-tool:disabled{opacity:.4;cursor:not-allowed}
@@ -846,9 +870,35 @@ h3{font-size:17px;color:var(--ink)}
   .brain-ref-workspace{height:100vh!important;min-height:0!important}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.NAVEEN_SUPABASE = {
+  url: "https://yjpbnqpyhznpqusvqhsh.supabase.co",
+  key: "sb_publishable_8Ofnl8zfDmQ78wX5UyR9tw_mZ2g2daF"
+};
+</script>
+
+<style id="supabase-auth-css">
+#authGate{position:fixed;inset:0;z-index:99999;display:none;place-items:center;background:rgba(15,13,11,.94);backdrop-filter:blur(12px)}
+#authGate .auth-card{width:min(420px,calc(100% - 28px));background:#211e19;border:1px solid #3d362e;border-radius:18px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+#authGate h2{margin:0 0 7px;color:#f0e6d6;font-size:26px}.auth-muted{color:#9e9589;font-size:11px;line-height:1.5;margin:0 0 18px}.auth-input{width:100%;box-sizing:border-box;margin:6px 0;padding:12px;border-radius:9px;border:1px solid #433b32;background:#181613;color:#eee5d8;outline:none}.auth-row{display:flex;gap:8px;margin-top:10px}.auth-row button{flex:1}.auth-status{min-height:18px;margin-top:10px;font-size:10px;color:#cbbca7}.auth-user-btn{cursor:pointer}
+</style>
 </head>
 
 <body>
+<div id="authGate">
+  <div class="auth-card">
+    <p class="kicker">NAVEEN WORKSPACE · CLOUD</p>
+    <h2 id="authTitle">Sign in</h2>
+    <p class="auth-muted">Your workspace syncs privately to Supabase. Each account gets its own protected data.</p>
+    <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email">
+    <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password">
+    <div class="auth-row"><button class="btn-accent" id="authSubmit">Sign in</button><button class="btn-light" id="authGoogle">Google</button></div>
+    <div class="auth-row"><button class="btn-light" id="authToggle">Create account</button><button class="btn-light" id="authReset">Reset password</button></div>
+    <div class="auth-status" id="authStatus"></div>
+  </div>
+</div>
+
 
 <div class="app">
 
@@ -896,8 +946,8 @@ h3{font-size:17px;color:var(--ink)}
     <div class="profile">
       <div class="avatar">N</div>
       <div>
-        <strong>Naveen</strong>
-        <small>Keep Building.</small>
+        <strong id="profileName">Naveen</strong>
+        <small id="profileCloud">Cloud workspace</small>
       </div>
     </div>
   </aside>
@@ -1134,7 +1184,8 @@ h3{font-size:17px;color:var(--ink)}
               <button class="brain-ref-chrome-btn" id="attachBrainButton">＋ Attach</button>
               <button class="brain-ref-chrome-btn" id="exportBrainPng">PNG</button>
               <button class="brain-ref-chrome-btn" id="exportBrainPdf">PDF</button>
-              <button class="brain-ref-chrome-btn" id="shareButton">⌘ Share</button>
+              <button class="brain-ref-chrome-btn" id="shareButton">⤴ Share</button>
+              <button class="brain-ref-chrome-btn" id="fullscreenBrainButton">⛶ Fullscreen</button>
               <button class="brain-ref-chrome-btn dark" id="newBoardButton">▣ New Board</button>
               <input id="brainAttachmentInput" type="file" accept="image/*,.pdf" hidden>
             </div>
@@ -1148,10 +1199,10 @@ h3{font-size:17px;color:var(--ink)}
             <button class="brain-ref-tool" data-tool="rect">▭ Rect</button>
             <button class="brain-ref-tool" data-tool="ellipse">◯ Ellipse</button>
             <button class="brain-ref-tool" data-tool="arrow">➜ Arrow</button>
-            <button class="brain-ref-tool" data-tool="drawEraser">🧽 Erase Draw</button>
+            <button class="brain-ref-tool" data-tool="drawEraser">⌫ Erase Draw</button>
             <button class="brain-ref-tool" data-tool="connector">⤴ Connector</button>
             <button class="brain-ref-tool" data-tool="text">T Text</button>
-            <button class="brain-ref-tool" data-tool="eraser">⌫ Eraser</button>
+            <button class="brain-ref-tool" data-tool="eraser">⌧ Eraser</button>
             <span class="brain-ref-divider"></span>
             <button class="brain-ref-tool" id="undoButton">↶ Undo</button>
             <button class="brain-ref-tool" id="redoButton" disabled>↷ Redo</button>
@@ -1331,7 +1382,7 @@ h3{font-size:17px;color:var(--ink)}
             <h3>Local workspace</h3>
             <p>Tasks, proof images and brainstorming notes are stored locally in this browser using localStorage.</p>
             <div class="theme-row">
-              <button class="theme-choice" id="clearAllData">Clear all data</button>
+              <button class="theme-choice" id="clearAllData">Clear all data</button> <button class="theme-choice" id="supabaseSignOut">Sign out</button>
             </div>
           </div>
 
@@ -1725,6 +1776,81 @@ function startFocusFromTaskId(id){
    DATA
 ============================================================ */
 
+/* ============================================================
+   SUPABASE CLOUD BACKEND
+============================================================ */
+const supabase = window.supabase.createClient(NAVEEN_SUPABASE.url, NAVEEN_SUPABASE.key);
+const CLOUD_KEYS = ["tasks","brain_notes","brain_connectors","v2_notes","v2_boards","focus","streak","draw_strokes","theme","current_board"];
+let cloudReady = false;
+let cloudUser = null;
+let cloudSaveTimer = null;
+let cloudHydrating = false;
+
+async function cloudGet(key){
+  if(!cloudUser) return null;
+  const {data,error}=await supabase.from("workspace_state").select("data").eq("user_id",cloudUser.id).eq("state_key",key).maybeSingle();
+  if(error){ console.error("Cloud read",key,error); return null; }
+  return data?.data ?? null;
+}
+async function cloudSet(key,value){
+  if(!cloudUser || cloudHydrating) return;
+  const {error}=await supabase.from("workspace_state").upsert({user_id:cloudUser.id,state_key:key,data:value},{onConflict:"user_id,state_key"});
+  if(error) console.error("Cloud write",key,error);
+}
+function scheduleCloudSet(key,value){
+  if(!cloudReady || cloudHydrating) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(()=>cloudSet(key,value),250);
+}
+async function hydrateCloud(){
+  if(!cloudUser) return;
+  cloudHydrating=true;
+  const rows=await supabase.from("workspace_state").select("state_key,data").eq("user_id",cloudUser.id);
+  if(rows.error){ console.error(rows.error); cloudHydrating=false; return; }
+  const map=Object.fromEntries((rows.data||[]).map(r=>[r.state_key,r.data]));
+  const migrate=(key,local)=>{ if(map[key]!==undefined) return map[key]; if(local!==undefined){ cloudSet(key,local); return local; } return undefined; };
+  tasks=migrate("tasks",tasks)||[]; notes=migrate("brain_notes",notes)||[]; connectors=migrate("brain_connectors",connectors)||[];
+  const localMap={v2_notes:"naveen_knowledge_notes_v1",v2_boards:"naveen_brainstorm_boards_v2",focus:"naveen_focus_sessions_v1",streak:"naveen_productivity_streak_v1",draw_strokes:"naveen_spa_draw_v3",theme:"naveen_spa_theme_v3"};
+  for(const [ck,lk] of Object.entries(localMap)){ if(map[ck]!==undefined) localStorage.setItem(lk,JSON.stringify(map[ck])); else { try { const local=JSON.parse(localStorage.getItem(lk)||"null"); if(local!==null) await cloudSet(ck,local); } catch{} } }
+  cloudHydrating=false;
+  cloudReady=true;
+  renderAll();
+}
+async function initSupabaseBackend(){
+  const gate=document.getElementById("authGate"), status=document.getElementById("authStatus");
+  let signup=false;
+  const showGate=()=>{gate.style.display="grid"}; const hideGate=()=>{gate.style.display="none"};
+  const msg=t=>{if(status)status.textContent=t};
+  document.getElementById("authToggle").onclick=()=>{signup=!signup;document.getElementById("authTitle").textContent=signup?"Create account":"Sign in";document.getElementById("authSubmit").textContent=signup?"Create account":"Sign in";document.getElementById("authToggle").textContent=signup?"Back to sign in":"Create account";};
+  document.getElementById("authSubmit").onclick=async()=>{
+    const email=document.getElementById("authEmail").value.trim(), password=document.getElementById("authPassword").value;
+    if(!email||password.length<6){msg("Enter a valid email and a password of at least 6 characters.");return;}
+    msg("Working…");
+    const r=signup?await supabase.auth.signUp({email,password}):await supabase.auth.signInWithPassword({email,password});
+    if(r.error){msg(r.error.message);return;}
+    msg(signup?"Account created. Check your email if confirmation is enabled.":"Signed in.");
+  };
+  document.getElementById("authGoogle").onclick=async()=>{
+    const r=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
+    if(r.error)msg(r.error.message);
+  };
+  document.getElementById("authReset").onclick=async()=>{
+    const email=document.getElementById("authEmail").value.trim(); if(!email){msg("Enter your email first.");return;}
+    const r=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname}); msg(r.error?r.error.message:"Password reset email sent.");
+  };
+  const {data,error}=await supabase.auth.getSession();
+  if(error){console.error("Supabase auth",error);msg(error.message);showGate();return;}
+  cloudUser=data.session?.user||null;
+  if(cloudUser){hideGate();await hydrateCloud();}
+  else showGate();
+  supabase.auth.onAuthStateChange(async (_event,session)=>{
+    cloudUser=session?.user||null;
+    if(cloudUser){hideGate();await hydrateCloud();} else {cloudReady=false;showGate();}
+  });
+}
+
+window.naveenCloud={supabase,initSupabaseBackend,getUser:()=>cloudUser};
+
 const KEYS = {
   TASKS: "naveen_spa_tasks_v3",
   NOTES: "naveen_spa_notes_v3",
@@ -1733,23 +1859,47 @@ const KEYS = {
 };
 
 const quotes = [
-  {
-    text:"The strong are always kind.",
-    source:"Vagabond — Volume 25"
-  },
-  {
-    text:"Invincible is just a word.",
-    source:"Vagabond — Volume 8"
-  },
-  {
-    text:"There is no light for those who do not know darkness.",
-    source:"Vagabond — Volume 2"
-  },
-  {
-    text:"Ultimately... we're all alone in this world.",
-    source:"Vagabond — Volume 25"
-  }
+  {text:"The strong are always kind.", source:"Vagabond — Volume 25"},
+  {text:"Invincible is just a word.", source:"Vagabond — Volume 8"},
+  {text:"There is no light for those who do not know darkness.", source:"Vagabond — Volume 2"},
+  {text:"Ultimately... we're all alone in this world.", source:"Vagabond — Volume 25"},
+  {text:"A quiet mind sees what a restless mind misses.", source:"Vagabond — inspired"},
+  {text:"Real strength begins when you stop proving you are strong.", source:"Vagabond — inspired"},
+  {text:"The path becomes clear when you keep walking it.", source:"Vagabond — inspired"},
+  {text:"Defeat can teach what victory hides.", source:"Vagabond — inspired"},
+  {text:"Knowing yourself is harder than defeating another man.", source:"Vagabond — inspired"},
+  {text:"A sword is only as calm as the hand that holds it.", source:"Vagabond — inspired"},
+  {text:"Ego makes noise. Understanding makes silence.", source:"Vagabond — inspired"},
+  {text:"The man who fears loss has already lost his freedom.", source:"Vagabond — inspired"},
+  {text:"Growth is often just pain understood later.", source:"Vagabond — inspired"},
+  {text:"Peace is not weakness; it is strength without anger.", source:"Vagabond — inspired"},
+  {text:"You do not master the mountain by hating its height.", source:"Vagabond — inspired"},
+  {text:"The greatest opponent is often the self you refuse to face.", source:"Vagabond — inspired"},
+  {text:"Power without control turns strength into ruin.", source:"Vagabond — inspired"},
+  {text:"A person can change the moment they stop running from truth.", source:"Vagabond — inspired"},
+  {text:"The deeper the roots, the quieter the tree.", source:"Vagabond — inspired"},
+  {text:"You become stronger when you no longer need to be feared.", source:"Vagabond — inspired"},
+  {text:"Every battle leaves a lesson behind.", source:"Vagabond — inspired"},
+  {text:"Peace with yourself is harder than victory over another.", source:"Vagabond — inspired"},
+  {text:"The strongest step is sometimes choosing not to strike.", source:"Vagabond — inspired"},
+  {text:"Pain can sharpen you, but only wisdom can guide you.", source:"Vagabond — inspired"},
+  {text:"Do not chase the image of strength; build the real thing.", source:"Vagabond — inspired"},
+  {text:"A lonely road can still lead to a meaningful life.", source:"Vagabond — inspired"},
+  {text:"Understanding another person starts with understanding yourself.", source:"Vagabond — inspired"},
+  {text:"The need to win can become its own kind of weakness.", source:"Vagabond — inspired"},
+  {text:"The journey changes the man more than the destination does.", source:"Vagabond — inspired"},
+  {text:"When the mind becomes still, even fear loses its voice.", source:"Vagabond — inspired"}
 ];
+
+let quoteBag = [];
+function refillQuoteBag(){
+  quoteBag = quotes.map((_,i)=>i);
+  for(let i=quoteBag.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [quoteBag[i],quoteBag[j]]=[quoteBag[j],quoteBag[i]];
+  }
+}
+
 
 let tasks = load(KEYS.TASKS, []);
 let notes = load(KEYS.NOTES, []);
@@ -1780,12 +1930,17 @@ function load(key, fallback) {
 function save(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
+    const cloudMap={
+      [KEYS.TASKS]:"tasks",[KEYS.NOTES]:"brain_notes",[KEYS.CONNECTORS]:"brain_connectors",
+      "naveen_knowledge_notes_v1":"v2_notes","naveen_brainstorm_boards_v2":"v2_boards",
+      "naveen_focus_sessions_v1":"focus","naveen_productivity_streak_v1":"streak",
+      "naveen_spa_draw_v3":"draw_strokes",[KEYS.THEME]:"theme"
+    };
+    if(cloudMap[key]) scheduleCloudSet(cloudMap[key],data);
     return true;
   } catch (error) {
     console.error("Storage save failed:", error);
-    if (typeof toast === "function") {
-      toast("Storage is full. Remove old proof images or data.", "error");
-    }
+    if (typeof toast === "function") toast("Local storage save failed.", "error");
     return false;
   }
 }
@@ -1895,7 +2050,8 @@ function priorityClass(p) {
 ============================================================ */
 
 function setQuote() {
-  const q = quotes[Math.floor(Math.random()*quotes.length)];
+  if(!quoteBag.length) refillQuoteBag();
+  const q = quotes[quoteBag.shift()];
   $("heroQuote").textContent = `“${q.text}”`;
   $("heroQuoteSource").textContent = `— ${q.source}`;
   $("sidebarQuote").textContent = q.text;
@@ -1914,9 +2070,11 @@ function updateClock() {
     `${String(d.getMinutes()).padStart(2,"0")}:`+
     `${String(d.getSeconds()).padStart(2,"0")}`;
 }
+refillQuoteBag();
 setQuote();
 updateClock();
 setInterval(updateClock,1000);
+setInterval(setQuote,14000);
 
 
 /* ============================================================
@@ -2708,10 +2866,16 @@ function drawMinimap(){
 }
 
 function setZoom(value){
-  zoom=Math.max(.65,Math.min(1.6,value));
+  zoom=Math.max(.35,Math.min(2.5,value));
   $("zoomValue").textContent=Math.round(zoom*100)+"%";
-  $("stickyLayer").style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`;
+  const worldTransform=`translate(${panX}px,${panY}px) scale(${zoom})`;
+  $("stickyLayer").style.transform=worldTransform;
   $("stickyLayer").style.transformOrigin="0 0";
+  const grid=$(".brain-ref-canvas-grid");
+  if(grid){
+    grid.style.backgroundPosition=`${panX}px ${panY}px`;
+    grid.style.backgroundSize=`${24*zoom}px ${24*zoom}px`;
+  }
   drawWires();
 }
 
@@ -2777,10 +2941,8 @@ window.addEventListener("pointermove",e=>{
     const n=brainNotes.find(x=>x.id===dragging.id);
     if(n){
       const r=$("board").getBoundingClientRect();
-      n.x=Math.max(10,Math.min((r.width-230)/Math.max(zoom,.01),
-        (e.clientX-r.left-panX-dragging.dx)/zoom));
-      n.y=Math.max(10,Math.min((r.height-170)/Math.max(zoom,.01),
-        (e.clientY-r.top-panY-dragging.dy)/zoom));
+      n.x=(e.clientX-r.left-panX-dragging.dx)/Math.max(zoom,.01);
+      n.y=(e.clientY-r.top-panY-dragging.dy)/Math.max(zoom,.01);
       render();
     }
   }
@@ -2789,6 +2951,11 @@ window.addEventListener("pointermove",e=>{
   panY+=e.clientY-lastPan.y;
   lastPan={x:e.clientX,y:e.clientY};
   $("stickyLayer").style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`;
+  const grid=$(".brain-ref-canvas-grid");
+  if(grid){
+    grid.style.backgroundPosition=`${panX}px ${panY}px`;
+    grid.style.backgroundSize=`${24*zoom}px ${24*zoom}px`;
+  }
   drawWires();
 });
 window.addEventListener("pointerup",()=>{
@@ -2870,6 +3037,22 @@ $("newBoardButton").onclick=()=>{
   history=[];historyIndex=-1;pushHistory();
   saveBrainScene();render();toast("New board created.");
 };
+
+const fullscreenBrainButton=$("fullscreenBrainButton");
+if(fullscreenBrainButton){
+  fullscreenBrainButton.onclick=async()=>{
+    const shell=document.querySelector(".brain-ref-shell");
+    if(!shell)return;
+    try{
+      if(document.fullscreenElement) await document.exitFullscreen();
+      else await shell.requestFullscreen();
+    }catch{ toast("Fullscreen is not available in this browser.","error"); }
+  };
+  document.addEventListener("fullscreenchange",()=>{
+    const active=!!document.fullscreenElement;
+    fullscreenBrainButton.textContent=active?"✕ Exit Fullscreen":"⛶ Fullscreen";
+  });
+}
 
 $("shareButton").onclick=async()=>{
   const url=location.href.split("#")[0];
@@ -3307,6 +3490,9 @@ function renderAll() {
 }
 
 renderAll();
+initSupabaseBackend();
+document.getElementById("supabaseSignOut")?.addEventListener("click",()=>supabase.auth.signOut());
+supabase.auth.getUser().then(({data})=>{if(data.user){const name=data.user.user_metadata?.full_name||data.user.email?.split("@")[0]||"Naveen";document.getElementById("profileName").textContent=name;document.getElementById("profileCloud").textContent=data.user.email||"Cloud workspace";}});
 
 if(location.hash==="#brainstorm"){
   switchView("brainstorm");
@@ -3341,7 +3527,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     STREAK:"naveen_productivity_streak_v1"
   };
   const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(f))}catch{return f}};
-  const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v)); const m={"naveen_knowledge_notes_v1":"v2_notes","naveen_brainstorm_boards_v2":"v2_boards","naveen_focus_sessions_v1":"focus","naveen_productivity_streak_v1":"streak"}; if(m[k]) scheduleCloudSet(m[k],v);};
   let v2Notes=read(V2.NOTES,[]);
   let activeV2Note=null;
   let searchTerm="";
@@ -3804,7 +3990,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
 ============================================================ */
 (function(){
   const DRAW_KEY = "naveen_spa_draw_v3";
-  const BOARD_W = 2600, BOARD_H = 1600;
+  const BOARD_W = 6000, BOARD_H = 4000;
   const SHAPE_TOOLS = ["pen","line","rect","ellipse","arrow"];
   const ERASE_TOOL = "drawEraser";
 
@@ -3824,7 +4010,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   function initDrawLayer(){
     const canvas = document.getElementById("drawLayer");
     if(!canvas) return;
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = 1;
     canvas.style.width = BOARD_W+"px";
     canvas.style.height = BOARD_H+"px";
     canvas.width = Math.round(BOARD_W*dpr);
