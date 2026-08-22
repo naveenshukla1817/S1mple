@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#171613">
+<meta name="color-scheme" content="dark">
+<title>NEXA — Your Space. Your Workflow.</title>
+<meta name="description" content="NEXA is a personal workspace for tasks, notes, ideas, focus and proof of work.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23171613'/%3E%3Cpath d='M15 45V19h8l18 18V19h8v26h-8L23 27v18z' fill='%23f0dfc1'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23c99d54'/%3E%3C/svg%3E">
+
+<style>
+:root{
+  --bg:#171613;--sidebar:#12110f;--panel:#f5ecdd;--panel-soft:#fbf5e9;--paper:#efe4d2;
+  --ink:#29241e;--cream:#efe2c6;--muted:#827768;--dark-muted:#aaa08f;--line:#d5c5ab;
+  --dark-line:#3a352e;--accent:#c99d54;--yellow:#f0cf67;--pink:#efaeab;--green:#b6d77d;
+  --blue:#9ccbe7;--purple:#cdb5de;--red:#b96e69;--success:#68885d;
+  --shadow:0 18px 40px rgba(31,24,15,.11);--chrome:#171512;--chrome-2:#1e1b17;--canvas:#24211d;
+  --radius:20px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:var(--bg);color:var(--cream)}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:grid;grid-template-columns:256px 1fr;background:var(--bg)}
+.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;border-right:1px solid var(--dark-line);background:var(--sidebar);padding:22px 16px;z-index:30}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 25px;border-bottom:1px solid var(--dark-line)}
+.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#27231d,#171613);border:1px solid #4d4334;display:grid;place-items:center;font-weight:900;letter-spacing:-1px;color:#f3dec0;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.brand strong{font-size:15px;letter-spacing:.22em}.brand small{display:block;color:var(--dark-muted);font-size:10px;margin-top:2px;letter-spacing:.12em}
+.nav{padding-top:18px;display:grid;gap:6px}.nav button,.bottom-nav button{border:0;background:transparent;color:#bcb2a3;text-align:left;padding:11px 12px;border-radius:12px;display:flex;align-items:center;gap:11px;font-size:12px;transition:.16s}
+.nav button:hover,.nav button.active,.bottom-nav button:hover{background:#201e1a;color:#f4e6cf}.nav .ico{width:20px;text-align:center;color:#caa56a}
+.bottom-nav{margin-top:auto;display:grid;gap:7px;padding-top:16px}
+.user-mini{border:1px solid var(--dark-line);background:#1b1916;border-radius:16px;padding:11px;margin-top:12px}
+.user-mini .row{display:flex;align-items:center;gap:10px}.avatar{width:32px;height:32px;border-radius:50%;background:#e4cfaa;color:#2a241d;display:grid;place-items:center;font-weight:800}
+.user-mini b{font-size:11px;color:#f1dfc5}.user-mini span{display:block;font-size:9px;color:#9c9284;margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+.main{min-width:0;background:var(--panel);color:var(--ink);min-height:100vh}
+.topbar{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;background:rgba(245,236,221,.93);backdrop-filter:blur(14px)}
+.breadcrumb{font-size:11px;color:#7b6e5f}.breadcrumb b{color:#2f2922}.top-actions{display:flex;gap:8px;align-items:center}
+.top-btn,.primary,.ghost,.danger,.pill-btn{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:11px;padding:9px 12px;font-size:11px}
+.primary{background:#2b2721;color:#f7ead3;border-color:#2b2721}.primary:hover{background:#1d1b18}
+.ghost:hover,.pill-btn:hover{background:#eee3d1}.danger{color:#944d47;border-color:#d6aaa4}
+.content{padding:26px;max-width:1500px;margin:0 auto}.view{display:none}.view.active{display:block}
+.kicker{margin:0 0 6px;color:#8a7a69;font-size:9px;font-weight:800;letter-spacing:.18em}
+h1,h2,h3,p{margin-top:0}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}.hero h1{font-size:33px;letter-spacing:-.04em;margin-bottom:8px}.hero p{color:#7b6d5e;font-size:13px}.hero-badge{display:flex;gap:7px;align-items:center;background:#ebe0ce;border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-size:10px}
+.grid{display:grid;gap:14px}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--panel-soft);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}.dark-card{background:#1e1b17;color:#f1e0c5;border-color:#322d26;box-shadow:none}
+.stat strong{font-size:26px;display:block;letter-spacing:-.04em}.stat span{font-size:10px;color:#827668}.stat .bar{height:6px;background:#e7dccb;border-radius:99px;margin-top:14px;overflow:hidden}.stat .bar i{display:block;height:100%;background:var(--accent);width:0}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.section-head h2{font-size:17px;margin:0}.section-head p{font-size:10px;color:#8b7b6c;margin:4px 0 0}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.list{display:grid;gap:9px}.item{border:1px solid var(--line);background:#fff9ef;border-radius:15px;padding:12px;display:flex;align-items:center;gap:12px}.item .grow{flex:1;min-width:0}.item b{font-size:12px}.item small{display:block;font-size:9px;color:#8b7b6c;margin-top:4px}.item.done{opacity:.58}.check{width:18px;height:18px;border-radius:6px;border:1px solid #a89a88;background:transparent;display:grid;place-items:center}.check.on{background:#6b815d;border-color:#6b815d;color:white}
+.progress-line{height:7px;border-radius:99px;background:#3a342c;overflow:hidden}.progress-line i{display:block;height:100%;background:#c99d54;width:0}
+.metric-row{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}.metric-row strong{font-size:26px}.muted{color:#8e8171;font-size:10px}
+.task-filters{display:flex;gap:7px;flex-wrap:wrap}.filter{border:1px solid var(--line);background:#f7eddf;border-radius:999px;padding:7px 10px;font-size:10px;color:#6f6254}.filter.active{background:#2d2822;color:#f6e8d1;border-color:#2d2822}
+input,textarea,select{width:100%;border:1px solid var(--line);background:#fffaf1;color:var(--ink);border-radius:11px;padding:10px 11px;outline:none}input:focus,textarea:focus,select:focus{border-color:#ae8954;box-shadow:0 0 0 3px rgba(201,157,84,.15)}label{display:block;font-size:10px;color:#7a6d5e;margin:0 0 6px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.full{grid-column:1/-1}
+.modal{position:fixed;inset:0;background:rgba(7,6,5,.58);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:18px;z-index:80}.modal.show{display:flex}.modal-card{width:min(520px,100%);background:#f7efe2;border:1px solid #cdbc9f;border-radius:20px;box-shadow:0 30px 70px rgba(0,0,0,.35);padding:18px;color:var(--ink)}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.modal-head h3{margin:0;font-size:17px}.x{border:0;background:transparent;font-size:20px;color:#7e715f}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.toast-wrap{position:fixed;right:18px;bottom:18px;z-index:120;display:grid;gap:8px}.toast{background:#211e1a;color:#f3e4cb;border:1px solid #40372d;border-radius:13px;padding:11px 13px;min-width:220px;font-size:11px;box-shadow:0 15px 35px rgba(0,0,0,.25)}
+.note-grid{display:grid;grid-template-columns:250px 1fr;min-height:560px}.note-list{border-right:1px solid var(--line);padding-right:10px}.note-list .item{cursor:pointer}.editor{padding-left:14px}.editor textarea{height:410px;resize:vertical;background:transparent;border:0;padding:0;font-size:15px;line-height:1.8}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line);border-radius:17px;overflow:hidden;background:#fffaf1}.dow,.day{padding:11px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:95px}.dow{min-height:auto;text-align:center;font-size:9px;font-weight:800;background:#f0e5d4;color:#786b5c}.day{font-size:10px}.day span{display:block;font-size:11px;font-weight:800;margin-bottom:8px}.day.today{background:#f3e5c9}.event{font-size:9px;background:#e7dcc8;padding:4px 5px;border-radius:6px;margin-top:4px}
+.proof-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.proof-card{background:#fffaf1;border:1px solid var(--line);border-radius:15px;padding:13px}.proof-card img{width:100%;height:135px;object-fit:cover;border-radius:10px;background:#eadfce}.proof-card h3{font-size:12px;margin:10px 0 4px}.proof-card p{font-size:9px;color:#847566}
+.settings{display:grid;gap:12px;max-width:850px}.setting{background:#fffaf1;border:1px solid var(--line);border-radius:16px;padding:16px}.setting h3{font-size:13px;margin-bottom:6px}.setting p{font-size:10px;color:#8a7968}.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px}.switch{width:44px;height:24px;border-radius:999px;background:#c7b7a0;padding:3px;border:0}.switch i{width:18px;height:18px;border-radius:50%;display:block;background:white;transition:.2s}.switch.on{background:#6f875e}.switch.on i{transform:translateX(20px)}
+.brain-layout{height:calc(100vh - 124px);min-height:620px;display:grid;grid-template-columns:1fr;gap:10px}.brain-shell{position:relative;overflow:hidden;background:#24211d;border:1px solid #40382f;border-radius:20px;min-height:620px}.brain-toolbar{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.brain-toolbar button{border:1px solid #51483b;background:#1b1916;color:#e9dbc2;border-radius:9px;padding:7px 9px;font-size:10px}.brain-toolbar button.active,.brain-toolbar button:hover{background:#302a23}.brain-help{position:absolute;bottom:12px;left:12px;color:#867a6b;font-size:10px;background:rgba(20,18,16,.72);padding:7px 10px;border-radius:9px}
+#brainCanvas{width:100%;height:100%;display:block;cursor:crosshair}.sticky{position:absolute;min-width:150px;max-width:220px;background:#f0cf67;color:#2f291f;border-radius:10px;padding:10px;box-shadow:0 12px 30px rgba(0,0,0,.28);user-select:none;z-index:3}.sticky b{font-size:11px}.sticky p{font-size:10px;margin:7px 0 0;white-space:pre-wrap}.sticky small{display:block;font-size:8px;margin-top:7px;opacity:.65}
+.auth-shell{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 80% 10%,#362b1d 0,#1b1814 35%,#11100e 78%);padding:22px}.auth-card{width:min(430px,100%);padding:26px;border:1px solid #41382d;background:rgba(26,24,20,.96);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.5);color:#efdfc4}.auth-card .logo{margin-bottom:14px}.auth-card h1{font-size:29px;margin:0 0 8px}.auth-card p{color:#a69b8b;font-size:11px;line-height:1.7}.auth-card label{color:#afa294}.auth-card input{background:#171613;border-color:#4a4034;color:#f4e8d6}.auth-card .link{border:0;background:transparent;color:#d8ad68;padding:0;font-size:10px;text-decoration:underline}.auth-note{font-size:9px;color:#7f7568;margin-top:12px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:17px 0}.auth-tabs button{border:1px solid #41382f;background:#1a1815;color:#bcb2a4;border-radius:10px;padding:9px;font-size:10px}.auth-tabs button.active{background:#2b261f;color:#f4e3c8;border-color:#69553a}
+.mobile-bar{display:none}
+.empty{padding:36px 15px;text-align:center;color:#8c7c6b;font-size:11px;border:1px dashed #cbbb9f;border-radius:15px}
+.hidden{display:none!important}
+@media (max-width:1050px){.app{grid-template-columns:82px 1fr}.sidebar{padding:18px 10px}.brand{justify-content:center}.brand>div:last-child,.nav button span,.bottom-nav button span,.user-mini .row>div:last-child{display:none}.nav button,.bottom-nav button{justify-content:center}.brand{border-bottom:0}.user-mini{padding:8px}.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.proof-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.app{grid-template-columns:1fr}.sidebar{display:none}.main{min-height:100vh}.topbar{padding:0 14px;height:64px}.content{padding:16px 13px 86px}.hero{display:block}.hero h1{font-size:28px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.note-grid{grid-template-columns:1fr}.note-list{border-right:0;border-bottom:1px solid var(--line);padding:0 0 10px;margin-bottom:10px;display:flex;gap:7px;overflow:auto}.note-list .item{min-width:185px}.proof-list{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.mobile-bar{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);bottom:0;left:0;right:0;height:62px;background:rgba(18,17,15,.97);border-top:1px solid #39332b;z-index:50}.mobile-bar button{background:transparent;border:0;color:#a69b8d;font-size:9px}.mobile-bar button.active{color:#efddbe}.mobile-bar i{display:block;font-style:normal;font-size:16px;margin-bottom:3px}.brain-layout{height:calc(100vh - 90px);min-height:540px}.brain-shell{min-height:540px}.day{min-height:70px;padding:7px}.dow{padding:7px}.event{display:none}}
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="authGate" class="auth-shell">
+  <div class="auth-card">
+    <div class="logo">N</div>
+    <p class="kicker" style="color:#b99a69">PERSONAL WORKSPACE</p>
+    <h1>Welcome to NEXA.</h1>
+    <p>One place for tasks, notes, ideas, focus and proof of work.</p>
+    <div class="auth-tabs">
+      <button id="tabLogin" class="active">Login</button>
+      <button id="tabSignup">Create account</button>
+    </div>
+    <form id="authForm" class="grid" style="gap:10px">
+      <div><label>Email</label><input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+      <div><label>Password</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="••••••••"></div>
+      <div id="nameField" class="hidden"><label>Your name</label><input id="authName" type="text" autocomplete="name" placeholder="Your name"></div>
+      <button class="primary" style="padding:12px" type="submit" id="authSubmit">Enter NEXA</button>
+    </form>
+    <p class="auth-note" id="authModeNote">Local preview mode is active. Connect Supabase later and this same UI becomes real authentication.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">N</div><div><strong>NEXA</strong><small>Your space. Your workflow.</small></div></div>
+    <nav class="nav" aria-label="Primary">
+      <button data-view="dashboard" class="active"><span class="ico">⌂</span><span>Dashboard</span></button>
+      <button data-view="tasks"><span class="ico">✓</span><span>Tasks</span></button>
+      <button data-view="brainstorm"><span class="ico">✦</span><span>Brainstorm</span></button>
+      <button data-view="proofs"><span class="ico">▣</span><span>Proofs</span></button>
+      <button data-view="calendar"><span class="ico">□</span><span>Calendar</span></button>
+      <button data-view="notes"><span class="ico">▤</span><span>Notes</span></button>
+      <button data-view="settings"><span class="ico">⚙</span><span>Settings</span></button>
+    </nav>
+    <div class="user-mini">
+      <div class="row"><div id="sidebarAvatar" class="avatar">N</div><div><b id="sidebarName">NEXA User</b><span id="sidebarEmail">Local account</span></div></div>
+      <button id="logoutBtn" class="ghost" style="width:100%;margin-top:8px;color:#cdbca4;border-color:#383129">Log out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb"><b>NEXA</b> <span id="crumb">/ Dashboard</span></div>
+      <div class="top-actions">
+        <button class="top-btn" id="focusTop">◷ <span id="focusTopText">25:00</span></button>
+        <button class="top-btn" id="newTaskTop">+ Task</button>
+        <button class="top-btn" id="themeTop">☀︎</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" class="view active">
+        <div class="hero">
+          <div><p class="kicker">PERSONAL COMMAND CENTER</p><h1 id="hello">Hello 👋</h1><p>Today’s focus is simple. Do the next useful thing.</p></div>
+          <div class="hero-badge"><span>●</span> <span id="syncStatus">Local mode</span></div>
+        </div>
+        <div class="grid grid-4">
+          <div class="card stat"><span>Today's tasks</span><strong id="statTasks">0</strong><div class="bar"><i id="statTaskBar"></i></div></div>
+          <div class="card stat"><span>Completed</span><strong id="statDone">0</strong><div class="bar"><i id="statDoneBar"></i></div></div>
+          <div class="card stat"><span>Ideas</span><strong id="statIdeas">0</strong><div class="bar"><i id="statIdeasBar"></i></div></div>
+          <div class="dark-card stat"><span style="color:#9d9283">Focus today</span><strong id="statFocus">0m</strong><div class="progress-line"><i id="statFocusBar"></i></div></div>
+        </div>
+        <div class="grid grid-2" style="margin-top:14px">
+          <div class="card">
+            <div class="section-head"><div><h2>Next up</h2><p>Your most useful open work</p></div><button class="ghost" data-view="tasks">View tasks</button></div>
+            <div id="nextTasks" class="list"></div>
+          </div>
+          <div class="dark-card">
+            <div class="section-head"><div><h2 style="color:#f1e2ca">Today’s focus</h2><p style="color:#9d9180">Keep the streak alive.</p></div><span style="font-size:22px">◒</span></div>
+            <p id="focusGoal" style="font-size:13px;line-height:1.6;color:#c5b8a7">Start one 25-minute session and protect it from distractions.</p>
+            <div style="margin:18px 0"><div style="font-size:38px;font-weight:800;letter-spacing:-.05em" id="dashTimer">25:00</div><div class="muted" style="color:#958a7b">Focus timer</div></div>
+            <button id="startFocus" class="primary" style="background:#f0cf67;color:#30291f;border-color:#f0cf67">▶ Start 25 min focus</button>
+          </div>
+        </div>
+        <div class="grid grid-3" style="margin-top:14px">
+          <div class="card"><div class="section-head"><div><h2>Brainstorm</h2><p>Turn a thought into action.</p></div><button class="ghost" data-view="brainstorm">Open ↗</button></div><div id="latestIdea" class="empty">No ideas yet. Add your first sticky note.</div></div>
+          <div class="card"><div class="section-head"><div><h2>Evidence of work</h2><p>Keep proof of what you shipped.</p></div><button class="ghost" data-view="proofs">Open ↗</button></div><div class="metric-row"><strong id="proofCount">0</strong><span class="muted">proof items</span></div></div>
+          <div class="card"><div class="section-head"><div><h2>Notes</h2><p>Your knowledge vault.</p></div><button class="ghost" data-view="notes">Open ↗</button></div><div id="notePreview" class="empty">No notes yet.</div></div>
+        </div>
+      </section>
+
+      <!-- TASKS -->
+      <section id="view-tasks" class="view">
+        <div class="section-head"><div><p class="kicker">WORK TO FINISH</p><h2>Tasks</h2><p>Simple queue. Clear priorities.</p></div><button class="primary" id="addTaskBtn">+ Add Task</button></div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:13px">
+            <div class="task-filters"><button class="filter active" data-task-filter="all">All</button><button class="filter" data-task-filter="pending">Pending</button><button class="filter" data-task-filter="today">Today</button><button class="filter" data-task-filter="done">Completed</button></div>
+            <input id="taskSearch" style="max-width:260px" placeholder="Search tasks…">
+          </div>
+          <div id="taskList" class="list"></div>
+        </div>
+      </section>
+
+      <!-- BRAINSTORM -->
+      <section id="view-brainstorm" class="view">
+        <div class="section-head"><div><p class="kicker">BRAINSTORMING</p><h2>Canvas</h2><p>Capture ideas fast. Turn the useful ones into tasks.</p></div><div class="actions"><button class="ghost" id="newStickyBtn">+ Sticky</button><button class="ghost" id="clearCanvasBtn">Clear</button><button class="primary" id="fullCanvasBtn">⛶ Fullscreen</button></div></div>
+        <div class="brain-layout">
+          <div class="brain-shell" id="brainShell">
+            <div class="brain-toolbar">
+              <button class="active" data-tool="select">↖ Select</button><button data-tool="sticky">▣ Sticky</button><button data-tool="pen">✎ Pen</button><button data-tool="erase">⌫ Erase</button><button id="undoCanvas">↶ Undo</button><button id="redoCanvas">↷ Redo</button>
+            </div>
+            <canvas id="brainCanvas"></canvas>
+            <div id="stickyLayer"></div>
+            <div class="brain-help">Double-click / Sticky → edit text • Drag sticky to move • Draw with pen</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROOFS -->
+      <section id="view-proofs" class="view">
+        <div class="section-head"><div><p class="kicker">EVIDENCE OF WORK</p><h2>Proofs</h2><p>Save screenshots, links or short records of work completed.</p></div><button class="primary" id="addProofBtn">+ Add proof</button></div>
+        <div id="proofGrid" class="proof-list"></div>
+      </section>
+
+      <!-- CALENDAR -->
+      <section id="view-calendar" class="view">
+        <div class="section-head"><div><p class="kicker">YOUR TIMELINE</p><h2 id="calendarTitle">Calendar</h2><p>Tasks with due dates appear here.</p></div><div class="actions"><button class="ghost" id="prevMonth">←</button><button class="ghost" id="todayMonth">Today</button><button class="ghost" id="nextMonth">→</button></div></div>
+        <div id="calendarGrid" class="calendar"></div>
+      </section>
+
+      <!-- NOTES -->
+      <section id="view-notes" class="view">
+        <div class="section-head"><div><p class="kicker">KNOWLEDGE VAULT</p><h2>Notes</h2><p>Keep useful knowledge close and searchable.</p></div><button class="primary" id="newNoteBtn">+ New note</button></div>
+        <div class="card note-grid">
+          <div class="note-list" id="noteList"></div>
+          <div class="editor">
+            <input id="noteTitle" placeholder="Note title" style="margin-bottom:10px;font-weight:700">
+            <textarea id="noteBody" placeholder="Start writing…"></textarea>
+            <div class="actions" style="margin-top:10px"><button class="primary" id="saveNoteBtn">Save note</button><button class="danger" id="deleteNoteBtn">Delete</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="view-settings" class="view">
+        <div class="section-head"><div><p class="kicker">WORKSPACE PREFERENCES</p><h2>Settings</h2><p>Keep NEXA lightweight and predictable.</p></div></div>
+        <div class="settings">
+          <div class="setting"><div class="toggle"><div><h3>Appearance</h3><p>Switch between NEXA Dark and Warm Light.</p></div><button id="themeToggle" class="switch on"><i></i></button></div></div>
+          <div class="setting"><h3>Account</h3><p id="settingsAccount">Local account</p><button id="settingsLogout" class="ghost">Log out</button></div>
+          <div class="setting"><h3>Backend status</h3><p id="backendDetails">Supabase is not configured yet. Your UI is ready for it.</p></div>
+          <div class="setting"><h3>Local data</h3><p>Clear local workspace data without touching your account settings.</p><button id="clearDataBtn" class="danger">Clear workspace data</button></div>
+          <div class="setting"><h3>Shortcuts</h3><p>Press <b>N</b> for a task, <b>/</b> to search tasks, and <b>1–7</b> to switch modules.</p></div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <nav class="mobile-bar">
+    <button data-view="dashboard" class="active"><i>⌂</i>Home</button>
+    <button data-view="tasks"><i>✓</i>Tasks</button>
+    <button data-view="brainstorm"><i>✦</i>Ideas</button>
+    <button data-view="notes"><i>▤</i>Notes</button>
+    <button data-view="settings"><i>⚙</i>More</button>
+  </nav>
+</div>
+
+<!-- MODALS -->
+<div id="taskModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>Add task</h3><button class="x" data-close="taskModal">×</button></div>
+    <form id="taskForm">
+      <div class="form-grid">
+        <div class="full"><label>Task</label><input id="taskTitle" required placeholder="What needs to get done?"></div>
+        <div><label>Priority</label><select id="taskPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+        <div><label>Category</label><select id="taskCategory"><option>College</option><option>Coding</option><option>Personal</option><option>Project</option></select></div>
+        <div><label>Due date</label><input id="taskDue" type="date"></div>
+        <div><label>Reminder time</label><input id="taskTime" type="time"></div>
+      </div>
+      <div class="modal-actions"><button type="button" class="ghost" data-close="taskModal">Cancel</button><button class="primary">Save task</button></div>
+    </form>
+  </div>
+</div>
+
+<div id="proofModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>Add proof</h3><button class="x" data-close="proofModal">×</button></div>
+    <form id="proofForm">
+      <div class="grid" style="gap:10px">
+        <div><label>Title</label><input id="proofTitle" required placeholder="e.g. Deployed NEXA landing page"></div>
+        <div><label>Link (optional)</label><input id="proofLink" type="url" placeholder="https://…"></div>
+        <div><label>Short note</label><textarea id="proofNote" rows="4" placeholder="What did you finish?"></textarea></div>
+        <div><label>File (optional)</label><input id="proofFile" type="file" accept="image/*,.pdf,.zip,.txt,.doc,.docx,.ppt,.pptx,.xls,.xlsx"></div>
+      </div>
+      <div class="modal-actions"><button type="button" class="ghost" data-close="proofModal">Cancel</button><button class="primary">Save proof</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ==========================================================================
+   NEXA FRONTEND DATA LAYER
+   ==========================================================================
+   One state object + one persistence boundary. When Supabase is connected,
+   replace/extend the adapter methods instead of scattering fetch/auth calls
+   across the UI.
+============================================================================= */
+const NEXA_CONFIG = {
+  supabaseUrl: "https://ueyivshnnbfnzjoqhwzs.supabase.co",
+  supabaseAnonKey: "sb_publishable_buUiXmdH8BEHrynIL0el0w_nOYf86xB",
+  localPreview: false
+};
+
+const KEY="nexa_v1";
+const defaultState={
+  user:null,
+  tasks:[],
+  notes:[],
+  proofs:[],
+  ideas:[],
+  canvasStrokes:[],
+  focusMinutes:0,
+  theme:"dark"
+};
+let state=loadState();
+let authMode="login";
+let currentNoteId=null;
+let taskFilter="all";
+let monthCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let focusSeconds=25*60, focusInterval=null, focusRunning=false;
+let canvasTool="select", drawing=false, stroke=[];
+let undoStack=[], redoStack=[];
+
+function loadState(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return structuredClone(defaultState);
+    const parsed=JSON.parse(raw);
+    return {...structuredClone(defaultState),...parsed};
+  }catch{return structuredClone(defaultState)}
+}
+function saveState(){localStorage.setItem(KEY,JSON.stringify(state))}
+function uid(prefix="id"){return prefix+"_"+cryptoRandom()}
+function cryptoRandom(){
+  if(window.crypto?.getRandomValues){const a=new Uint32Array(2);crypto.getRandomValues(a);return [...a].map(x=>x.toString(36)).join("")}
+  return Math.random().toString(36).slice(2)+Date.now().toString(36)
+}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function todayISO(){return new Date().toISOString().slice(0,10)}
+function toast(msg){const el=document.createElement("div");el.className="toast";el.textContent=msg;document.querySelector("#toastWrap").appendChild(el);setTimeout(()=>el.remove(),2600)}
+function initials(name){return (name||"N").trim().split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()||"N"}
+function backendReady(){return !!supabaseClient && !!state.user?.id}
+function backendFail(err, fallback){console.warn("NEXA backend error",err);toast(err?.message||fallback||"Could not sync with Supabase")}
+
+const LocalAuth={
+  async signup(email,password,name){
+    const users=JSON.parse(localStorage.getItem("nexa_users")||"[]");
+    if(users.some(u=>u.email.toLowerCase()===email.toLowerCase())) throw new Error("An account with this email already exists.");
+    const pass=await hashText(password);
+    const user={id:uid("usr"),email:email.toLowerCase(),name:name||email.split("@")[0],passwordHash:pass};
+    users.push(user);localStorage.setItem("nexa_users",JSON.stringify(users));
+    return {id:user.id,email:user.email,name:user.name};
+  },
+  async login(email,password){
+    const users=JSON.parse(localStorage.getItem("nexa_users")||"[]");
+    const hash=await hashText(password);
+    const user=users.find(u=>u.email.toLowerCase()===email.toLowerCase()&&u.passwordHash===hash);
+    if(!user) throw new Error("Incorrect email or password.");
+    return {id:user.id,email:user.email,name:user.name};
+  },
+};
+async function hashText(text){
+  const data=new TextEncoder().encode(text);
+  if(window.crypto?.subtle){const buf=await crypto.subtle.digest("SHA-256",data);return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("")}
+  return btoa(unescape(encodeURIComponent(text)));
+}
+
+let supabaseClient=null;
+async function initSupabase(){
+  if(!NEXA_CONFIG.supabaseUrl||!NEXA_CONFIG.supabaseAnonKey||NEXA_CONFIG.localPreview) return false;
+  try{
+    if(!window.supabase) return false;
+    supabaseClient=window.supabase.createClient(NEXA_CONFIG.supabaseUrl,NEXA_CONFIG.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error) throw error;
+    if(data?.session?.user){
+      await Backend.hydrateUser(data.session.user);
+      await Backend.loadWorkspace();
+    }else{
+      state.user=null;state.tasks=[];state.notes=[];state.proofs=[];state.ideas=[];state.canvasStrokes=[];state.focusMinutes=0;saveState();
+    }
+    supabaseClient.auth.onAuthStateChange(async (_event,session)=>{
+      if(session?.user){
+        await Backend.hydrateUser(session.user);
+        if(_event!=="INITIAL_SESSION") await Backend.loadWorkspace();
+      }else if(_event!=="SIGNED_OUT"){
+        state.user=null;saveState();
+      }
+    });
+    return true;
+  }catch(e){console.warn("Supabase init failed",e);supabaseClient=null;return false}
+}
+const Backend={
+  async hydrateUser(u){
+    const {data:profile}=await supabaseClient.from("profiles").select("full_name,username,avatar_url").eq("id",u.id).maybeSingle();
+    state.user={id:u.id,email:u.email||"",name:profile?.full_name||u.user_metadata?.full_name||u.email?.split("@")[0]||"NEXA User"};
+    if(profile?.full_name && u.user_metadata?.full_name!==profile.full_name){
+      await supabaseClient.from("profiles").update({full_name:profile.full_name,updated_at:new Date().toISOString()}).eq("id",u.id);
+    }
+    saveState();
+  },
+  async signup(email,password,name){
+    if(!supabaseClient) return LocalAuth.signup(email,password,name);
+    const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:name}}});
+    if(error) throw error;
+    if(!data.user) throw new Error("Account created. Check your email to verify it, then log in.");
+    if(data.session) await this.hydrateUser(data.user);
+    return {id:data.user.id,email:data.user.email,name:name||data.user.email.split("@")[0],needsEmailVerification:!data.session};
+  },
+  async login(email,password){
+    if(!supabaseClient) return LocalAuth.login(email,password);
+    const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    const u=data.user; await this.hydrateUser(u); await this.loadWorkspace();
+    return {id:u.id,email:u.email,name:state.user.name};
+  },
+  async logout(){
+    if(supabaseClient) await supabaseClient.auth.signOut();
+    state.user=null;state.tasks=[];state.notes=[];state.proofs=[];state.ideas=[];state.canvasStrokes=[];state.focusMinutes=0;saveState();showAuth();
+  },
+  async loadWorkspace(){
+    if(!backendReady()) return;
+    const uid=state.user.id;
+    const [tasksR,notesR,proofsR,brainR,focusR,settingsR]=await Promise.all([
+      supabaseClient.from("tasks").select("*").eq("user_id",uid).order("created_at",{ascending:false}),
+      supabaseClient.from("notes").select("*").eq("user_id",uid).order("updated_at",{ascending:false}),
+      supabaseClient.from("proofs").select("*").eq("user_id",uid).order("created_at",{ascending:false}),
+      supabaseClient.from("brainstorms").select("*").eq("user_id",uid).order("updated_at",{ascending:false}).limit(1).maybeSingle(),
+      supabaseClient.from("focus_sessions").select("duration_seconds,started_at,completed_at").eq("user_id",uid).eq("session_type","focus").gte("started_at",todayISO()+"T00:00:00.000Z"),
+      supabaseClient.from("settings").select("theme,preferences").eq("user_id",uid).maybeSingle()
+    ]);
+    for(const r of [tasksR,notesR,proofsR,brainR,focusR,settingsR]) if(r.error) throw r.error;
+    state.tasks=(tasksR.data||[]).map(t=>({id:t.id,title:t.title,description:t.description||"",priority:(t.priority||"medium")[0].toUpperCase()+(t.priority||"medium").slice(1),category:"Project",due:t.due_date||"",time:"",done:t.status==="completed",createdAt:new Date(t.created_at).getTime(),updatedAt:new Date(t.updated_at||t.created_at).getTime()}));
+    state.notes=(notesR.data||[]).map(n=>({id:n.id,title:n.title,body:n.content||"",createdAt:new Date(n.created_at).getTime(),updatedAt:new Date(n.updated_at||n.created_at).getTime()}));
+    state.proofs=(proofsR.data||[]).map(p=>({id:p.id,title:p.file_name||"Proof",link:p.file_url||"",note:p.file_path||"",filePath:p.file_path||"",fileType:p.file_type||"",fileSize:p.file_size||0,createdAt:new Date(p.created_at).getTime()}));
+    await Promise.all(state.proofs.map(async p=>{
+      if(p.filePath && p.filePath.includes("/")){
+        try{
+          const {data}=await supabaseClient.storage.from("nexa-files").createSignedUrl(p.filePath,3600);
+          if(data?.signedUrl) p.previewUrl=data.signedUrl;
+        }catch(e){}
+      }
+    }));
+    const b=brainR.data?.canvas_data||{};state.canvasStrokes=Array.isArray(b.strokes)?b.strokes:[];state.ideas=Array.isArray(b.ideas)?b.ideas:[];
+    state.focusMinutes=Math.floor((focusR.data||[]).reduce((sum,x)=>sum+(x.duration_seconds||0),0)/60);
+    if(settingsR.data?.theme) state.theme=settingsR.data.theme;
+    saveState();applyTheme();renderAll();
+  },
+  async createTask(t){
+    if(!backendReady()) return null;
+    const payload={user_id:state.user.id,title:t.title,description:null,priority:(t.priority||"Medium").toLowerCase(),status:"todo",due_date:t.due||null};
+    const {data,error}=await supabaseClient.from("tasks").insert(payload).select("*").single();if(error)throw error;return data;
+  },
+  async updateTask(t){
+    if(!backendReady()) return;
+    const {error}=await supabaseClient.from("tasks").update({title:t.title,status:t.done?"completed":"todo",due_date:t.due||null,priority:(t.priority||"Medium").toLowerCase(),completed_at:t.done?new Date().toISOString():null}).eq("id",t.id).eq("user_id",state.user.id);if(error)throw error;
+  },
+  async deleteTask(id){if(!backendReady())return;const {error}=await supabaseClient.from("tasks").delete().eq("id",id).eq("user_id",state.user.id);if(error)throw error},
+  async createNote(n){if(!backendReady())return null;const {data,error}=await supabaseClient.from("notes").insert({user_id:state.user.id,title:n.title,content:n.body||""}).select("*").single();if(error)throw error;return data},
+  async updateNote(n){if(!backendReady())return;const {error}=await supabaseClient.from("notes").update({title:n.title,content:n.body||"",updated_at:new Date().toISOString()}).eq("id",n.id).eq("user_id",state.user.id);if(error)throw error},
+  async deleteNote(id){if(!backendReady())return;const {error}=await supabaseClient.from("notes").delete().eq("id",id).eq("user_id",state.user.id);if(error)throw error},
+  async createProof(p){
+    if(!backendReady())return null;
+    let filePath=null,fileType=null,fileSize=null;
+    if(p.file){
+      const safeName=p.file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-120);
+      filePath=`${state.user.id}/${Date.now()}_${cryptoRandom()}_${safeName}`;
+      const {error:uploadError}=await supabaseClient.storage.from("nexa-files").upload(filePath,p.file,{upsert:false,contentType:p.file.type||"application/octet-stream"});
+      if(uploadError)throw uploadError;
+      fileType=p.file.type||"application/octet-stream";fileSize=p.file.size||0;
+    }
+    const {data,error}=await supabaseClient.from("proofs").insert({user_id:state.user.id,file_name:p.title||p.file?.name||"Proof",file_path:filePath||p.note||"",file_url:p.link||null,file_type:fileType||"link",file_size:fileSize}).select("*").single();
+    if(error){if(filePath) await supabaseClient.storage.from("nexa-files").remove([filePath]);throw error;}
+    if(filePath){const {data:signed}=await supabaseClient.storage.from("nexa-files").createSignedUrl(filePath,3600);if(signed?.signedUrl)data.previewUrl=signed.signedUrl;}
+    return data;
+  },
+  async deleteProof(id){
+    if(!backendReady())return;
+    const {data:row,error:findError}=await supabaseClient.from("proofs").select("file_path").eq("id",id).eq("user_id",state.user.id).maybeSingle();
+    if(findError)throw findError;
+    const {error}=await supabaseClient.from("proofs").delete().eq("id",id).eq("user_id",state.user.id);
+    if(error)throw error;
+    if(row?.file_path && row.file_path.includes("/")){const {error:storageError}=await supabaseClient.storage.from("nexa-files").remove([row.file_path]);if(storageError)console.warn(storageError);}
+  },
+  async saveBrainstorm(){if(!backendReady())return;const payload={user_id:state.user.id,name:"Main Canvas",canvas_data:{strokes:state.canvasStrokes,ideas:state.ideas},updated_at:new Date().toISOString()};const {data:existing,error:findErr}=await supabaseClient.from("brainstorms").select("id").eq("user_id",state.user.id).limit(1).maybeSingle();if(findErr)throw findErr;if(existing?.id){const {error}=await supabaseClient.from("brainstorms").update(payload).eq("id",existing.id).eq("user_id",state.user.id);if(error)throw error}else{const {error}=await supabaseClient.from("brainstorms").insert(payload);if(error)throw error}},
+  async saveFocus(){if(!backendReady())return;const {error}=await supabaseClient.from("focus_sessions").insert({user_id:state.user.id,duration_seconds:1500,session_type:"focus",started_at:new Date(Date.now()-1500*1000).toISOString(),completed_at:new Date().toISOString()});if(error)throw error},
+  async saveSettings(){if(!backendReady())return;const {error}=await supabaseClient.from("settings").upsert({user_id:state.user.id,theme:state.theme,preferences:{},updated_at:new Date().toISOString()});if(error)throw error},
+  async clearWorkspace(){
+    if(!backendReady())return;
+    const uid=state.user.id;
+    for(const table of ["tasks","notes","proofs","focus_sessions","brainstorms"]){const {error}=await supabaseClient.from(table).delete().eq("user_id",uid);if(error)throw error}
+  }
+};
+
+function showAuth(){
+  document.querySelector("#authGate").classList.remove("hidden");
+  document.querySelector("#app").classList.add("hidden");
+}
+function showApp(){
+  document.querySelector("#authGate").classList.add("hidden");
+  document.querySelector("#app").classList.remove("hidden");
+  renderAll();
+  startApp();
+}
+function userReady(){return !!state.user}
+
+function showAuth(){
+  document.querySelector("#authGate").classList.remove("hidden");
+  document.querySelector("#app").classList.add("hidden");
+}
+function showApp(){
+  document.querySelector("#authGate").classList.add("hidden");
+  document.querySelector("#app").classList.remove("hidden");
+  renderAll();
+  startApp();
+}
+function userReady(){return !!state.user}
+
+/* Navigation */
+function switchView(view){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="view-"+view));
+  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+  const pretty={dashboard:"Dashboard",tasks:"Tasks",brainstorm:"Brainstorm",proofs:"Proofs",calendar:"Calendar",notes:"Notes",settings:"Settings"};
+  document.querySelector("#crumb").textContent="/ "+pretty[view];
+  if(view==="calendar") renderCalendar(); if(view==="notes") renderNotes(); if(view==="brainstorm") resizeCanvas();
+}
+document.addEventListener("click",e=>{
+  const v=e.target.closest("[data-view]"); if(v){switchView(v.dataset.view);return}
+  const c=e.target.closest("[data-close]"); if(c){document.getElementById(c.dataset.close).classList.remove("show")}
+});
+
+/* Rendering */
+function renderUser(){
+  const name=state.user?.name||"NEXA User",email=state.user?.email||"";
+  document.querySelector("#hello").textContent=`Hello ${esc(name)} 👋`;
+  document.querySelector("#sidebarName").textContent=name;
+  document.querySelector("#sidebarEmail").textContent=email;
+  document.querySelector("#sidebarAvatar").textContent=initials(name);
+  document.querySelector("#settingsAccount").textContent=`${name} · ${email||"local preview"}`;
+}
+function renderDashboard(){
+  const total=state.tasks.length,done=state.tasks.filter(t=>t.done).length;
+  const ideas=state.ideas.length,focus=state.focusMinutes;
+  document.querySelector("#statTasks").textContent=total;
+  document.querySelector("#statDone").textContent=done;
+  document.querySelector("#statIdeas").textContent=ideas;
+  document.querySelector("#statFocus").textContent=`${focus}m`;
+  document.querySelector("#statTaskBar").style.width=total?Math.min(100,(done/total)*100)+"%":"0%";
+  document.querySelector("#statDoneBar").style.width=total?Math.min(100,(done/total)*100)+"%":"0%";
+  document.querySelector("#statIdeasBar").style.width=ideas?Math.min(100,ideas*10)+"%":"0%";
+  document.querySelector("#statFocusBar").style.width=Math.min(100,(focus/60)*100)+"%";
+  document.querySelector("#proofCount").textContent=state.proofs.length;
+  const open=state.tasks.filter(t=>!t.done).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")).slice(0,5);
+  document.querySelector("#nextTasks").innerHTML=open.length?open.map(taskHTML).join(""):'<div class="empty">Nothing pending. Nice.</div>';
+  const latest=state.ideas[0];
+  document.querySelector("#latestIdea").innerHTML=latest?`<b>${esc(latest.title||"Idea")}</b><div class="muted" style="margin-top:6px">${esc(latest.text||"")}</div>`:'<div class="empty">No ideas yet. Add your first sticky note.</div>';
+  const note=state.notes[0];
+  document.querySelector("#notePreview").innerHTML=note?`<b>${esc(note.title||"Untitled")}</b><div class="muted" style="margin-top:6px">${esc((note.body||"").slice(0,120))}</div>`:'<div class="empty">No notes yet.</div>';
+}
+function taskHTML(t){
+  const date=t.due?new Date(t.due+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short"}):"No date";
+  return `<div class="item ${t.done?"done":""}" data-id="${t.id}">
+    <button class="check ${t.done?"on":""}" data-toggle-task="${t.id}">${t.done?"✓":""}</button>
+    <div class="grow"><b>${esc(t.title)}</b><small>${esc(t.category)} · ${esc(t.priority)} · ${date}</small></div>
+    <button class="danger" data-delete-task="${t.id}" aria-label="Delete task">×</button>
+  </div>`;
+}
+function renderTasks(){
+  const q=document.querySelector("#taskSearch").value.trim().toLowerCase();
+  let arr=[...state.tasks];
+  if(taskFilter==="pending") arr=arr.filter(t=>!t.done);
+  if(taskFilter==="today") arr=arr.filter(t=>t.due===todayISO());
+  if(taskFilter==="done") arr=arr.filter(t=>t.done);
+  if(q) arr=arr.filter(t=>(t.title+" "+t.category+" "+t.priority).toLowerCase().includes(q));
+  document.querySelector("#taskList").innerHTML=arr.length?arr.map(taskHTML).join(""):'<div class="empty">No tasks here.</div>';
+}
+function renderProofs(){
+  document.querySelector("#proofGrid").innerHTML=state.proofs.length?state.proofs.map(p=>`<article class="proof-card">
+    <div style="display:flex;justify-content:space-between;gap:8px"><span class="kicker">${new Date(p.createdAt).toLocaleDateString()}</span><button class="danger" data-delete-proof="${p.id}">Delete</button></div>
+    ${p.previewUrl && (p.fileType||"").startsWith("image/")?`<img src="${esc(p.previewUrl)}" alt="${esc(p.title)}">`:""}
+    <h3>${esc(p.title)}</h3><p>${esc(p.note||"")}</p>
+    ${p.previewUrl?`<a href="${esc(p.previewUrl)}" target="_blank" rel="noopener" style="font-size:9px;color:#8b5f2e">Open uploaded file ↗</a>`:""}
+    ${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" style="font-size:9px;color:#8b5f2e;display:block;margin-top:5px">Open link ↗</a>`:""}
+  </article>`).join(""):'<div class="empty" style="grid-column:1/-1">No proof yet. Finish something worth keeping.</div>';
+}
+function renderNotes(){
+  document.querySelector("#noteList").innerHTML=state.notes.length?state.notes.map(n=>`<div class="item ${n.id===currentNoteId?"done":""}" data-open-note="${n.id}"><div class="grow"><b>${esc(n.title||"Untitled")}</b><small>${new Date(n.updatedAt||n.createdAt).toLocaleDateString()}</small></div></div>`).join(""):'<div class="empty">No notes.</div>';
+  if(currentNoteId){
+    const n=state.notes.find(x=>x.id===currentNoteId);
+    if(n){document.querySelector("#noteTitle").value=n.title;document.querySelector("#noteBody").value=n.body}
+  }else{document.querySelector("#noteTitle").value="";document.querySelector("#noteBody").value=""}
+}
+function renderCalendar(){
+  const year=monthCursor.getFullYear(),month=monthCursor.getMonth();
+  document.querySelector("#calendarTitle").textContent=monthCursor.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  const first=new Date(year,month,1),days=new Date(year,month+1,0).getDate(),start=first.getDay();
+  const names=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  let out=names.map(d=>`<div class="dow">${d}</div>`).join("");
+  for(let i=0;i<start;i++) out+='<div class="day"></div>';
+  for(let d=1;d<=days;d++){
+    const iso=`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const tasks=state.tasks.filter(t=>t.due===iso);
+    out+=`<div class="day ${iso===todayISO()?"today":""}"><span>${d}</span>${tasks.slice(0,3).map(t=>`<div class="event">${esc(t.title)}</div>`).join("")}</div>`;
+  }
+  document.querySelector("#calendarGrid").innerHTML=out;
+}
+function renderAll(){renderUser();renderDashboard();renderTasks();renderProofs();renderNotes();renderCalendar();applyTheme();updateSyncStatus();renderStickers()}
+function applyTheme(){
+  const dark=state.theme!=="light";
+  document.body.dataset.theme=dark?"dark":"light";
+  if(dark){
+    document.querySelector(".main").style.background="var(--panel)";
+  }else{
+    document.querySelector(".main").style.background="#fff8ef";
+  }
+  document.querySelector("#themeToggle").classList.toggle("on",dark);
+  document.querySelector("#themeTop").textContent=dark?"☀︎":"◐";
+}
+function updateSyncStatus(){
+  const active=!!supabaseClient;
+  document.querySelector("#syncStatus").textContent=active?"Synced with Supabase":"Local mode";
+  document.querySelector("#backendDetails").textContent=active?"Supabase connection detected. Keep auth/data rules enabled before production.":"Supabase is not configured yet. This frontend is intentionally self-contained and will work in local preview mode.";
+}
+
+/* Tasks */
+function openTaskModal(){document.querySelector("#taskModal").classList.add("show");setTimeout(()=>document.querySelector("#taskTitle").focus(),50)}
+async function addTask(data){
+  try{
+    if(backendReady()){
+      const row=await Backend.createTask(data);
+      state.tasks.unshift({id:row.id,done:false,createdAt:Date.now(),...data});
+    }else state.tasks.unshift({id:uid("task"),done:false,createdAt:Date.now(),...data});
+    saveState();renderAll();toast("Task added");
+  }catch(err){backendFail(err,"Task could not be saved")}
+}
+document.querySelector("#taskForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  await addTask({title:document.querySelector("#taskTitle").value.trim(),priority:document.querySelector("#taskPriority").value,category:document.querySelector("#taskCategory").value,due:document.querySelector("#taskDue").value||"",time:document.querySelector("#taskTime").value||""});
+  e.target.reset();document.querySelector("#taskModal").classList.remove("show");
+});
+document.addEventListener("click",async e=>{
+  const tg=e.target.closest("[data-toggle-task]");
+  if(tg){const t=state.tasks.find(x=>x.id===tg.dataset.toggleTask);if(t){t.done=!t.done;saveState();renderAll();try{await Backend.updateTask(t);toast(t.done?"Task completed":"Task reopened")}catch(err){backendFail(err,"Task status could not sync")}}}
+  const del=e.target.closest("[data-delete-task]");
+  if(del){const id=del.dataset.deleteTask;state.tasks=state.tasks.filter(x=>x.id!==id);saveState();renderAll();try{await Backend.deleteTask(id);toast("Task deleted")}catch(err){backendFail(err,"Task delete could not sync")}}
+  const pd=e.target.closest("[data-delete-proof]");
+  if(pd){const id=pd.dataset.deleteProof;state.proofs=state.proofs.filter(x=>x.id!==id);saveState();renderAll();try{await Backend.deleteProof(id);toast("Proof deleted")}catch(err){backendFail(err,"Proof delete could not sync")}}
+  const on=e.target.closest("[data-open-note]");if(on){currentNoteId=on.dataset.openNote;renderNotes()}
+});
+document.querySelector("#taskSearch").addEventListener("input",renderTasks);
+document.querySelectorAll("[data-task-filter]").forEach(b=>b.addEventListener("click",()=>{taskFilter=b.dataset.taskFilter;document.querySelectorAll("[data-task-filter]").forEach(x=>x.classList.toggle("active",x===b));renderTasks()}));
+document.querySelector("#addTaskBtn").onclick=openTaskModal;document.querySelector("#newTaskTop").onclick=openTaskModal;
+
+/* Notes */
+document.querySelector("#newNoteBtn").onclick=async()=>{
+  const draft={title:"New note",body:"",createdAt:Date.now(),updatedAt:Date.now()};
+  try{const row=await Backend.createNote(draft);draft.id=row?.id||uid("note");}catch(err){draft.id=uid("note");backendFail(err,"Note will remain local until sync is restored")}
+  currentNoteId=draft.id;state.notes.unshift(draft);saveState();renderNotes();toast("New note created")
+};
+document.querySelector("#saveNoteBtn").onclick=async()=>{
+  if(!currentNoteId) return toast("Create a note first");
+  const n=state.notes.find(x=>x.id===currentNoteId);if(!n) return;
+  n.title=document.querySelector("#noteTitle").value.trim()||"Untitled";n.body=document.querySelector("#noteBody").value;n.updatedAt=Date.now();saveState();renderAll();
+  try{await Backend.updateNote(n);toast("Note saved")}catch(err){backendFail(err,"Note could not sync")}
+};
+document.querySelector("#deleteNoteBtn").onclick=async()=>{
+  if(!currentNoteId)return;
+  const id=currentNoteId;state.notes=state.notes.filter(x=>x.id!==id);currentNoteId=null;saveState();renderAll();
+  try{await Backend.deleteNote(id);toast("Note deleted")}catch(err){backendFail(err,"Note delete could not sync")}
+};
+
+/* Proofs */
+document.querySelector("#addProofBtn").onclick=()=>document.querySelector("#proofModal").classList.add("show");
+document.querySelector("#proofForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const file=document.querySelector("#proofFile").files[0]||null;
+  if(file && file.size>25*1024*1024){toast("File must be 25 MB or smaller");return}
+  const proof={id:uid("proof"),title:document.querySelector("#proofTitle").value.trim(),link:document.querySelector("#proofLink").value.trim(),note:document.querySelector("#proofNote").value.trim(),file,createdAt:Date.now()};
+  try{const row=await Backend.createProof(proof);if(row?.id)proof.id=row.id;if(row?.file_path)proof.filePath=row.file_path;if(row?.file_type)proof.fileType=row.file_type;if(row?.file_size)proof.fileSize=row.file_size;if(row?.file_url)proof.link=row.file_url;if(row?.previewUrl)proof.previewUrl=row.previewUrl;state.proofs.unshift(proof);saveState();renderAll();toast("Proof saved")}catch(err){backendFail(err,"Proof could not be saved");return}
+  e.target.reset();document.querySelector("#proofModal").classList.remove("show");
+});
+
+/* Focus */
+function renderFocus(){const m=Math.floor(focusSeconds/60),s=focusSeconds%60,txt=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;document.querySelector("#dashTimer").textContent=txt;document.querySelector("#focusTopText").textContent=txt}
+function startFocus(){
+  if(focusRunning)return;
+  focusRunning=true;document.querySelector("#startFocus").textContent="⏸ Running…";
+  focusInterval=setInterval(()=>{focusSeconds--;renderFocus();if(focusSeconds<=0){finishFocus()}},1000)
+}
+async function finishFocus(){
+  clearInterval(focusInterval);focusInterval=null;focusRunning=false;state.focusMinutes+=25;focusSeconds=25*60;saveState();renderAll();
+  try{await Backend.saveFocus();toast("Focus session complete 🎉")}catch(err){backendFail(err,"Focus session could not sync")}
+}
+function resetFocus(){clearInterval(focusInterval);focusInterval=null;focusRunning=false;focusSeconds=25*60;renderFocus();document.querySelector("#startFocus").textContent="▶ Start 25 min focus"}
+document.querySelector("#startFocus").onclick=startFocus;document.querySelector("#focusTop").onclick=()=>focusRunning?finishFocus():startFocus();
+
+/* Calendar */
+document.querySelector("#prevMonth").onclick=()=>{monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()-1,1);renderCalendar()};
+document.querySelector("#nextMonth").onclick=()=>{monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,1);renderCalendar()};
+document.querySelector("#todayMonth").onclick=()=>{monthCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderCalendar()};
+
+/* Theme */
+async function toggleTheme(){state.theme=state.theme==="light"?"dark":"light";saveState();applyTheme();try{await Backend.saveSettings()}catch(err){backendFail(err,"Theme could not sync")}}
+document.querySelector("#themeTop").onclick=toggleTheme;document.querySelector("#themeToggle").onclick=toggleTheme;
+
+/* Auth */
+function setAuthMode(mode){
+  authMode=mode;
+  document.querySelector("#tabLogin").classList.toggle("active",mode==="login");
+  document.querySelector("#tabSignup").classList.toggle("active",mode==="signup");
+  document.querySelector("#nameField").classList.toggle("hidden",mode!=="signup");
+  document.querySelector("#authSubmit").textContent=mode==="login"?"Enter NEXA":"Create NEXA account";
+}
+document.querySelector("#tabLogin").onclick=()=>setAuthMode("login");
+document.querySelector("#tabSignup").onclick=()=>setAuthMode("signup");
+document.querySelector("#authForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=document.querySelector("#authSubmit");btn.disabled=true;
+  try{
+    const email=document.querySelector("#authEmail").value.trim(),password=document.querySelector("#authPassword").value;
+    const result=authMode==="signup"?await Backend.signup(email,password,document.querySelector("#authName").value.trim()):await Backend.login(email,password);
+    if(result?.needsEmailVerification){showAuth();toast("Account created. Check your email to verify, then log in.");return}
+    state.user=result;saveState();await Backend.loadWorkspace();showApp();toast(authMode==="signup"?"Welcome to NEXA":"Welcome back");
+  }catch(err){toast(err?.message||"Authentication failed")}
+  finally{btn.disabled=false}
+});
+document.querySelector("#logoutBtn").onclick=()=>Backend.logout();document.querySelector("#settingsLogout").onclick=()=>Backend.logout();
+
+/* Local data reset */
+document.querySelector("#clearDataBtn").onclick=async()=>{
+  if(!confirm("Clear tasks, notes, proofs, focus history and canvas data?"))return;
+  try{await Backend.clearWorkspace();const user=state.user;state={...structuredClone(defaultState),user,theme:state.theme};saveState();currentNoteId=null;renderAll();toast("Workspace data cleared")}
+  catch(err){backendFail(err,"Workspace could not be cleared")};
+};
+
+/* Brainstorm canvas */
+const canvas=document.querySelector("#brainCanvas"),ctx=canvas.getContext("2d"),shell=document.querySelector("#brainShell");
+function resizeCanvas(){
+  if(!shell) return;
+  const r=shell.getBoundingClientRect(),d=window.devicePixelRatio||1;
+  canvas.width=Math.max(1,Math.floor(r.width*d));canvas.height=Math.max(1,Math.floor(r.height*d));canvas.style.width=r.width+"px";canvas.style.height=r.height+"px";ctx.setTransform(d,0,0,d,0,0);redrawCanvas()
+}
+function redrawCanvas(){
+  const r=shell.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);ctx.lineCap="round";ctx.lineJoin="round";
+  for(const s of state.canvasStrokes){ctx.beginPath();ctx.strokeStyle=s.color;ctx.lineWidth=s.width;s.points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}
+}
+function pointerPos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+canvas.addEventListener("pointerdown",e=>{
+  if(canvasTool!=="pen"&&canvasTool!=="erase")return;
+  drawing=true;stroke=[pointerPos(e)];canvas.setPointerCapture(e.pointerId)
+});
+canvas.addEventListener("pointermove",e=>{if(!drawing)return;stroke.push(pointerPos(e));redrawCanvas();ctx.beginPath();ctx.strokeStyle=canvasTool==="erase"?"#24211d":"#e6d7bd";ctx.lineWidth=canvasTool==="erase"?18:3;stroke.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()});
+canvas.addEventListener("pointerup",async e=>{
+  if(!drawing)return;drawing=false;const before=JSON.stringify(state.canvasStrokes);state.canvasStrokes.push({color:canvasTool==="erase"?"#24211d":"#e6d7bd",width:canvasTool==="erase"?18:3,points:stroke});undoStack.push(before);redoStack=[];saveState();
+  try{await Backend.saveBrainstorm()}catch(err){backendFail(err,"Canvas could not sync")}
+});
+document.querySelectorAll("[data-tool]").forEach(b=>b.onclick=()=>{canvasTool=b.dataset.tool;document.querySelectorAll("[data-tool]").forEach(x=>x.classList.toggle("active",x===b))});
+document.querySelector("#newStickyBtn").onclick=()=>addSticky(120,130);
+document.querySelector("#clearCanvasBtn").onclick=async()=>{if(confirm("Clear the canvas?")){state.canvasStrokes=[];state.ideas=[];saveState();renderAll();redrawCanvas();try{await Backend.saveBrainstorm();toast("Canvas cleared")}catch(err){backendFail(err,"Canvas could not sync")}}};
+document.querySelector("#undoCanvas").onclick=()=>{if(!undoStack.length)return;redoStack.push(JSON.stringify(state.canvasStrokes));state.canvasStrokes=JSON.parse(undoStack.pop());saveState();redrawCanvas()};
+document.querySelector("#redoCanvas").onclick=()=>{if(!redoStack.length)return;undoStack.push(JSON.stringify(state.canvasStrokes));state.canvasStrokes=JSON.parse(redoStack.pop());saveState();redrawCanvas()};
+async function addSticky(x,y){
+  const item={id:uid("idea"),title:"Idea",text:"Double-click to edit",x,y};
+  state.ideas.unshift(item);saveState();renderStickers();renderDashboard();
+  try{await Backend.saveBrainstorm();toast("Sticky added")}catch(err){backendFail(err,"Sticky could not sync")}
+}
+function renderStickers(){
+  const layer=document.querySelector("#stickyLayer");layer.innerHTML="";
+  for(const idea of state.ideas){
+    const el=document.createElement("div");el.className="sticky";el.dataset.id=idea.id;el.style.left=idea.x+"px";el.style.top=idea.y+"px";
+    el.innerHTML=`<b>${esc(idea.title)}</b><p>${esc(idea.text)}</p><small>Drag me</small>`;
+    el.addEventListener("dblclick",async()=>{const title=prompt("Idea title",idea.title);if(title===null)return;const text=prompt("Idea text",idea.text);if(text===null)return;idea.title=title||"Idea";idea.text=text;saveState();renderStickers();renderDashboard();try{await Backend.saveBrainstorm()}catch(err){backendFail(err,"Sticky could not sync")}});
+    let sx=0,sy=0,ox=0,oy=0,moving=false;
+    el.addEventListener("pointerdown",e=>{if(canvasTool!=="select")return;e.stopPropagation();moving=true;sx=e.clientX;sy=e.clientY;ox=idea.x;oy=idea.y;el.setPointerCapture(e.pointerId)});
+    el.addEventListener("pointermove",e=>{if(!moving)return;idea.x=Math.max(4,ox+(e.clientX-sx));idea.y=Math.max(4,oy+(e.clientY-sy));el.style.left=idea.x+"px";el.style.top=idea.y+"px"});
+    el.addEventListener("pointerup",async()=>{moving=false;saveState();try{await Backend.saveBrainstorm()}catch(err){backendFail(err,"Sticky position could not sync")}});layer.appendChild(el)
+  }
+}
+document.querySelector("#fullCanvasBtn").onclick=()=>{const el=document.querySelector("#brainShell");if(!document.fullscreenElement)el.requestFullscreen?.();else document.exitFullscreen?.()};
+window.addEventListener("resize",resizeCanvas);
+
+/* Keyboard */
+document.addEventListener("keydown",e=>{
+  if(e.target.matches("input,textarea,select"))return;
+  if(e.key.toLowerCase()==="n"){e.preventDefault();openTaskModal()}
+  if(e.key==="/"){e.preventDefault();switchView("tasks");document.querySelector("#taskSearch").focus()}
+  const map={"1":"dashboard","2":"tasks","3":"brainstorm","4":"proofs","5":"calendar","6":"notes","7":"settings"};if(map[e.key])switchView(map[e.key]);
+  if(e.key==="Escape"){document.querySelectorAll(".modal.show").forEach(m=>m.classList.remove("show"))}
+});
+
+/* Init */
+async function startApp(){resizeCanvas();renderFocus()}
+(async()=>{
+  const hasSupabase=await initSupabase();
+  updateSyncStatus();
+  if(state.user){showApp()}else{showAuth()}
+  if(location.hash==="#auth")showAuth();
+  window.addEventListener("load",()=>setTimeout(resizeCanvas,150));
+})();
+</script>
+
+</body>
+</html>
