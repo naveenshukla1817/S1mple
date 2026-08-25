@@ -323,15 +323,34 @@ function todayKey() {
   ].join("-");
 }
 
+function parseLocalDateTime(dateValue, timeValue = "23:59:59") {
+  if (!dateValue) return null;
+  const datePart = String(dateValue).trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) return null;
+
+  const rawTime = String(timeValue || "23:59:59").trim();
+  const timePart = /^\d{2}:\d{2}$/.test(rawTime)
+    ? `${rawTime}:00`
+    : /^\d{2}:\d{2}:\d{2}$/.test(rawTime)
+      ? rawTime
+      : null;
+
+  if (!timePart) return null;
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hour, minute, second] = timePart.split(":").map(Number);
+  const parsed = new Date(year, month - 1, day, hour, minute, second);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 function reminderDate(task) {
   if (!task.reminderDate || !task.reminderTime) return null;
-  return new Date(`${task.reminderDate}T${task.reminderTime}:00`);
+  return parseLocalDateTime(task.reminderDate, task.reminderTime);
 }
 
 function taskScheduleDate(task) {
   const reminder = reminderDate(task);
   if (reminder) return reminder;
-  if (task.dueDate) return new Date(`${task.dueDate}T23:59:59`);
+  if (task.dueDate) return parseLocalDateTime(task.dueDate, "23:59:59");
   return null;
 }
 
@@ -4619,4 +4638,3 @@ document.querySelectorAll(".modal").forEach(modal=>{
   const dashHint=$('dashTodayHint');
   if(dashHint && !dashHint.textContent.trim()) dashHint.textContent='No tasks yet — add your first one';
 })();
-
