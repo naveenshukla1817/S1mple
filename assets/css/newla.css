@@ -3340,3 +3340,54 @@ body.light .brain-empty-card .brain-empty-hint{color:#8b6c45;}
   .newla-empty{min-height:160px;}
 }
 
+/* ---------- Needs Attention — action-button treatment ---------- */
+#view-dashboard .v2-attention-item{
+  min-height:42px;
+  box-sizing:border-box;
+  align-items:center;
+  padding:10px 12px;
+  border:1px solid #8f4f4a;
+  border-radius:14px;
+  background:transparent;
+  color:#d19a92;
+  font-size:11px;
+  font-weight:600;
+  line-height:1.25;
+  box-shadow:none;
+  transition:border-color .18s ease,background-color .18s ease,color .18s ease,transform .18s ease;
+}
+#view-dashboard .v2-attention-item .dot{
+  width:7px;
+  height:7px;
+  margin-top:0;
+  background:#b96e69;
+  box-shadow:0 0 0 2px rgba(185,110,105,.08);
+}
+#view-dashboard .v2-attention-item:hover{
+  border-color:#a9645d;
+  background:rgba(143,79,74,.05);
+  color:#e0aaa2;
+  transform:translateY(-1px);
+}
+#view-dashboard .v2-attention-item.good{
+  border-color:#5e7257;
+  color:#aec0a5;
+}
+#view-dashboard .v2-attention-item.good .dot{
+  background:#68885d;
+  box-shadow:0 0 0 2px rgba(104,136,93,.08);
+}
+body.light #view-dashboard .v2-attention-item{
+  border-color:#cba8a1;
+  color:#8c4d45;
+  background:transparent;
+}
+body.light #view-dashboard .v2-attention-item .dot{
+  background:#a96a62;
+  box-shadow:0 0 0 2px rgba(169,106,98,.06);
+}
+body.light #view-dashboard .v2-attention-item:hover{
+  border-color:#bb7a70;
+  background:rgba(185,110,105,.05);
+  color:#7e3d35;
+}
