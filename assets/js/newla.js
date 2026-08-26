@@ -4546,9 +4546,52 @@ document.querySelectorAll(".modal").forEach(modal=>{
   const oldRenderV2=window.renderV2Dashboard;
   window.renderV2Dashboard=function(){
     try{ if(typeof oldRenderV2==="function")oldRenderV2(); }catch{}
+
+    // Keep dashboard numbers and their supporting copy in sync.
+    // The old UI had static empty-state text, which could remain visible
+    // even when the metric itself showed a non-zero count.
+    const today=todayKey();
+    const metrics=[
+      {
+        valueId:"dashToday",
+        hintId:"dashTodayHint",
+        count:tasks.filter(t=>t.dueDate===today||t.reminderDate===today).length,
+        empty:"No tasks yet — add your first one",
+        filled:n=>`${n} task${n===1?"":"s"} planned`
+      },
+      {
+        valueId:"dashPending",
+        hintId:"dashPendingHint",
+        count:tasks.filter(t=>t.status!=="completed").length,
+        empty:"Nothing pending — you are clear",
+        filled:n=>`${n} task${n===1?"":"s"} to finish`
+      },
+      {
+        valueId:"dashOverdue",
+        hintId:"dashOverdueHint",
+        count:tasks.filter(isOverdue).length,
+        empty:"You are all clear",
+        filled:n=>`${n} item${n===1?"":"s"} ${n===1?"needs":"need"} attention`
+      },
+      {
+        valueId:"dashCompleted",
+        hintId:"dashCompletedHint",
+        count:tasks.filter(t=>t.status==="completed").length,
+        empty:"Complete your first task",
+        filled:n=>`${n} completed`
+      }
+    ];
+
+    metrics.forEach(({valueId,hintId,count,empty,filled})=>{
+      const valueEl=$(valueId);
+      const hintEl=$(hintId);
+      if(valueEl) valueEl.textContent=count===0?"—":String(count);
+      if(hintEl) hintEl.textContent=count===0?empty:filled(count);
+    });
+
     const sessions=readFocus();
-    const today=todayKeyLocal();
-    const mins=sessions.filter(s=>todayKeyLocal(new Date(s.completedAt||s.startedAt||0))===today).reduce((a,s)=>a+sessionMinutes(s),0);
+    const focusToday=todayKeyLocal();
+    const mins=sessions.filter(s=>todayKeyLocal(new Date(s.completedAt||s.startedAt||0))===focusToday).reduce((a,s)=>a+sessionMinutes(s),0);
     if($("dashFocusTime"))$("dashFocusTime").textContent=mins>=60?`${Math.floor(mins/60)}h ${mins%60}m`:`${mins}m`;
   };
 
