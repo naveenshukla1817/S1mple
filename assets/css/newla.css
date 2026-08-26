@@ -3616,3 +3616,156 @@ html:not(.nexa-auth-ready) .app{visibility:hidden!important;pointer-events:none!
 html:not(.nexa-auth-ready) .nexa-auth-gate{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 html.nexa-auth-ready .nexa-auth-gate{visibility:visible;opacity:1;transition:opacity .16s ease}
 html.nexa-auth-ready .app{visibility:visible}
+
+/* ============================================================
+   NEWLA — FINAL MOBILE UX PASS
+   Mobile-only overrides. Desktop styles remain unchanged.
+============================================================ */
+@media (max-width:760px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  .main{overflow-x:hidden}
+
+  /* Touch-friendly spacing without changing desktop cards. */
+  button,.btn-light,.btn-dark,.btn-accent,.top-btn,.nav-btn,
+  .task-action,.calendar-control-v11,.calendar-mode-v11,
+  .calendar-today-v11,.brain-ref-tool,.brain-group-trigger,
+  .proof-actions-v5 button{min-height:36px}
+
+  /* Keep bottom navigation clear of device safe areas. */
+  .mobile-nav{
+    left:8px!important;
+    right:8px!important;
+    bottom:max(8px,env(safe-area-inset-bottom))!important;
+    padding-bottom:env(safe-area-inset-bottom);
+    max-width:none!important;
+  }
+  .mobile-more-menu{
+    bottom:calc(76px + env(safe-area-inset-bottom))!important;
+  }
+
+  /* Dashboard: cards and action areas stay inside the viewport. */
+  .v2-card-head{min-width:0}
+  .v2-card-head h3{min-width:0;word-break:break-word}
+  .v2-progress-meta{align-items:flex-start}
+  .v2-focus-btn{min-height:42px}
+
+  /* Tasks: filters scroll instead of widening the page. */
+  .task-filter-bar{min-width:0}
+  .task-filter-bar .filters{
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .task-filter-bar .filters::-webkit-scrollbar{display:none}
+  .task-search-wrap{min-width:0;width:100%}
+  .task-toolbar-v2{min-width:0}
+  .task-toolbar-v2>*{min-width:0}
+  .task-select-v2{max-width:100%}
+  .task-card{min-width:0}
+  .task-title,.task-desc{overflow-wrap:anywhere}
+  .task-actions{gap:7px}
+  .task-action{flex:1 1 auto}
+
+  /* Task modal: fit short screens and keep action buttons reachable. */
+  #taskModal{overflow-y:auto;align-items:flex-start!important}
+  #taskModal > div{
+    width:min(100%,560px)!important;
+    max-height:calc(100dvh - 20px)!important;
+    overflow-y:auto!important;
+    margin:10px 0!important;
+  }
+  #taskModal form{min-width:0}
+  #taskModal input,#taskModal textarea,#taskModal select{max-width:100%}
+
+  /* Proofs: image viewer and upload modal fit the phone viewport. */
+  .proof-grid{min-width:0}
+  .proof-card{min-width:0}
+  .proof-card .proof-image-wrap img{max-width:100%;height:auto}
+  .proof-modal-card-v5,.proof-viewer-card-v5{
+    width:100%!important;
+    max-height:calc(100dvh - 20px)!important;
+    overflow:auto!important;
+  }
+  .proof-viewer-image-v5{max-height:58dvh!important}
+  .proof-input-wrap-v5 input[type=file]{max-width:100%;overflow:hidden}
+  .proof-modal-actions-v5{flex-wrap:wrap}
+  .proof-modal-actions-v5 button{flex:1 1 120px;min-width:0}
+
+  /* Calendar: controls wrap, cells stay compact, event text never forces width. */
+  #view-calendar .calendar-topbar-v11{gap:10px}
+  #view-calendar .calendar-controls-v11{gap:6px;justify-content:flex-start}
+  #view-calendar .calendar-control-v11,
+  #view-calendar .calendar-mode-v11,
+  #view-calendar .calendar-today-v11{flex:1 1 auto;min-width:0;padding-inline:10px}
+  #view-calendar .calendar-layout-v11{min-width:0}
+  #view-calendar .calendar-main-v11,
+  #view-calendar .calendar-sidebar-v11{min-width:0}
+  #view-calendar .calendar-week-head-v11,
+  #view-calendar .calendar-week-grid-v11{min-width:0}
+  #view-calendar .calendar-cell-v11{overflow:hidden}
+  #view-calendar .calendar-event-v11{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #view-calendar .calendar-event-v11 span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* Brainstorming: toolbars can scroll horizontally; canvas never widens the page. */
+  #view-brainstorm .brain-ref-topbar,
+  #view-brainstorm .brain-ref-toolbar{
+    max-width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  #view-brainstorm .brain-ref-topbar::-webkit-scrollbar,
+  #view-brainstorm .brain-ref-toolbar::-webkit-scrollbar{display:none}
+  #view-brainstorm .brain-ref-shell,
+  #view-brainstorm .brain-ref-workspace{max-width:100%;min-width:0}
+  #view-brainstorm .brain-ref-board{max-width:100%;overflow:auto}
+  #view-brainstorm .brain-ref-sticky{max-width:calc(100vw - 54px)}
+
+  /* Knowledge/notes: long titles and editor content wrap cleanly. */
+  .notes-list-v2,.note-editor-v2{min-width:0;max-width:100%}
+  .note-list-item-v2,.note-title-input,.note-tags-v2 input{min-width:0;max-width:100%}
+  .note-title-input{overflow-wrap:anywhere}
+  .note-preview-v2{overflow-wrap:anywhere;word-break:break-word}
+
+  /* Focus/settings: dialogs and controls must stay inside the viewport. */
+  .focus-card,.command-card,.nexa-info-card,.nexa-dialog-card{max-width:calc(100vw - 20px)}
+  .focus-actions{flex-wrap:wrap}
+  .focus-actions>*{flex:1 1 120px}
+
+  /* Login / auth: avoid clipped fields on compact phones. */
+  .nexa-auth-card input{min-width:0;max-width:100%}
+  .nexa-auth-submit,.nexa-google-btn{min-height:44px}
+}
+
+@media (max-width:520px){
+  .topbar{padding-left:10px!important;padding-right:10px!important}
+  .content{padding-left:10px!important;padding-right:10px!important}
+
+  .stat{min-width:0}
+  .stat strong{font-size:21px}
+  .stat small{display:block;overflow-wrap:anywhere}
+
+  .task-actions .task-action{flex:1 1 calc(50% - 4px)}
+  .task-actions .task-thumb{flex:0 0 42px}
+
+  #taskModal > div{max-height:calc(100dvh - 14px)!important;margin:7px 0!important}
+  #taskModal .btn-light,#taskModal .btn-dark,#taskModal .btn-danger{width:100%}
+
+  .proof-actions-v5 button{flex:1 1 100%!important}
+  .proof-modal-actions-v5 button{flex:1 1 100%}
+
+  #view-calendar .calendar-controls-v11>*{flex:1 1 calc(50% - 3px)}
+  #view-calendar .calendar-cell-v11{min-height:82px!important;padding:5px!important}
+  #view-calendar .calendar-day-head-v11{font-size:7px!important}
+  #view-calendar .calendar-event-v11{font-size:7px!important;padding:4px!important}
+
+  .nexa-auth-card{padding:18px!important}
+  .nexa-auth-intro h1{font-size:clamp(34px,11vw,48px)}
+  .nexa-feature-card small{font-size:8px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .mobile-nav,.mobile-more-menu,.nexa-feature-card,.task-action,
+  .calendar-control-v11,.calendar-mode-v11,.calendar-today-v11,
+  .proof-actions-v5 button{transition:none!important}
+}
