@@ -3769,3 +3769,35 @@ html.nexa-auth-ready .app{visibility:visible}
   .calendar-control-v11,.calendar-mode-v11,.calendar-today-v11,
   .proof-actions-v5 button{transition:none!important}
 }
+
+
+/* Signup guidance + status polish */
+.nexa-signup-google-hint{
+  margin:10px 0 14px;
+  padding:9px 12px;
+  border:1px solid rgba(201,157,84,.22);
+  border-radius:10px;
+  background:rgba(201,157,84,.055);
+  color:#cdbb9f;
+  font-size:11px;
+  line-height:1.45;
+  text-align:center;
+}
+.nexa-auth-status{
+  font-size:13px!important;
+  font-weight:600;
+  line-height:1.45;
+  color:#f0e6d6;
+}
+.nexa-auth-status.nexa-auth-status-error{color:#e7a59d!important;}
+body.light .nexa-signup-google-hint{
+  background:rgba(139,108,69,.07);
+  border-color:rgba(139,108,69,.22);
+  color:#6f6254;
+}
+body.light .nexa-auth-status{color:#3b332b;}
+body.light .nexa-auth-status.nexa-auth-status-error{color:#a34f49!important;}
+@media(max-width:760px){
+  .nexa-signup-google-hint{font-size:10.5px;margin-top:8px;margin-bottom:12px}
+  .nexa-auth-status{font-size:12px!important}
+}
