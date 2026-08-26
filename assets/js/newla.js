@@ -3045,92 +3045,8 @@ document.querySelectorAll(".modal").forEach(modal=>{
   const saveJson=(k,v)=>originalSetItem(k,JSON.stringify(v));
   const authGate=$n('nexaAuthGate');
   const app=document.querySelector('.app');
-
-  // Keep the auth gate private during session restoration so a refresh never
-  // flashes the login form for an already-authenticated user.
-  function ensureAuthBootStyles(){
-    if(document.getElementById('nexaAuthBootStyles')) return;
-    const style=document.createElement('style');
-    style.id='nexaAuthBootStyles';
-    style.textContent=`
-      #nexaAuthGate.nexa-auth-gate-booting .nexa-auth-card{
-        visibility:hidden !important;
-      }
-      #nexaAuthGate.nexa-auth-gate-booting .nexa-auth-loading{
-        display:flex;
-      }
-      .nexa-auth-loading{
-        display:none;
-        position:absolute;
-        inset:0;
-        align-items:center;
-        justify-content:center;
-        flex-direction:column;
-        gap:10px;
-        z-index:20;
-        color:#e7dccb;
-        text-align:center;
-        pointer-events:none;
-      }
-      .nexa-auth-loading .spinner{
-        width:22px;
-        height:22px;
-        border:2px solid rgba(231,220,203,.18);
-        border-top-color:#d8b47a;
-        border-radius:50%;
-        animation:nexaAuthSpin .8s linear infinite;
-      }
-      .nexa-auth-loading strong{
-        font-size:13px;
-        letter-spacing:.01em;
-      }
-      .nexa-auth-loading span{
-        font-size:11px;
-        color:#948b80;
-      }
-      @keyframes nexaAuthSpin{to{transform:rotate(360deg)}}
-    `;
-    document.head.appendChild(style);
-  }
-
-  function showAuthBootLoading(){
-    if(!authGate) return;
-    ensureAuthBootStyles();
-    let loader=authGate.querySelector('.nexa-auth-loading');
-    if(!loader){
-      loader=document.createElement('div');
-      loader.className='nexa-auth-loading';
-      loader.innerHTML='<div class="spinner" aria-hidden="true"></div><strong>Restoring your workspace…</strong><span>Checking your secure session.</span>';
-      authGate.appendChild(loader);
-    }
-    authGate.classList.add('nexa-auth-gate-booting');
-    authGate.style.display='flex';
-    app?.classList.add('auth-hidden');
-  }
-
-  function hideAuthBootLoading(){
-    if(!authGate) return;
-    authGate.classList.remove('nexa-auth-gate-booting');
-    const loader=authGate.querySelector('.nexa-auth-loading');
-    if(loader) loader.remove();
-  }
-
-  function authShow(){
-    hideAuthBootLoading();
-    authGate.style.display='flex';
-    app?.classList.add('auth-hidden');
-  }
-
-  function appShow(){
-    hideAuthBootLoading();
-    authGate.style.display='none';
-    app?.classList.remove('auth-hidden');
-    try{
-      if(typeof renderAll==='function')renderAll();
-      if(typeof window.renderNotes==='function')window.renderNotes();
-      if(typeof window.renderV2Dashboard==='function')window.renderV2Dashboard();
-    }catch(e){console.warn(e)}
-  }
+  function authShow(){authGate.style.display='flex';app?.classList.add('auth-hidden');}
+  function appShow(){authGate.style.display='none';app?.classList.remove('auth-hidden');try{if(typeof renderAll==='function')renderAll();if(typeof window.renderNotes==='function')window.renderNotes();if(typeof window.renderV2Dashboard==='function')window.renderV2Dashboard();}catch(e){console.warn(e)}}
   function authStatus(msg,err=false){const el=$n('nexaAuthStatus');if(el){el.textContent=msg||'';el.classList.toggle('nexa-auth-status-error',!!err);el.style.color=err?'#e7a59d':'#e2c182'}}
   function clearAuthError(){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),status=$n('nexaAuthStatus'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');card?.classList.remove('nexa-login-error');email?.removeAttribute('aria-invalid');password?.removeAttribute('aria-invalid');if(email)email.classList.remove('nexa-input-error');if(password)password.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error');status?.classList.remove('nexa-auth-status-error')}
   function showAuthError(message='Invalid email or password. Please try again.'){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');authStatus(message,true);email?.setAttribute('aria-invalid','true');password?.setAttribute('aria-invalid','true');card?.classList.remove('nexa-login-error');email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');void (email?.offsetWidth);void (password?.offsetWidth);email?.classList.add('nexa-input-error');password?.classList.add('nexa-input-error');card?.classList.add('nexa-login-error');btn?.classList.add('nexa-auth-submit-error');setTimeout(()=>{email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error')},650)}
@@ -3388,40 +3304,27 @@ document.querySelectorAll(".modal").forEach(modal=>{
     if(!session?.user){
       window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';booting=false;authShow();return;
     }
-    showAuthBootLoading();
     window.NEXA_USER=session.user;
     const {data:p,error:profileError}=await client.from('profiles').select('full_name').eq('id',session.user.id).maybeSingle();
     if(profileError) console.warn('Newla profile lookup failed',profileError);
     window.NEXA_DISPLAY_NAME=p?.full_name||session.user.user_metadata?.full_name||session.user.user_metadata?.name||session.user.email?.split('@')[0]||'there';
-    authShow();
+    // Keep the auth gate hidden while an existing session hydrates. Showing the login
+    // form here causes a visible login flash on refresh even though the session is valid.
     try{await hydrate();}catch(e){console.error('Newla cloud hydrate failed',e);authStatus('Signed in, but cloud data could not be loaded. Refresh once.',true);}
     booting=false;
     appShow();
   }
   async function init(){
     setMode('login');
-    showAuthBootLoading();
+    // Boot state: hide both surfaces until Supabase resolves the persisted session.
+    // This prevents the login form from flashing during a normal authenticated refresh.
+    authGate.style.display='none';
+    app?.classList.add('auth-hidden');
     client=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.NEXA_BACKEND.client=client;
-    let data,error;
-    try{
-      ({data,error}=await client.auth.getSession());
-      if(error) throw error;
-    }catch(err){
-      console.error('Newla auth session restore failed',err);
-      booting=false;
-      authStatus('Could not restore your session. Please sign in again.',true);
-      authShow();
-      return;
-    }
+    const {data,error}=await client.auth.getSession();if(error)throw error;
     let appliedInitialSession=false;
     client.auth.onAuthStateChange((_event,session)=>{
-      if(_event==='SIGNED_OUT'){
-        window.NEXA_USER=null;
-        window.NEXA_DISPLAY_NAME='there';
-        booting=false;
-        authShow();
-        return;
-      }
+      if(_event==='SIGNED_OUT'){window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';booting=false;authShow();return;}
       // Avoid re-hydrating all cloud data on every token refresh.
       // INITIAL_SESSION is handled here only when getSession() did not already apply it.
       if(session?.user && _event==='INITIAL_SESSION' && !appliedInitialSession){
@@ -3436,8 +3339,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
       appliedInitialSession=true;
       await applySession(data.session);
     } else {
-      booting=false;
-      authShow();
+      booting=false;authShow();
     }
   }
   $n('nexaLoginTab').onclick=()=>setMode('login');$n('nexaSignupTab').onclick=()=>setMode('signup');
@@ -3476,7 +3378,15 @@ document.querySelectorAll(".modal").forEach(modal=>{
   const clearBtn=document.getElementById('clearAllData'); if(clearBtn){ /* guarded by confirmation modal */ }
   // Patch task/notes/brain/focus rendering identity.
   document.addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b){const v=b.dataset.view;setTimeout(()=>{if(v==='dashboard'&&window.updateGreeting)window.updateGreeting();},0)}});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,60));else setTimeout(init,60);
+  const safeInit=()=>init().catch(error=>{
+    console.error('Newla auth bootstrap failed',error);
+    booting=false;
+    window.NEXA_USER=null;
+    window.NEXA_DISPLAY_NAME='there';
+    authShow();
+    authStatus('Could not restore your session. Please sign in again.',true);
+  });
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(safeInit,60));else setTimeout(safeInit,60);
 })();
 
 
