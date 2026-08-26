@@ -3391,3 +3391,85 @@ body.light #view-dashboard .v2-attention-item:hover{
   background:rgba(185,110,105,.05);
   color:#7e3d35;
 }
+
+/* ============================================================
+   NEWLA LOGIN LANDING — product context, same Newla visual language
+   ============================================================ */
+.nexa-auth-shell{
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(360px,.88fr);
+  width:min(1060px,100%);
+  max-width:1060px;
+  gap:30px;
+  align-items:center;
+}
+.nexa-auth-intro{min-width:0;padding:12px 4px 8px 8px;color:#efe2c6}
+.nexa-auth-intro-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.nexa-auth-logo-inline{display:flex;align-items:center;min-height:42px}
+.nexa-auth-logo-inline .nexa-auth-logo-image{display:block;width:min(220px,42vw);height:auto;max-height:54px;object-fit:contain;object-position:left center;filter:none}
+.nexa-auth-intro-status{display:inline-flex;align-items:center;gap:7px;border:1px solid #3a352e;background:#1d1b17;border-radius:999px;padding:7px 9px;color:#9d9487;font-size:8px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.nexa-auth-intro-status i{width:7px;height:7px;border-radius:50%;background:#86a66f;box-shadow:0 0 0 4px rgba(134,166,111,.08)}
+.nexa-intro-kicker{color:#b5986b;margin-bottom:10px}
+.nexa-auth-intro h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(42px,5vw,70px);line-height:.95;letter-spacing:-.055em;color:#f1e6d5;font-weight:600;margin:0}
+.nexa-auth-intro h1 span{color:#c99d54}
+.nexa-auth-intro-copy{max-width:560px;margin-top:20px;color:#aaa093;font-size:13px;line-height:1.7}
+.nexa-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:22px}
+.nexa-feature-card{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #353028;background:linear-gradient(145deg,#211f1b,#1c1a17);border-radius:13px;transition:.18s ease}
+.nexa-feature-card:hover{border-color:#55493a;transform:translateY(-1px)}
+.nexa-feature-icon{width:28px;height:28px;flex:0 0 28px;border-radius:9px;display:grid;place-items:center;background:#2a251f;border:1px solid #433a30;color:#c99d54}
+.nexa-feature-icon svg{width:15px;height:15px}
+.nexa-feature-card strong{display:block;color:#ede3d5;font-size:10px;line-height:1.2}
+.nexa-feature-card small{display:block;margin-top:4px;color:#8f877b;font-size:8px;line-height:1.4}
+.nexa-proof-quote{display:flex;align-items:flex-start;gap:9px;margin-top:17px;padding-top:15px;border-top:1px solid #312d27}
+.nexa-proof-mark{font:30px/1 Georgia,serif;color:#c99d54}
+.nexa-proof-quote p{font:600 19px/1.18 Georgia,serif;color:#eadfce}
+.nexa-proof-quote p strong{color:#c99d54}
+.nexa-proof-quote small{display:block;margin-top:6px;color:#7e7569;font-size:8px;letter-spacing:.15em}
+.nexa-auth-card{width:100%;max-width:500px;justify-self:end;padding:28px;border-radius:20px;background:rgba(29,26,22,.92);border:1px solid #40382f;box-shadow:0 28px 90px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.02);backdrop-filter:blur(18px)}
+.nexa-auth-card .kicker{color:#b5986b}
+.nexa-auth-card h2{font-size:29px}
+.nexa-auth-card>p:not(.kicker):not(.nexa-auth-foot){margin-bottom:18px}
+.nexa-auth-submit{background:#c99d54;border-color:#c99d54;color:#261f17;box-shadow:0 9px 26px rgba(201,157,84,.14)}
+.nexa-auth-submit:hover{background:#d7ae68;border-color:#d7ae68;color:#211b14;box-shadow:0 12px 30px rgba(201,157,84,.18)}
+.nexa-auth-foot{color:#766e63;font-size:9px!important}
+body.light .nexa-auth-intro{color:#342d25}
+body.light .nexa-auth-intro h1{color:#302820}
+body.light .nexa-auth-intro h1 span{color:#8b6c45}
+body.light .nexa-intro-kicker{color:#8b6c45}
+body.light .nexa-auth-intro-copy{color:#766b60}
+body.light .nexa-auth-intro-status{background:#f5eee4;border-color:#d7c8b6;color:#766b60}
+body.light .nexa-feature-card{background:linear-gradient(145deg,#f6eee4,#eee5d9);border-color:#d3c4b2}
+body.light .nexa-feature-icon{background:#ebe0d1;border-color:#d0c0ac;color:#8b6c45}
+body.light .nexa-feature-card strong{color:#3b332b}
+body.light .nexa-feature-card small{color:#766b60}
+body.light .nexa-proof-quote{border-top-color:#d8cabb}
+body.light .nexa-proof-quote p{color:#40372e}
+body.light .nexa-proof-quote p strong{color:#8b6c45}
+body.light .nexa-proof-quote small{color:#8a7d6f}
+body.light .nexa-auth-card{background:rgba(247,240,230,.95);border-color:#d3c4b1;box-shadow:0 28px 80px rgba(74,57,38,.16)}
+body.light .nexa-auth-card h2{color:#322b23}
+body.light .nexa-auth-card>p:not(.kicker):not(.nexa-auth-foot){color:#756a5e}
+body.light .nexa-auth-card input{background:#fffaf2;border-color:#d1c1ad;color:#302820}
+body.light .nexa-auth-tabs{background:#ede4d8;border-color:#d3c4b1}
+body.light .nexa-auth-tabs button{color:#766b60}
+body.light .nexa-auth-tabs button.active{background:#8b6c45;color:#fffaf2}
+body.light .nexa-auth-submit{background:#8b6c45;border-color:#8b6c45;color:#fffaf2}
+body.light .nexa-auth-submit:hover{background:#9c7b52;border-color:#9c7b52;color:#fffaf2}
+body.light .nexa-google-btn{background:#fffaf2;border-color:#d3c4b1;color:#40372e}
+@media(max-width:900px){
+  .nexa-auth-shell{grid-template-columns:1fr;max-width:560px;gap:18px}
+  .nexa-auth-intro{padding:4px 4px 0}
+  .nexa-auth-intro h1{font-size:clamp(38px,9vw,56px)}
+  .nexa-auth-card{max-width:none;justify-self:stretch}
+}
+@media(max-width:650px){
+  .nexa-auth-gate{overflow:auto;align-items:flex-start;padding:24px 16px}
+  .nexa-auth-intro-top{margin-bottom:16px}
+  .nexa-auth-logo-inline .nexa-auth-logo-image{width:min(180px,58vw)}
+  .nexa-auth-intro-status{display:none}
+  .nexa-feature-grid{grid-template-columns:1fr;gap:7px}
+  .nexa-feature-card{padding:10px}
+  .nexa-proof-quote{margin-bottom:3px}
+  .nexa-proof-quote p{font-size:17px}
+  .nexa-auth-card{padding:22px}
+}
