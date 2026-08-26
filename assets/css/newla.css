@@ -1137,7 +1137,7 @@ body:not(.light) #view-notes .note-preview-v2 a{
 .nexa-google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid rgba(210,190,160,.22);background:rgba(255,255,255,.035);color:#eee5d8;border-radius:12px;padding:11px 13px;font-size:12px;font-weight:700;cursor:pointer;transition:.18s ease}
 .nexa-google-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(210,190,160,.34);transform:translateY(-1px)}
 .nexa-google-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-.nexa-google-mark{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:#fff;color:#4285f4;font-weight:900;font-family:Arial,sans-serif;font-size:14px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.nexa-google-mark{width:20px;height:20px;display:block;flex:0 0 20px;border-radius:0;background:transparent;box-shadow:none}
 
 
 /* Source style block 7 */
@@ -3473,3 +3473,6 @@ body.light .nexa-google-btn{background:#fffaf2;border-color:#d3c4b1;color:#40372
   .nexa-proof-quote p{font-size:17px}
   .nexa-auth-card{padding:22px}
 }
+
+/* Login landing polish: hide workspace-ready status badge. */
+.nexa-auth-intro-status{display:none!important}
