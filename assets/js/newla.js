@@ -923,6 +923,7 @@ $("submitProof").onclick = async () => {
     if(window.NEXA_SYNC_PROOF_NOW) await window.NEXA_SYNC_PROOF_NOW(completedTask);
   }catch(error){
     console.warn("Immediate proof sync skipped; background sync will retry.",error);
+    toast(friendlyCloudError(error),"error");
   }
   closeProofModal();
   renderAll();
@@ -947,7 +948,7 @@ async function deleteProofForTask(task){
     if(window.NEXA_DELETE_PROOF_CLOUD) await window.NEXA_DELETE_PROOF_CLOUD(task);
   }catch(error){
     console.warn("Cloud proof delete failed",error);
-    toast("Cloud delete failed. Your proof is kept locally until sync retries.","error");
+    toast(friendlyCloudError(error),"error");
     return;
   }
   task.proofDataUrl=null;
@@ -3048,7 +3049,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   function markAuthReady(){document.documentElement.classList.add('nexa-auth-ready')}
   function authShow(){app?.classList.add('auth-hidden');authGate.style.display='flex';markAuthReady();}
   function appShow(){app?.classList.remove('auth-hidden');authGate.style.display='none';markAuthReady();try{if(typeof renderAll==='function')renderAll();if(typeof window.renderNotes==='function')window.renderNotes();if(typeof window.renderV2Dashboard==='function')window.renderV2Dashboard();}catch(e){console.warn(e)}}
-  function authStatus(msg,err=false){const el=$n('nexaAuthStatus');if(el){el.textContent=msg||'';el.classList.toggle('nexa-auth-status-error',!!err);el.style.color=err?'#e7a59d':'#e2c182'}}
+  function authStatus(msg,err=false){const el=$n('nexaAuthStatus');if(el){el.textContent=msg||'';el.classList.toggle('nexa-auth-status-error',!!err);el.style.color=err?'#e7a59d':'#f0e6d6'}}
   function clearAuthError(){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),status=$n('nexaAuthStatus'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');card?.classList.remove('nexa-login-error');email?.removeAttribute('aria-invalid');password?.removeAttribute('aria-invalid');if(email)email.classList.remove('nexa-input-error');if(password)password.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error');status?.classList.remove('nexa-auth-status-error')}
   function showAuthError(message='Invalid email or password. Please try again.'){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');authStatus(message,true);email?.setAttribute('aria-invalid','true');password?.setAttribute('aria-invalid','true');card?.classList.remove('nexa-login-error');email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');void (email?.offsetWidth);void (password?.offsetWidth);email?.classList.add('nexa-input-error');password?.classList.add('nexa-input-error');card?.classList.add('nexa-login-error');btn?.classList.add('nexa-auth-submit-error');setTimeout(()=>{email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error')},650)}
   function setMode(mode){
@@ -3089,6 +3090,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     $n('nexaPasswordLabel').textContent=mode==='recovery'?'New password':'Password';
     $n('nexaAuthDivider').style.display=(mode==='login'||mode==='signup')?'flex':'none';
     $n('nexaGoogleBtn').style.display=(mode==='login'||mode==='signup')?'flex':'none';
+    $n('nexaSignupGoogleHint').style.display=mode==='signup'?'block':'none';
     authStatus('');
   }
 
@@ -3290,6 +3292,28 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const pn=$n('profileName');if(pn)pn.textContent=window.NEXA_DISPLAY_NAME||'Newla User';const hh=$n('heroHello');if(hh)hh.textContent=`Hello ${window.NEXA_DISPLAY_NAME||''} 👋`;if(window.renderAll)renderAll();if(window.renderNotes)renderNotes();if(window.renderV2Dashboard)renderV2Dashboard();
   }
   let v2NotesCache=[];
+  function friendlyCloudError(error){
+    const msg=String(error?.message||error||'').toLowerCase();
+    if(!navigator.onLine || /network|fetch|failed to fetch|offline|timeout|timed out|connection/.test(msg)) return 'You’re offline. Newla saved this locally and will sync when you’re back online.';
+    if(/jwt|session|token|auth/.test(msg)) return 'Your session needs attention. Please sign in again to continue cloud sync.';
+    if(/storage|upload|bucket|object/.test(msg)) return 'The file could not be uploaded. Your local copy is still safe.';
+    if(/permission|rls|not authorized|forbidden/.test(msg)) return 'Newla could not access that cloud resource. Your local copy is still here.';
+    return 'Cloud sync is temporarily unavailable. Your local changes are saved on this device and will retry automatically.';
+  }
+  function showCloudError(error, options={}){
+    const message=options.message||friendlyCloudError(error);
+    try{ toast(message,'error'); }catch{}
+    try{ setSyncIndicator('error',message); }catch{}
+  }
+  function showNetworkState(){
+    if(navigator.onLine){
+      if(client&&window.NEXA_USER&&!booting&&syncQueue?.size) scheduleCloudFlush(80);
+      return;
+    }
+    try{ setSyncIndicator('offline'); }catch{}
+    try{ toast('You’re offline. Newla will keep your changes locally and sync when you’re back online.','error'); }catch{}
+  }
+
   function setSyncIndicator(state,message){
     const el=$n('notesSyncIndicator');
     if(!el)return;
@@ -3334,7 +3358,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
       syncBackoff=Math.min(syncBackoff+1,5);
       const delay=Math.min(30000,1000*(2**syncBackoff));
       console.warn('Newla cloud sync failed; retry scheduled',e);
-      setSyncIndicator('error');
+      showCloudError(e);
       scheduleCloudFlush(delay);
     }finally{
       syncInFlight=false;
@@ -3361,7 +3385,13 @@ document.querySelectorAll(".modal").forEach(modal=>{
     window.NEXA_DISPLAY_NAME=p?.full_name||session.user.user_metadata?.full_name||session.user.user_metadata?.name||session.user.email?.split('@')[0]||'there';
     // Keep the auth gate hidden while an existing session hydrates. Showing the login
     // form here causes a visible login flash on refresh even though the session is valid.
-    try{await hydrate();}catch(e){console.error('Newla cloud hydrate failed',e);authStatus('Signed in, but cloud data could not be loaded. Refresh once.',true);}
+    try{await hydrate();}
+    catch(e){
+      console.error('Newla cloud hydrate failed',e);
+      const msg=friendlyCloudError(e);
+      authStatus(msg,true);
+      showCloudError(e,{message:msg});
+    }
     booting=false;
     appShow();
   }
@@ -3377,7 +3407,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     let appliedInitialSession=false;
     let recoveryFlow=recoveryFromUrl;
     client.auth.onAuthStateChange((_event,session)=>{
-      if(_event==='SIGNED_OUT'){window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';booting=false;setMode('login');authShow();return;}
+      if(_event==='SIGNED_OUT'){window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';booting=false;setMode('login');authShow();authStatus('You’re signed out. Sign in again to continue.');return;}
       if(_event==='PASSWORD_RECOVERY'){
         recoveryFlow=true;
         booting=false;
@@ -3476,6 +3506,13 @@ document.querySelectorAll(".modal").forEach(modal=>{
   const clearBtn=document.getElementById('clearAllData'); if(clearBtn){ /* guarded by confirmation modal */ }
   // Patch task/notes/brain/focus rendering identity.
   document.addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b){const v=b.dataset.view;setTimeout(()=>{if(v==='dashboard'&&window.updateGreeting)window.updateGreeting();},0)}});
+  window.addEventListener('offline',showNetworkState);
+  window.addEventListener('online',()=>{
+    try{ toast('You’re back online. Newla will retry cloud sync now.'); }catch{}
+    if(client&&window.NEXA_USER&&!booting) scheduleCloudFlush(60);
+  });
+  if(!navigator.onLine) setTimeout(showNetworkState,120);
+
   const safeInit=()=>init().catch(error=>{
     console.error('Newla auth bootstrap failed',error);
     booting=false;
