@@ -3484,3 +3484,18 @@ body.light .nexa-google-btn{background:#fffaf2;border-color:#d3c4b1;color:#40372
 
 /* Login landing polish: hide workspace-ready status badge. */
 .nexa-auth-intro-status{display:none!important}
+
+
+/* Password recovery */
+.nexa-forgot-row{display:flex;justify-content:flex-end;margin-top:7px}
+.nexa-text-link{border:0;background:transparent;color:#d0ad70;font-size:10px;padding:2px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.nexa-text-link:hover{color:#f0d59f}
+.nexa-reset-back{display:flex;justify-content:center;margin-top:12px}
+.nexa-auth-card.recovery-mode .nexa-auth-tabs,.nexa-auth-card.recovery-mode .nexa-auth-divider,.nexa-auth-card.recovery-mode #nexaGoogleBtn,.nexa-auth-card.recovery-mode #nexaForgotRow,.nexa-auth-card.recovery-mode #nexaNameWrap{display:none}
+.nexa-auth-card.recovery-request .nexa-auth-tabs,.nexa-auth-card.recovery-request .nexa-auth-divider,.nexa-auth-card.recovery-request #nexaGoogleBtn,.nexa-auth-card.recovery-request #nexaResetConfirmWrap,.nexa-auth-card.recovery-request #nexaNameWrap{display:none}
+.nexa-auth-card.recovery-request #nexaAuthPassword,.nexa-auth-card.recovery-request #nexaPasswordLabel{display:none}
+.nexa-auth-card.recovery-request #nexaForgotRow{display:none}
+@media(max-width:760px){.nexa-forgot-row{margin-top:8px}}
+
+.nexa-auth-card.recovery-mode #nexaEmailLabel,.nexa-auth-card.recovery-mode #nexaAuthEmail{display:none}
+.nexa-auth-card.recovery-mode #nexaPasswordLabel{display:block}
