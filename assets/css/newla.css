@@ -3551,3 +3551,61 @@ body.light .profile .avatar{
 body.light .profile .avatar:after{
   border-color:var(--sidebar);
 }
+
+/* ============================================================
+   LOGIN MICRO-INTERACTIONS
+   ============================================================ */
+
+/* Primary login / action button:
+   warm Newla gold at rest, purposeful success-green on hover. */
+.nexa-auth-submit{
+  transition:
+    background .18s ease,
+    color .18s ease,
+    border-color .18s ease,
+    transform .12s ease,
+    box-shadow .18s ease;
+}
+.nexa-auth-submit:hover:not(:disabled){
+  background:#68885d;
+  border-color:#68885d;
+  color:#fffaf2;
+  transform:translateY(-1px);
+  box-shadow:0 11px 28px rgba(104,136,93,.22);
+}
+.nexa-auth-submit:focus-visible{
+  outline:2px solid rgba(201,157,84,.65);
+  outline-offset:3px;
+}
+
+/* Forgot password:
+   quiet danger-red accent, no underline, slightly larger on hover. */
+.nexa-text-link{
+  color:#b96e69;
+  text-decoration:none;
+  transition:color .16s ease,font-size .16s ease,transform .16s ease;
+}
+.nexa-text-link:hover{
+  color:#dc8a82;
+  font-size:11.5px;
+  text-decoration:none;
+  transform:translateY(-1px);
+}
+.nexa-text-link:focus-visible{
+  outline:2px solid rgba(185,110,105,.45);
+  outline-offset:3px;
+  border-radius:4px;
+}
+body.light .nexa-text-link{
+  color:#a34f49;
+}
+body.light .nexa-text-link:hover{
+  color:#c8675f;
+}
+
+/* Keep disabled/loading state authoritative. */
+.nexa-auth-submit:disabled,
+.nexa-auth-submit:hover:disabled{
+  transform:none;
+  box-shadow:none;
+}
