@@ -3609,3 +3609,10 @@ body.light .nexa-text-link:hover{
   transform:none;
   box-shadow:none;
 }
+
+
+/* ---------- Auth boot: prevent first-paint flash ---------- */
+html:not(.nexa-auth-ready) .app{visibility:hidden!important;pointer-events:none!important}
+html:not(.nexa-auth-ready) .nexa-auth-gate{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+html.nexa-auth-ready .nexa-auth-gate{visibility:visible;opacity:1;transition:opacity .16s ease}
+html.nexa-auth-ready .app{visibility:visible}
