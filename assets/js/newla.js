@@ -3050,7 +3050,57 @@ document.querySelectorAll(".modal").forEach(modal=>{
   function authStatus(msg,err=false){const el=$n('nexaAuthStatus');if(el){el.textContent=msg||'';el.classList.toggle('nexa-auth-status-error',!!err);el.style.color=err?'#e7a59d':'#e2c182'}}
   function clearAuthError(){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),status=$n('nexaAuthStatus'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');card?.classList.remove('nexa-login-error');email?.removeAttribute('aria-invalid');password?.removeAttribute('aria-invalid');if(email)email.classList.remove('nexa-input-error');if(password)password.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error');status?.classList.remove('nexa-auth-status-error')}
   function showAuthError(message='Invalid email or password. Please try again.'){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');authStatus(message,true);email?.setAttribute('aria-invalid','true');password?.setAttribute('aria-invalid','true');card?.classList.remove('nexa-login-error');email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');void (email?.offsetWidth);void (password?.offsetWidth);email?.classList.add('nexa-input-error');password?.classList.add('nexa-input-error');card?.classList.add('nexa-login-error');btn?.classList.add('nexa-auth-submit-error');setTimeout(()=>{email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error')},650)}
-  function setMode(mode){authMode=mode;clearAuthError();$n('nexaLoginTab').classList.toggle('active',mode==='login');$n('nexaSignupTab').classList.toggle('active',mode==='signup');$n('nexaNameWrap').style.display=mode==='signup'?'block':'none';const pwd=$n('nexaAuthPassword');if(pwd){pwd.autocomplete=mode==='signup'?'new-password':'current-password';pwd.minLength=mode==='signup'?8:6;pwd.placeholder=mode==='signup'?'At least 8 characters':'••••••••'};$n('nexaAuthTitle').textContent=mode==='login'?'Welcome back 👋':'Create your Newla account';$n('nexaAuthSubtitle').textContent=mode==='login'?'Login to continue to Newla.':'Create your workspace account.';$n('nexaAuthSubmit').textContent=mode==='login'?'Enter Newla':'Create Newla account';authStatus('')}
+  function setMode(mode){
+    authMode=mode;
+    clearAuthError();
+    const card=$n('nexaAuthForm')?.closest('.nexa-auth-card');
+    card?.classList.toggle('recovery-request',mode==='recovery-request');
+    card?.classList.toggle('recovery-mode',mode==='recovery');
+    $n('nexaLoginTab').classList.toggle('active',mode==='login');
+    $n('nexaSignupTab').classList.toggle('active',mode==='signup');
+    $n('nexaNameWrap').style.display=mode==='signup'?'block':'none';
+    $n('nexaForgotRow').style.display=mode==='login'?'flex':'none';
+    $n('nexaResetConfirmWrap').style.display=mode==='recovery'?'block':'none';
+    $n('nexaResetBackWrap').style.display=(mode==='recovery-request'||mode==='recovery')?'flex':'none';
+    const pwd=$n('nexaAuthPassword');
+    const confirm=$n('nexaAuthPasswordConfirm');
+    const email=$n('nexaAuthEmail');
+    if(pwd){
+      pwd.autocomplete=(mode==='signup'||mode==='recovery')?'new-password':'current-password';
+      pwd.minLength=(mode==='signup'||mode==='recovery')?8:6;
+      pwd.placeholder=(mode==='recovery'||mode==='signup')?'At least 8 characters':'••••••••';
+      pwd.required=mode!=='recovery-request';
+    }
+    if(confirm){confirm.value='';confirm.required=mode==='recovery';confirm.autocomplete='new-password';}
+    if(email){email.required=mode!=='recovery';email.disabled=false;}
+    $n('nexaAuthTitle').textContent=
+      mode==='login'?'Welcome back 👋':
+      mode==='signup'?'Create your Newla account':
+      mode==='recovery-request'?'Reset your password':'Set a new password';
+    $n('nexaAuthSubtitle').textContent=
+      mode==='login'?'Login to continue to Newla.':
+      mode==='signup'?'Create your workspace account.':
+      mode==='recovery-request'?'Enter your email and we’ll send a secure reset link.':'Choose a new password for your Newla account.';
+    $n('nexaAuthSubmit').textContent=
+      mode==='login'?'Enter Newla':
+      mode==='signup'?'Create Newla account':
+      mode==='recovery-request'?'Send reset link':'Update password';
+    $n('nexaPasswordLabel').textContent=mode==='recovery'?'New password':'Password';
+    $n('nexaAuthDivider').style.display=(mode==='login'||mode==='signup')?'flex':'none';
+    $n('nexaGoogleBtn').style.display=(mode==='login'||mode==='signup')?'flex':'none';
+    authStatus('');
+  }
+
+  function openPasswordResetRequest(){
+    const email=$n('nexaAuthEmail');
+    if(email && !email.value.trim()) email.focus();
+    setMode('recovery-request');
+  }
+
+  function openPasswordRecovery(){
+    setMode('recovery');
+    $n('nexaAuthPassword')?.focus();
+  }
   function priorityNorm(v){const s=String(v||'medium').toLowerCase();return ['urgent','high','medium','low'].includes(s)?s:'medium'}
   function statusNorm(v){return v==='completed'?'completed':v==='in_progress'?'in_progress':'todo'}
   function mapTaskFromDb(t){return {id:t.id,title:t.title,description:t.description||'',priority:priorityNorm(t.priority),dueDate:t.due_date||'',reminderDate:t.reminder_date||'',reminderTime:t.reminder_time||'',category:t.category||'Project',recurring:t.recurring||'none',subtasks:Array.isArray(t.subtasks)?t.subtasks:[],status:statusNorm(t.status),proofDataUrl:null,proofPath:t.proof_path||null,completedAt:t.completed_at||null,remindedAt:null,createdAt:t.created_at||new Date().toISOString(),updatedAt:t.updated_at||t.created_at||new Date().toISOString()}}
@@ -3321,35 +3371,75 @@ document.querySelectorAll(".modal").forEach(modal=>{
     authGate.style.display='none';
     app?.classList.add('auth-hidden');
     client=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.NEXA_BACKEND.client=client;
+    const recoveryFromUrl=/(^|[?&#])type=recovery(&|$)/.test(`${location.search}&${location.hash}`);
     const {data,error}=await client.auth.getSession();if(error)throw error;
     let appliedInitialSession=false;
+    let recoveryFlow=recoveryFromUrl;
     client.auth.onAuthStateChange((_event,session)=>{
-      if(_event==='SIGNED_OUT'){window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';booting=false;authShow();return;}
+      if(_event==='SIGNED_OUT'){window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';booting=false;setMode('login');authShow();return;}
+      if(_event==='PASSWORD_RECOVERY'){
+        recoveryFlow=true;
+        booting=false;
+        openPasswordRecovery();
+        authShow();
+        return;
+      }
       // Avoid re-hydrating all cloud data on every token refresh.
       // INITIAL_SESSION is handled here only when getSession() did not already apply it.
       if(session?.user && _event==='INITIAL_SESSION' && !appliedInitialSession){
         appliedInitialSession=true;
+        if(recoveryFlow){booting=false;openPasswordRecovery();authShow();return;}
         queueMicrotask(()=>applySession(session).catch(e=>{console.error(e);booting=false;authShow();}));
       }
       if(session?.user && _event==='SIGNED_IN'){
-        queueMicrotask(()=>applySession(session).catch(e=>{console.error(e);booting=false;authShow();}));
+        queueMicrotask(()=>{
+          if(recoveryFlow){booting=false;openPasswordRecovery();authShow();return;}
+          applySession(session).catch(e=>{console.error(e);booting=false;authShow();});
+        });
       }
     });
     if(data?.session?.user){
       appliedInitialSession=true;
-      await applySession(data.session);
+      if(recoveryFlow){booting=false;openPasswordRecovery();authShow();}
+      else await applySession(data.session);
     } else {
-      booting=false;authShow();
+      booting=false;
+      if(recoveryFlow){openPasswordRecovery();authShow();}
+      else {setMode('login');authShow();}
     }
   }
-  $n('nexaLoginTab').onclick=()=>setMode('login');$n('nexaSignupTab').onclick=()=>setMode('signup');
-  [$n('nexaAuthEmail'),$n('nexaAuthPassword')].forEach(input=>input?.addEventListener('input',()=>{if(input.value)clearAuthError()}));
+  $n('nexaLoginTab').onclick=()=>setMode('login');
+  $n('nexaSignupTab').onclick=()=>setMode('signup');
+  $n('nexaForgotPassword').onclick=openPasswordResetRequest;
+  $n('nexaResetBack').onclick=()=>setMode('login');
+  [$n('nexaAuthEmail'),$n('nexaAuthPassword'),$n('nexaAuthPasswordConfirm')].forEach(input=>input?.addEventListener('input',()=>{if(input.value)clearAuthError()}));
   $n('nexaAuthForm').addEventListener('submit',async e=>{
     e.preventDefault();
     clearAuthError();
-    const email=$n('nexaAuthEmail').value.trim(),password=$n('nexaAuthPassword').value,name=$n('nexaAuthName').value.trim(),btn=$n('nexaAuthSubmit');
-    btn.disabled=true;authStatus(authMode==='login'?'Signing in…':'Creating your account…');
+    const email=$n('nexaAuthEmail').value.trim(),password=$n('nexaAuthPassword').value,passwordConfirm=$n('nexaAuthPasswordConfirm').value,name=$n('nexaAuthName').value.trim(),btn=$n('nexaAuthSubmit');
+    btn.disabled=true;
+    if(authMode==='recovery-request'){authStatus('Sending reset link…');}
+    else if(authMode==='recovery'){authStatus('Updating password…');}
+    else btn.textContent=authMode==='login'?'Signing in…':'Creating your account…';
     try{
+      if(authMode==='recovery-request'){
+        const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+        if(error)throw error;
+        authStatus('If an account exists for this email, we’ve sent a secure reset link.');
+        return;
+      }
+      if(authMode==='recovery'){
+        if(password.length<8){authStatus('Use at least 8 characters.',true);return;}
+        if(password!==passwordConfirm){authStatus('Passwords do not match.',true);return;}
+        const {error}=await client.auth.updateUser({password});
+        if(error)throw error;
+        authStatus('Password updated. Loading Newla…');
+        recoveryFlow=false;
+        const {data:sessionData}=await client.auth.getSession();
+        if(sessionData?.session) await applySession(sessionData.session);
+        else {setMode('login');authStatus('Password updated. Please sign in again.');}
+        return;
+      }
       if(authMode==='login'){
         const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;
         authStatus('Signed in. Loading Newla…');
@@ -3359,8 +3449,15 @@ document.querySelectorAll(".modal").forEach(modal=>{
         if(!data.session)authStatus('Account created. Check your email, confirm it, then return to Newla.');
         else authStatus('Account created. Loading Newla…');
       }
-    }catch(err){if(authMode==='login')showAuthError('Invalid email or password. Please try again.');else authStatus(err?.message||'Authentication failed.',true)}
-    finally{btn.disabled=false}
+    }catch(err){
+      if(authMode==='login')showAuthError('Invalid email or password. Please try again.');
+      else if(authMode==='recovery')authStatus(err?.message||'Could not update your password.',true);
+      else if(authMode==='recovery-request')authStatus('We could not send the reset email. Please try again.',true);
+      else authStatus(err?.message||'Authentication failed.',true);
+    }finally{
+      btn.disabled=false;
+      if(authMode==='login'||authMode==='signup')btn.textContent=authMode==='login'?'Enter Newla':'Create Newla account';
+    }
   });
   const googleBtn=$n('nexaGoogleBtn');
   if(googleBtn) googleBtn.addEventListener('click',async()=>{
