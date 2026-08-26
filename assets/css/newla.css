@@ -3416,8 +3416,12 @@ body.light #view-dashboard .v2-attention-item:hover{
 .nexa-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:22px}
 .nexa-feature-card{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #353028;background:linear-gradient(145deg,#211f1b,#1c1a17);border-radius:13px;transition:.18s ease}
 .nexa-feature-card:hover{border-color:#55493a;transform:translateY(-1px)}
-.nexa-feature-icon{width:28px;height:28px;flex:0 0 28px;border-radius:9px;display:grid;place-items:center;background:#2a251f;border:1px solid #433a30;color:#c99d54}
-.nexa-feature-icon svg{width:15px;height:15px}
+.nexa-feature-icon{width:34px;height:34px;flex:0 0 34px;border-radius:10px;display:grid;place-items:center;background:#2a251f;border:1px solid #433a30;color:#c99d54;box-shadow:inset 0 0 0 1px rgba(255,255,255,.015)}
+.nexa-feature-icon svg{width:17px;height:17px;stroke-width:2.1}
+.nexa-feature-card:nth-child(1) .nexa-feature-icon{color:#e46f3d;background:rgba(228,111,61,.10);border-color:rgba(228,111,61,.28);box-shadow:0 0 20px rgba(228,111,61,.08) inset}
+.nexa-feature-card:nth-child(2) .nexa-feature-icon{color:#e8b84a;background:rgba(232,184,74,.09);border-color:rgba(232,184,74,.25);box-shadow:0 0 20px rgba(232,184,74,.07) inset}
+.nexa-feature-card:nth-child(3) .nexa-feature-icon{color:#8ec45a;background:rgba(142,196,90,.09);border-color:rgba(142,196,90,.25);box-shadow:0 0 20px rgba(142,196,90,.07) inset}
+.nexa-feature-card:nth-child(4) .nexa-feature-icon{color:#6fa8dc;background:rgba(111,168,220,.09);border-color:rgba(111,168,220,.25);box-shadow:0 0 20px rgba(111,168,220,.07) inset}
 .nexa-feature-card strong{display:block;color:#ede3d5;font-size:10px;line-height:1.2}
 .nexa-feature-card small{display:block;margin-top:4px;color:#8f877b;font-size:8px;line-height:1.4}
 .nexa-proof-quote{display:flex;align-items:flex-start;gap:9px;margin-top:17px;padding-top:15px;border-top:1px solid #312d27}
@@ -3440,6 +3444,10 @@ body.light .nexa-auth-intro-copy{color:#766b60}
 body.light .nexa-auth-intro-status{background:#f5eee4;border-color:#d7c8b6;color:#766b60}
 body.light .nexa-feature-card{background:linear-gradient(145deg,#f6eee4,#eee5d9);border-color:#d3c4b2}
 body.light .nexa-feature-icon{background:#ebe0d1;border-color:#d0c0ac;color:#8b6c45}
+body.light .nexa-feature-card:nth-child(1) .nexa-feature-icon{color:#c85f32;background:rgba(200,95,50,.08);border-color:rgba(200,95,50,.22);box-shadow:none}
+body.light .nexa-feature-card:nth-child(2) .nexa-feature-icon{color:#b58925;background:rgba(181,137,37,.08);border-color:rgba(181,137,37,.20);box-shadow:none}
+body.light .nexa-feature-card:nth-child(3) .nexa-feature-icon{color:#668f3d;background:rgba(102,143,61,.08);border-color:rgba(102,143,61,.20);box-shadow:none}
+body.light .nexa-feature-card:nth-child(4) .nexa-feature-icon{color:#4d82b0;background:rgba(77,130,176,.08);border-color:rgba(77,130,176,.20);box-shadow:none}
 body.light .nexa-feature-card strong{color:#3b332b}
 body.light .nexa-feature-card small{color:#766b60}
 body.light .nexa-proof-quote{border-top-color:#d8cabb}
