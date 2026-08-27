@@ -300,8 +300,6 @@ https://newshukla.vercel.app/
 
 Newla
 
-Your space.
-Your workflow.
-Your work.
+
 
 Plan it. Make it. Prove it. Keep moving.
