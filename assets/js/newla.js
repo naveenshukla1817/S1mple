@@ -3049,7 +3049,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   function markAuthReady(){document.documentElement.classList.add('nexa-auth-ready')}
   function authShow(){app?.classList.add('auth-hidden');authGate.style.display='flex';markAuthReady();}
   function appShow(){app?.classList.remove('auth-hidden');authGate.style.display='none';markAuthReady();try{if(typeof renderAll==='function')renderAll();if(typeof window.renderNotes==='function')window.renderNotes();if(typeof window.renderV2Dashboard==='function')window.renderV2Dashboard();}catch(e){console.warn(e)}}
-  function authStatus(msg,err=false){const el=$n('nexaAuthStatus');if(el){el.textContent=msg||'';el.classList.toggle('nexa-auth-status-error',!!err);el.style.color=err?'#e7a59d':'#e2c182'}}
+  function authStatus(msg,err=false){const el=$n('nexaAuthStatus');if(el){el.textContent=msg||'';el.classList.toggle('nexa-auth-status-error',!!err);el.style.color=err?'#e7a59d':'#f0e6d6'}}
   function clearAuthError(){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),status=$n('nexaAuthStatus'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');card?.classList.remove('nexa-login-error');email?.removeAttribute('aria-invalid');password?.removeAttribute('aria-invalid');if(email)email.classList.remove('nexa-input-error');if(password)password.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error');status?.classList.remove('nexa-auth-status-error')}
   function showAuthError(message='Invalid email or password. Please try again.'){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');authStatus(message,true);email?.setAttribute('aria-invalid','true');password?.setAttribute('aria-invalid','true');card?.classList.remove('nexa-login-error');email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');void (email?.offsetWidth);void (password?.offsetWidth);email?.classList.add('nexa-input-error');password?.classList.add('nexa-input-error');card?.classList.add('nexa-login-error');btn?.classList.add('nexa-auth-submit-error');setTimeout(()=>{email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error')},650)}
   function setMode(mode){
@@ -3090,6 +3090,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     $n('nexaPasswordLabel').textContent=mode==='recovery'?'New password':'Password';
     $n('nexaAuthDivider').style.display=(mode==='login'||mode==='signup')?'flex':'none';
     $n('nexaGoogleBtn').style.display=(mode==='login'||mode==='signup')?'flex':'none';
+    $n('nexaSignupGoogleHint').style.display=mode==='signup'?'block':'none';
     authStatus('');
   }
 
