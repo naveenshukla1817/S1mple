@@ -3770,34 +3770,173 @@ html.nexa-auth-ready .app{visibility:visible}
   .proof-actions-v5 button{transition:none!important}
 }
 
-
-/* Signup guidance + status polish */
-.nexa-signup-google-hint{
-  margin:10px 0 14px;
-  padding:9px 12px;
-  border:1px solid rgba(201,157,84,.22);
-  border-radius:10px;
-  background:rgba(201,157,84,.055);
-  color:#cdbb9f;
-  font-size:11px;
-  line-height:1.45;
+/* ============================================================
+   NEWLA PUBLIC LANDING — same product language, more context
+   ============================================================ */
+.nexa-auth-gate{
+  display:block !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  align-items:initial;
+  justify-content:initial;
+  padding:28px 22px 44px;
+}
+.nexa-auth-shell{
+  margin:0 auto;
+}
+.nexa-public-story{
+  width:min(1060px,100%);
+  margin:34px auto 0;
+  color:#efe2c6;
+}
+.nexa-story-rule{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:#7e7569;
+  font-size:8px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.nexa-story-rule span{height:1px;flex:1;background:#312d27}
+.nexa-story-rule i{font-style:normal;white-space:nowrap}
+.nexa-story-lead{
+  max-width:760px;
+  margin:24px auto 0;
   text-align:center;
 }
-.nexa-auth-status{
-  font-size:13px!important;
-  font-weight:600;
-  line-height:1.45;
-  color:#f0e6d6;
+.nexa-story-lead .kicker{color:#b5986b;margin-bottom:10px}
+.nexa-story-lead h2{
+  margin:0;
+  font:600 clamp(30px,4vw,48px)/1.02 Georgia,"Times New Roman",serif;
+  letter-spacing:-.04em;
+  color:#f1e6d5;
 }
-.nexa-auth-status.nexa-auth-status-error{color:#e7a59d!important;}
-body.light .nexa-signup-google-hint{
-  background:rgba(139,108,69,.07);
-  border-color:rgba(139,108,69,.22);
-  color:#6f6254;
+.nexa-story-lead p:not(.kicker){
+  margin:14px auto 0;
+  max-width:690px;
+  color:#aaa093;
+  font-size:13px;
+  line-height:1.7;
 }
-body.light .nexa-auth-status{color:#3b332b;}
-body.light .nexa-auth-status.nexa-auth-status-error{color:#a34f49!important;}
-@media(max-width:760px){
-  .nexa-signup-google-hint{font-size:10.5px;margin-top:8px;margin-bottom:12px}
-  .nexa-auth-status{font-size:12px!important}
+.nexa-story-lead p strong{color:#e7d8c1;font-weight:700}
+.nexa-story-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-top:24px;
+}
+.nexa-story-card{
+  min-height:164px;
+  padding:16px;
+  border:1px solid #353028;
+  background:linear-gradient(145deg,#211f1b,#1c1a17);
+  border-radius:15px;
+  position:relative;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.nexa-story-card:hover{
+  transform:translateY(-2px);
+  border-color:#55493a;
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+.nexa-story-card.proof{border-color:rgba(201,157,84,.28)}
+.nexa-story-index{display:block;color:#806f58;font-size:8px;letter-spacing:.14em;font-weight:800}
+.nexa-story-card h3{margin-top:36px;font:600 24px/1 Georgia,"Times New Roman",serif;color:#efe4d2}
+.nexa-story-card p{margin-top:8px;color:#93897d;font-size:10px;line-height:1.55}
+.nexa-story-card.proof h3{color:#c99d54}
+.nexa-story-proof{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  margin-top:18px;
+  padding:18px 20px;
+  border:1px solid #39322b;
+  border-radius:16px;
+  background:rgba(28,25,21,.72);
+}
+.nexa-story-proof .kicker{color:#8f805f;margin-bottom:8px}
+.nexa-story-proof blockquote{margin:0;font:600 clamp(17px,2.2vw,24px)/1.28 Georgia,"Times New Roman",serif;color:#e9ddcc}
+.nexa-story-proof blockquote strong{color:#c99d54}
+.nexa-story-flow{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:8px;
+  color:#9b9184;
+  font-size:10px;
+  white-space:nowrap;
+}
+.nexa-story-flow span{
+  padding:8px 10px;
+  border:1px solid #40382f;
+  border-radius:999px;
+  background:#1c1916;
+}
+.nexa-story-flow b{font-size:13px;color:#c99d54;font-weight:500}
+.nexa-story-features{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:9px;
+  margin-top:14px;
+}
+.nexa-story-features article{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:12px;
+  border:1px solid #312d27;
+  border-radius:13px;
+  background:rgba(29,26,22,.72);
+}
+.nexa-story-features svg{width:17px;height:17px;color:#c99d54;flex:0 0 17px}
+.nexa-story-features strong{display:block;color:#e7ddcf;font-size:10px}
+.nexa-story-features small{display:block;margin-top:3px;color:#81786d;font-size:8px;line-height:1.3}
+.nexa-story-footer{
+  margin-top:24px;
+  padding-top:16px;
+  border-top:1px solid #312d27;
+  text-align:center;
+}
+.nexa-story-footer span{font:700 14px Georgia,serif;letter-spacing:.1em;color:#f0e5d5}
+.nexa-story-footer p{margin-top:5px;color:#a49a8d;font-size:10px}
+.nexa-story-footer small{display:block;margin-top:6px;color:#736a5f;font-size:8px;letter-spacing:.1em;text-transform:uppercase}
+body.light .nexa-story-rule span{background:#d8cabb}
+body.light .nexa-story-lead h2{color:#302820}
+body.light .nexa-story-lead p:not(.kicker){color:#766b60}
+body.light .nexa-story-lead p strong{color:#4a4035}
+body.light .nexa-story-card{background:linear-gradient(145deg,#f6eee4,#eee5d9);border-color:#d3c4b2}
+body.light .nexa-story-card h3{color:#3e352c}
+body.light .nexa-story-card p{color:#766b60}
+body.light .nexa-story-card.proof h3{color:#8b6c45}
+body.light .nexa-story-proof{background:rgba(247,240,230,.82);border-color:#d3c4b1}
+body.light .nexa-story-proof blockquote{color:#40372e}
+body.light .nexa-story-flow span{background:#fffaf2;border-color:#d3c4b1;color:#756a5e}
+body.light .nexa-story-features article{background:rgba(247,240,230,.82);border-color:#d8cabb}
+body.light .nexa-story-features strong{color:#3d342b}
+body.light .nexa-story-features small{color:#766b60}
+body.light .nexa-story-footer{border-top-color:#d8cabb}
+body.light .nexa-story-footer span{color:#302820}
+body.light .nexa-story-footer p{color:#766b60}
+body.light .nexa-story-footer small{color:#8a7d6f}
+
+@media(max-width:900px){
+  .nexa-auth-gate{padding:24px 16px 36px}
+  .nexa-story-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nexa-story-features{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .nexa-story-proof{align-items:flex-start;flex-direction:column}
+  .nexa-story-flow{justify-content:flex-start}
+}
+@media(max-width:650px){
+  .nexa-auth-gate{padding:20px 14px 32px}
+  .nexa-public-story{margin-top:28px}
+  .nexa-story-lead{margin-top:20px}
+  .nexa-story-grid{grid-template-columns:1fr}
+  .nexa-story-card{min-height:140px}
+  .nexa-story-features{grid-template-columns:1fr 1fr}
+  .nexa-story-proof{padding:16px}
+  .nexa-story-flow{gap:6px}
+  .nexa-story-flow span{padding:7px 8px}
 }
