@@ -11503,3 +11503,153 @@ body.light .nexa-auth-status.nexa-auth-status-error {
     font-size: 12px !important
   }
 }
+
+/* ---------- ARCHIVED WORK ---------- */
+.archive-top-btn{
+  position:relative;
+  width:38px;
+  height:34px;
+  padding:7px 9px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .18s ease,color .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+.archive-top-btn svg{width:15px;height:15px;transition:transform .18s ease}
+.archive-top-btn:hover{
+  color:var(--green);
+  border-color:rgba(182,215,125,.55);
+  background:rgba(182,215,125,.07);
+  transform:scale(1.08);
+  box-shadow:0 0 0 3px rgba(182,215,125,.05);
+}
+.archive-top-btn:hover svg{transform:scale(1.08)}
+.archive-count{
+  position:absolute;
+  top:-5px;
+  right:-5px;
+  min-width:15px;
+  height:15px;
+  padding:0 4px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:var(--green);
+  color:#1d2618;
+  font-size:8px;
+  font-weight:900;
+  line-height:1;
+}
+.archive-modal-card{
+  width:min(680px,100%);
+  max-height:min(82vh,760px);
+  overflow:auto;
+  background:var(--panel);
+  color:var(--ink);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:22px;
+  box-shadow:0 30px 90px rgba(0,0,0,.35);
+}
+.archive-modal-head{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:flex-start;
+  margin-bottom:18px;
+}
+.archive-modal-head h2{margin-top:4px}
+.archive-modal-head p:not(.kicker){margin-top:6px;color:var(--muted);font-size:12px}
+.archive-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:16px;
+}
+.archive-stat{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--panel-soft);
+}
+.archive-stat span{display:block;font-size:9px;letter-spacing:.1em;font-weight:800;color:var(--muted)}
+.archive-stat strong{display:block;margin-top:5px;font-family:Georgia,serif;font-size:23px;color:var(--ink)}
+.archive-list{display:grid;gap:9px}
+.archive-item{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel-soft);
+}
+.archive-item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.archive-item h3{font-family:Georgia,serif;font-size:17px;color:var(--ink)}
+.archive-item-reason{margin-top:5px;color:var(--muted);font-size:11px}
+.archive-item-date{color:var(--muted);font-size:10px;white-space:nowrap}
+.archive-item-note{
+  margin-top:9px;
+  padding:9px 10px;
+  border-left:2px solid var(--accent);
+  background:rgba(201,157,84,.08);
+  color:var(--ink);
+  font-size:11px;
+  line-height:1.45;
+}
+.archive-item-actions{display:flex;justify-content:flex-end;margin-top:11px}
+.archive-empty{
+  padding:38px 18px;
+  text-align:center;
+  color:var(--muted);
+  border:1px dashed var(--line);
+  border-radius:12px;
+}
+.delete-reason-options{display:grid;gap:7px}
+.delete-reason-options label{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel-soft);
+  color:var(--ink);
+  font-size:12px;
+  cursor:pointer;
+  transition:.18s ease;
+}
+.delete-reason-options label:hover{border-color:#b9a789;transform:translateX(1px)}
+.delete-reason-options input{accent-color:var(--success)}
+.delete-reason-note{
+  width:100%;
+  min-height:76px;
+  margin-top:9px;
+  resize:vertical;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel-soft);
+  color:var(--ink);
+  padding:11px;
+  font-size:12px;
+}
+.archive-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.btn-danger{
+  border:1px solid #9e5e59;
+  background:#7d4541;
+  color:#fff8f2;
+  padding:9px 13px;
+  border-radius:9px;
+  font-size:11px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.18s ease;
+}
+.btn-danger:hover:not(:disabled){background:#96534e;transform:translateY(-1px)}
+.btn-danger:disabled{opacity:.42;cursor:not-allowed}
+body.light .archive-modal-card{background:var(--panel);border-color:var(--line)}
+body.light .archive-item,
+body.light .archive-stat,
+body.light .delete-reason-options label,
+body.light .delete-reason-note{background:var(--panel-soft)}
+@media(max-width:700px){
+  .archive-stats{grid-template-columns:repeat(2,1fr)}
+  .archive-modal-card{padding:16px;max-height:88vh}
+  .archive-modal-actions{flex-direction:column-reverse}
+  .archive-modal-actions button{width:100%}
+}
