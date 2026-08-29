@@ -11981,3 +11981,43 @@ body.light #view-about .about-linkedin { color:#574c40; background:#fbf5e9; bord
     margin-top: 0;
   }
 }
+
+
+/* ============================================================
+   TEAM WORKSPACE
+============================================================ */
+.team-hero-row{align-items:flex-end}
+.team-hero-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.team-empty-grid{display:grid;grid-template-columns:1.25fr .875fr .875fr;gap:14px;margin-top:22px}
+.team-intro-card,.team-choice-card,.team-panel,.team-toolbar{border:1px solid #353028;border-radius:16px;background:linear-gradient(145deg,#25211c,#1f1d19);padding:18px}
+.team-intro-card h2,.team-choice-card h3,.team-panel h2{color:#eee6d9}
+.team-intro-card p,.team-choice-card p{color:#aaa095;font-size:12px;line-height:1.6}
+.team-loop{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px;color:#e9dfcf;font-weight:700;font-size:13px}
+.team-loop b{color:#c99d54;font-weight:700}
+.team-choice-card{display:flex;flex-direction:column;justify-content:space-between;min-height:210px}
+.team-choice-card .theme-choice{align-self:flex-start}
+.team-workspace{margin-top:22px;display:grid;gap:14px}
+.team-toolbar{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.team-switch-wrap,.team-code-wrap{display:grid;gap:7px}
+.team-switch-line{display:flex;align-items:center;gap:9px}
+.team-switch-line select{min-width:250px}
+.team-code-wrap{justify-items:end}
+.team-code-wrap strong{font-family:Georgia,serif;font-size:20px;letter-spacing:.08em;color:#eee5d6}
+.team-role-pill{padding:5px 9px;border:1px solid #544b3e;border-radius:999px;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#c7b99f}
+.team-copy-btn{border:1px solid #3d372f;background:transparent;color:#d7ccbb;border-radius:8px;padding:6px 9px;font-size:10px}
+.team-copy-btn:hover{border-color:#68885d;color:#b6d77d;transform:scale(1.03)}
+.team-grid{display:grid;grid-template-columns:.7fr 1.3fr;gap:14px}
+.team-panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.team-count{min-width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:#2d2922;border:1px solid #494136;color:#d5c9b6;font-size:11px}
+.team-members-list{display:grid;gap:9px}
+.team-member-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #39332c;border-radius:11px;background:#211f1a}
+.team-member-avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#3a3328;color:#efe3d1;font-family:Georgia,serif}
+.team-member-row strong{display:block;font-size:12px;color:#eee5d6}.team-member-row small{display:block;color:#8f877b;font-size:9px;margin-top:2px}
+.team-task-form{display:grid;gap:12px}.team-task-form label{display:grid;gap:6px;font-size:10px;color:#aaa095}.team-task-form input,.team-task-form textarea,.team-task-form select,.team-task-form-inline textarea,.team-file-field input{border:1px solid #413a31;border-radius:9px;background:#1a1916;color:#eee5d6;padding:10px 11px;font-size:12px}.team-task-form textarea,.team-task-form-inline textarea{resize:vertical}.team-form-grid{display:grid;grid-template-columns:1.2fr .8fr .9fr;gap:9px}.team-proof-required{border:1px solid #3d372f;border-radius:11px;padding:11px;background:#211f1a;display:grid;gap:4px}.team-proof-required span{font-size:10px;color:#e3d7c5}.team-proof-required strong{color:#b6d77d;font-size:11px}.team-proof-required small{color:#8f877b;font-size:9px;line-height:1.4}
+.team-tasks-list{display:grid;gap:10px}.team-task-card{border:1px solid #3c362f;border-radius:13px;background:#211f1a;padding:14px}.team-task-card.approved{border-color:#4d6548}.team-task-card.changes{border-color:#6a4b44}.team-task-top{display:flex;justify-content:space-between;gap:14px}.team-task-title-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.team-task-title-row h3{color:#eee5d6;font-size:15px}.team-task-top p{color:#9e9589;font-size:11px;line-height:1.5;margin-top:4px}.team-task-date{color:#9f9586;font-size:10px;white-space:nowrap}.team-status{padding:4px 7px;border-radius:999px;border:1px solid #464037;font-size:8px;text-transform:uppercase;letter-spacing:.09em;color:#c9bca7}.team-status.progress{color:#c8b27c}.team-status.submitted{color:#9ccbe7}.team-status.approved{color:#b6d77d;border-color:#4e6b49}.team-status.changes{color:#df9289;border-color:#694640}.team-task-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.team-task-meta span{border:1px solid #39332c;border-radius:999px;padding:5px 7px;color:#90877c;font-size:8px}.team-review-note,.team-proof-note{display:grid;gap:4px;margin-top:10px;padding:9px 10px;border-left:2px solid #a58a60;background:#1b1a16}.team-review-note strong,.team-proof-note strong{font-size:9px;color:#c8b99f;text-transform:uppercase;letter-spacing:.08em}.team-review-note span,.team-proof-note span{font-size:10px;color:#c2b7a8}.team-task-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.team-task-btn{border:1px solid #423b33;background:#2a261f;color:#e4d9c9;padding:7px 9px;border-radius:8px;font-size:9px;transition:.18s ease}.team-task-btn:hover{transform:scale(1.03);border-color:#68885d;color:#b6d77d}.team-task-btn.proof{color:#b6d77d}.team-task-btn.approve{color:#b6d77d;border-color:#4f6a4b}.team-task-btn.changes{color:#df9289;border-color:#674640}.team-proof-preview{border:1px solid #4a4338;background:transparent;color:#9ccbe7;padding:7px 9px;border-radius:8px;font-size:9px}.team-empty-mini{padding:24px;border:1px dashed #3a342c;border-radius:11px;text-align:center;color:#8f877b;font-size:10px;line-height:1.5}
+.team-modal-card{width:min(520px,100%);max-height:88vh;overflow:auto}.team-modal-note{color:#91897e;font-size:10px;line-height:1.5}.team-proof-task-name{font-family:Georgia,serif;font-size:20px;color:#eee5d6;margin:0 0 12px}.team-file-field{display:grid;gap:7px;font-size:10px;color:#aaa095}.team-proof-preview-wrap{display:flex;align-items:center;justify-content:center;min-height:0}.team-proof-preview-wrap img{display:block;max-width:100%;max-height:280px;border-radius:10px;border:1px solid #3d372f;object-fit:contain}.team-task-form-inline{display:grid;gap:6px;font-size:10px;color:#aaa095}
+body.light .team-intro-card,body.light .team-choice-card,body.light .team-panel,body.light .team-toolbar{background:linear-gradient(145deg,#f8f1e7,#eee5d7);border-color:#d8cbbb} body.light .team-intro-card h2,body.light .team-choice-card h3,body.light .team-panel h2{color:#3f352b} body.light .team-intro-card p,body.light .team-choice-card p{color:#74695d} body.light .team-member-row,body.light .team-task-card,body.light .team-proof-required{background:#f4ede3;border-color:#d8cbbb} body.light .team-member-row strong,body.light .team-task-title-row h3{color:#3f352b} body.light .team-member-row small,body.light .team-task-top p,.body.light .team-task-date{color:#786e63} body.light .team-task-form label,body.light .team-file-field,body.light .team-task-form-inline{color:#786e63} body.light .team-task-form input,body.light .team-task-form textarea,body.light .team-task-form select,body.light .team-task-form-inline textarea{background:#fffaf2;color:#2d281f;border-color:#cfc0ad} body.light .team-role-pill{color:#665b4f;border-color:#cfc0ad} body.light .team-code-wrap strong{color:#3f352b}
+@media(max-width:900px){.team-empty-grid{grid-template-columns:1fr}.team-grid{grid-template-columns:1fr}.team-toolbar{flex-direction:column;align-items:flex-start}.team-code-wrap{justify-items:start}.team-topbar{flex-wrap:wrap}.team-form-grid{grid-template-columns:1fr 1fr}.team-task-top{flex-direction:column}.team-task-date{white-space:normal}}
+@media(max-width:760px){.team-hero-row{flex-direction:column;align-items:flex-start}.team-hero-actions{justify-content:flex-start}.team-switch-line{flex-wrap:wrap}.team-switch-line select{min-width:0;width:100%}.team-toolbar{padding:15px}.team-form-grid{grid-template-columns:1fr}.team-task-top{gap:8px}.team-empty-grid{margin-top:16px}.team-intro-card,.team-choice-card,.team-panel,.team-toolbar{padding:15px}.team-task-title-row h3{font-size:14px}}
+
+.team-code-actions{display:flex;gap:6px;flex-wrap:wrap}
