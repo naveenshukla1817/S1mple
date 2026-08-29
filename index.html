@@ -137,6 +137,9 @@
 <button class="nav-btn" data-view="tasks">
 <span class="nav-icon"><i data-lucide="check-square-2"></i></span> Tasks
       </button>
+<button class="nav-btn" data-view="teams">
+<span class="nav-icon"><i data-lucide="users-round"></i></span> Teams
+      </button>
 <button class="nav-btn" data-view="brainstorm">
 <span class="nav-icon"><i data-lucide="lightbulb"></i></span> Brainstorming
       </button>
@@ -580,6 +583,125 @@ Write your notes here..."></textarea>
 </section>
 </div>
 </section>
+<!-- TEAMS -->
+<section class="view" id="view-teams">
+  <div class="hero-row team-hero-row">
+    <div>
+      <p class="kicker">TEAM WORKSPACE</p>
+      <h1>Work together. Keep the proof.</h1>
+      <p class="hero-note">Assign real work, submit evidence, and review it in one quiet place.</p>
+    </div>
+    <div class="team-hero-actions">
+      <button class="btn-accent" id="teamCreateOpen" type="button">+ Create team</button>
+      <button class="btn-dark" id="teamJoinOpen" type="button">Join with code</button>
+    </div>
+  </div>
+
+  <div id="teamEmptyState" class="team-empty-grid">
+    <section class="team-intro-card">
+      <p class="kicker">HOW IT WORKS</p>
+      <h2>Work has a visible finish line.</h2>
+      <p>Head assigns a task. A member does the work. Proof is submitted before the task can be approved.</p>
+      <div class="team-loop">
+        <span>Assign</span><b>→</b><span>Do</span><b>→</b><span>Prove</span><b>→</b><span>Review</span>
+      </div>
+    </section>
+    <section class="team-choice-card">
+      <div>
+        <p class="kicker">START A TEAM</p>
+        <h3>Create your team</h3>
+        <p>Become the head automatically, then invite your people with one short code.</p>
+      </div>
+      <button class="theme-choice action-primary" id="teamCreateOpenAlt" type="button">Create team</button>
+    </section>
+    <section class="team-choice-card">
+      <div>
+        <p class="kicker">JOIN EXISTING WORK</p>
+        <h3>Have a team code?</h3>
+        <p>Use the code shared by your head and your new workspace will appear here.</p>
+      </div>
+      <button class="theme-choice" id="teamJoinOpenAlt" type="button">Join team</button>
+    </section>
+  </div>
+
+  <div id="teamWorkspace" class="team-workspace" style="display:none">
+    <div class="team-toolbar dark-card">
+      <div class="team-switch-wrap">
+        <p class="kicker">YOUR TEAMS</p>
+        <div class="team-switch-line">
+          <select id="teamSwitcher" class="task-select-v2"></select>
+          <span class="team-role-pill" id="teamRolePill">Member</span>
+        </div>
+      </div>
+      <div class="team-code-wrap">
+        <span class="kicker">JOIN CODE</span>
+        <strong id="teamJoinCode">—</strong>
+        <div class="team-code-actions"><button class="team-copy-btn" id="teamCopyCode" type="button">Copy code</button><button class="team-copy-btn" id="teamCopyLink" type="button">Copy invite link</button></div>
+      </div>
+    </div>
+
+    <div class="team-grid">
+      <section class="team-panel dark-card">
+        <div class="team-panel-head"><div><p class="kicker">PEOPLE</p><h2>Members</h2></div><span id="teamMemberCount" class="team-count">0</span></div>
+        <div id="teamMembersList" class="team-members-list"></div>
+      </section>
+
+      <section class="team-panel dark-card" id="teamHeadPanel" style="display:none">
+        <div class="team-panel-head"><div><p class="kicker">HEAD</p><h2>Assign work</h2></div></div>
+        <form id="teamTaskForm" class="team-task-form">
+          <label>Task title<input id="teamTaskTitle" maxlength="140" required placeholder="e.g. Photograph the finished display"/></label>
+          <label>Description<textarea id="teamTaskDescription" rows="3" placeholder="What needs to be done?"></textarea></label>
+          <div class="team-form-grid">
+            <label>Assign to<select id="teamTaskAssignee" required></select></label>
+            <label>Priority<select id="teamTaskPriority"><option value="low">Low</option><option selected value="medium">Medium</option><option value="high">High</option></select></label>
+            <label>Due date<input id="teamTaskDueDate" type="date"/></label>
+          </div>
+          <div class="team-proof-required"><span>Proof required</span><strong>Always on</strong><small>Team work reaches approval only after evidence is submitted.</small></div>
+          <button class="btn-accent" type="submit">Assign task</button>
+        </form>
+      </section>
+    </div>
+
+    <section class="team-panel dark-card team-tasks-panel">
+      <div class="team-panel-head"><div><p class="kicker">TEAM WORK</p><h2>Tasks</h2></div><span id="teamTaskCount" class="team-count">0</span></div>
+      <div id="teamTasksList" class="team-tasks-list"></div>
+    </section>
+  </div>
+</section>
+
+<div class="nexa-info-modal" id="teamCreateModal" aria-hidden="true">
+  <div class="nexa-info-card team-modal-card" role="dialog" aria-modal="true" aria-labelledby="teamCreateTitle">
+    <div class="nexa-info-head"><div><p class="kicker">TEAM WORKSPACE</p><h2 id="teamCreateTitle">Create a team</h2></div><button class="btn-light" id="teamCreateClose" type="button">×</button></div>
+    <form id="teamCreateForm" class="team-task-form">
+      <label>Team name<input id="teamCreateName" maxlength="80" required placeholder="e.g. Newla Design Studio"/></label>
+      <label>Description<textarea id="teamCreateDescription" rows="3" maxlength="240" placeholder="What does this team work on?"></textarea></label>
+      <button class="btn-accent" type="submit">Create team</button>
+    </form>
+  </div>
+</div>
+
+<div class="nexa-info-modal" id="teamJoinModal" aria-hidden="true">
+  <div class="nexa-info-card team-modal-card" role="dialog" aria-modal="true" aria-labelledby="teamJoinTitle">
+    <div class="nexa-info-head"><div><p class="kicker">JOIN A TEAM</p><h2 id="teamJoinTitle">Enter your team code</h2></div><button class="btn-light" id="teamJoinClose" type="button">×</button></div>
+    <form id="teamJoinForm" class="team-task-form">
+      <label>Join code<input id="teamJoinInput" maxlength="16" required placeholder="NLA-7K42Q" autocomplete="off"/></label>
+      <p class="team-modal-note">You need a Newla account to join. Joining makes you a member of the team.</p>
+      <button class="btn-accent" type="submit">Join team</button>
+    </form>
+  </div>
+</div>
+
+<div class="nexa-info-modal" id="teamProofModal" aria-hidden="true">
+  <div class="nexa-info-card team-modal-card" role="dialog" aria-modal="true" aria-labelledby="teamProofTitle">
+    <div class="nexa-info-head"><div><p class="kicker">PROOF REQUIRED</p><h2 id="teamProofTitle">Submit your work</h2></div><button class="btn-light" id="teamProofClose" type="button">×</button></div>
+    <p id="teamProofTaskName" class="team-proof-task-name"></p>
+    <label class="team-file-field">Proof image<input id="teamProofFile" type="file" accept="image/*"/></label>
+    <label class="team-task-form-inline">Note for the reviewer<textarea id="teamProofNote" rows="3" maxlength="500" placeholder="A quick note about what you finished..."></textarea></label>
+    <div class="team-proof-preview-wrap"><img id="teamProofPreview" alt="Proof preview" style="display:none"/></div>
+    <button class="btn-accent" id="teamProofSubmit" type="button">Submit proof</button>
+  </div>
+</div>
+
 <!-- SETTINGS -->
 <section class="view" id="view-settings">
 <div class="hero-row">
@@ -750,6 +872,7 @@ Write your notes here..."></textarea>
 <div aria-hidden="true" class="mobile-more-menu" id="mobileMoreMenu">
 <button data-view="calendar"><i data-lucide="calendar-days"></i> Calendar</button>
 <button data-view="notes"><i data-lucide="notebook-tabs"></i> Knowledge</button>
+<button data-view="teams"><i data-lucide="users-round"></i> Teams</button>
 <button data-view="settings"><i data-lucide="settings-2"></i> Settings</button>
 </div>
 <!-- CUSTOM BROWSER-DIALOG REPLACEMENT -->
