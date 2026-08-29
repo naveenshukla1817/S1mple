@@ -15,6 +15,7 @@ const commandItems = [
   {label:"New Task", detail:"Create a new task", action:()=>{switchView("tasks");openTaskModal();}},
   {label:"Dashboard", detail:"Go to dashboard", action:()=>switchView("dashboard")},
   {label:"Tasks", detail:"Open task manager", action:()=>switchView("tasks")},
+  {label:"Teams", detail:"Work with your team", action:()=>switchView("teams")},
   {label:"Brainstorming", detail:"Open sticky-note board", action:()=>switchView("brainstorm")},
   {label:"Proofs", detail:"Open proof wall", action:()=>switchView("proofs")},
   {label:"Calendar", detail:"Open calendar", action:()=>switchView("calendar")},
@@ -428,6 +429,7 @@ setInterval(setQuote,14000);
 const viewNames = {
   dashboard:"Dashboard",
   tasks:"Tasks",
+  teams:"Teams",
   brainstorm:"Brainstorming",
   proofs:"Proofs",
   calendar:"Calendar",
@@ -460,6 +462,7 @@ function switchView(view) {
   if (view === "proofs") renderProofs();
   if (view === "calendar") renderCalendar();
   if (view === "dashboard") renderDashboard();
+  if (view === "teams" && typeof window.renderTeams === "function") window.renderTeams();
 }
 
 document.querySelectorAll("[data-view]").forEach(button => {
@@ -3243,7 +3246,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   const app=document.querySelector('.app');
   function markAuthReady(){document.documentElement.classList.add('nexa-auth-ready')}
   function authShow(){app?.classList.add('auth-hidden');authGate.style.display='flex';markAuthReady();}
-  function appShow(){app?.classList.remove('auth-hidden');authGate.style.display='none';markAuthReady();try{if(typeof renderAll==='function')renderAll();if(typeof window.renderNotes==='function')window.renderNotes();if(typeof window.renderV2Dashboard==='function')window.renderV2Dashboard();}catch(e){console.warn(e)}}
+  function appShow(){app?.classList.remove('auth-hidden');authGate.style.display='none';markAuthReady();try{if(typeof renderAll==='function')renderAll();if(typeof window.renderNotes==='function')window.renderNotes();if(typeof window.renderV2Dashboard==='function')window.renderV2Dashboard();if(typeof window.renderTeams==='function')window.renderTeams();}catch(e){console.warn(e)}}
   function authStatus(msg,err=false){const el=$n('nexaAuthStatus');if(el){el.textContent=msg||'';el.classList.toggle('nexa-auth-status-error',!!err);el.style.color=err?'#e7a59d':'#f0e6d6'}}
   function clearAuthError(){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),status=$n('nexaAuthStatus'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');card?.classList.remove('nexa-login-error');email?.removeAttribute('aria-invalid');password?.removeAttribute('aria-invalid');if(email)email.classList.remove('nexa-input-error');if(password)password.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error');status?.classList.remove('nexa-auth-status-error')}
   function showAuthError(message='Invalid email or password. Please try again.'){const form=$n('nexaAuthForm'),card=form?.closest('.nexa-auth-card'),email=$n('nexaAuthEmail'),password=$n('nexaAuthPassword'),btn=$n('nexaAuthSubmit');authStatus(message,true);email?.setAttribute('aria-invalid','true');password?.setAttribute('aria-invalid','true');card?.classList.remove('nexa-login-error');email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');void (email?.offsetWidth);void (password?.offsetWidth);email?.classList.add('nexa-input-error');password?.classList.add('nexa-input-error');card?.classList.add('nexa-login-error');btn?.classList.add('nexa-auth-submit-error');setTimeout(()=>{email?.classList.remove('nexa-input-error');password?.classList.remove('nexa-input-error');btn?.classList.remove('nexa-auth-submit-error')},650)}
@@ -5022,4 +5025,187 @@ document.querySelectorAll(".modal").forEach(modal=>{
   // Dashboard already has an empty hint; make sure its CTA message remains visible and clear.
   const dashHint=$('dashTodayHint');
   if(dashHint && !dashHint.textContent.trim()) dashHint.textContent='No tasks yet — add your first one';
+})();
+
+/* ============================================================
+   TEAM WORKSPACE
+============================================================ */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  let teamRows=[];
+  let teamMembers=[];
+  let teamTasks=[];
+  let activeTeamId=localStorage.getItem('nexa_active_team_id')||'';
+  let teamProofTaskId='';
+  let teamProofData='';
+
+  const TEAM_STATUSES={assigned:'Assigned',in_progress:'In progress',submitted:'Awaiting review',approved:'Approved',changes_requested:'Changes requested'};
+  const TEAM_STATUS_CLASS={assigned:'assigned',in_progress:'progress',submitted:'submitted',approved:'approved',changes_requested:'changes'};
+  const client=()=>window.NEXA_BACKEND?.client||null;
+  const user=()=>window.NEXA_USER||null;
+  const esc=(v)=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const teamCode=()=>{
+    const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let out='NLA-';
+    for(let i=0;i<6;i++) out+=alphabet[Math.floor(Math.random()*alphabet.length)];
+    return out;
+  };
+  const teamInviteLink=(code)=>`${location.origin}${location.pathname}?join=${encodeURIComponent(code)}`;
+  function currentTeam(){return teamRows.find(t=>t.id===activeTeamId)||teamRows[0]||null;}
+  function currentRole(){const t=currentTeam();const m=teamMembers.find(x=>x.team_id===t?.id&&x.user_id===user()?.id);return m?.role||'member';}
+  function openModal(id){const el=$(id);if(!el)return;el.style.display='flex';el.setAttribute('aria-hidden','false');}
+  function closeModal(id){const el=$(id);if(!el)return;el.style.display='none';el.setAttribute('aria-hidden','true');}
+  function formatTeamDate(v){if(!v)return 'No due date';try{return new Date(v+'T00:00:00').toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'})}catch{return v}}
+  async function loadTeams(){
+    const c=client(),u=user();
+    if(!c||!u){teamRows=[];teamMembers=[];teamTasks=[];renderTeamShell();return;}
+    const {data,error}=await c.from('nexa_teams').select('id,name,description,join_code,created_by,created_at').order('created_at',{ascending:false});
+    if(error){console.warn('Teams load failed',error);toast('Could not load your teams. Please try again.','error');return;}
+    teamRows=data||[];
+    if(activeTeamId && !teamRows.some(t=>t.id===activeTeamId)) activeTeamId='';
+    if(!activeTeamId&&teamRows[0]){activeTeamId=teamRows[0].id;localStorage.setItem('nexa_active_team_id',activeTeamId)}
+    await refreshCurrentTeam();
+  }
+  async function refreshCurrentTeam(){
+    const c=client(),t=currentTeam();
+    if(!c||!t){teamMembers=[];teamTasks=[];renderTeamShell();return;}
+    const [m,tt]=await Promise.all([
+      c.from('nexa_team_members').select('id,team_id,user_id,display_name,role,joined_at').eq('team_id',t.id).order('joined_at',{ascending:true}),
+      c.from('nexa_team_tasks').select('id,team_id,created_by,assigned_to,title,description,priority,due_date,proof_required,status,proof_path,proof_note,review_note,submitted_at,reviewed_at,created_at,updated_at').eq('team_id',t.id).order('created_at',{ascending:false})
+    ]);
+    if(m.error)console.warn('Team members load failed',m.error); else teamMembers=m.data||[];
+    if(tt.error)console.warn('Team tasks load failed',tt.error); else teamTasks=tt.data||[];
+    renderTeamShell();
+  }
+  function renderTeamShell(){
+    const empty=$('teamEmptyState'),ws=$('teamWorkspace');
+    if(!empty||!ws)return;
+    const has=teamRows.length>0;
+    empty.style.display=has?'none':'grid';ws.style.display=has?'block':'none';
+    if(!has)return;
+    const t=currentTeam(); if(!t)return;
+    const sw=$('teamSwitcher');
+    if(sw){sw.innerHTML=teamRows.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');sw.value=t.id;sw.onchange=async()=>{activeTeamId=sw.value;localStorage.setItem('nexa_active_team_id',activeTeamId);await refreshCurrentTeam();};}
+    const role=currentRole();
+    $('teamRolePill').textContent=role==='head'?'Head':'Member';
+    $('teamJoinCode').textContent=t.join_code;
+    $('teamJoinCode').dataset.inviteLink=teamInviteLink(t.join_code);
+    $('teamMemberCount').textContent=String(teamMembers.length);
+    $('teamMembersList').innerHTML=teamMembers.length?teamMembers.map(m=>`<div class="team-member-row"><div class="team-member-avatar">${esc((m.display_name||'M').charAt(0).toUpperCase())}</div><div><strong>${esc(m.display_name||'Member')}</strong><small>${m.role==='head'?'Head':'Member'}</small></div></div>`).join(''):'<div class="team-empty-mini">No members yet. Share the join code.</div>';
+    const head=$('teamHeadPanel');
+    head.style.display=role==='head'?'block':'none';
+    if(role==='head'){
+      const sel=$('teamTaskAssignee');sel.innerHTML=teamMembers.filter(m=>m.role!=='head').map(m=>`<option value="${esc(m.user_id)}">${esc(m.display_name||'Member')}</option>`).join('');
+      if(!teamMembers.some(m=>m.role!=='head')) sel.innerHTML='<option value="">Invite a member first</option>';
+    }
+    renderTeamTasks();
+  }
+  async function renderTeamTasks(){
+    const list=$('teamTasksList');if(!list)return;
+    const role=currentRole(),uid=user()?.id;
+    const visible=role==='head'?teamTasks:teamTasks.filter(t=>t.assigned_to===uid);
+    $('teamTaskCount').textContent=String(visible.length);
+    if(!visible.length){list.innerHTML=`<div class="team-empty-mini">${role==='head'?'No team tasks yet. Assign the first piece of work above.':'No tasks assigned to you yet.'}</div>`;return;}
+    list.innerHTML=visible.map(t=>teamTaskCard(t,role)).join('');
+    list.querySelectorAll('[data-team-start]').forEach(b=>b.onclick=()=>updateTeamTaskStatus(b.dataset.teamStart,'in_progress'));
+    list.querySelectorAll('[data-team-proof]').forEach(b=>b.onclick=()=>openTeamProof(b.dataset.teamProof));
+    list.querySelectorAll('[data-team-approve]').forEach(b=>b.onclick=()=>reviewTeamTask(b.dataset.teamApprove,'approved'));
+    list.querySelectorAll('[data-team-changes]').forEach(b=>b.onclick=()=>reviewTeamTask(b.dataset.teamChanges,'changes_requested'));
+  }
+  function assigneeName(uid){return teamMembers.find(m=>m.user_id===uid)?.display_name||'Member';}
+  function teamTaskCard(t,role){
+    const status=TEAM_STATUSES[t.status]||t.status;
+    const klass=TEAM_STATUS_CLASS[t.status]||'';
+    const due=t.due_date?formatTeamDate(t.due_date):'No due date';
+    const proofButton=t.assigned_to===user()?.id && ['assigned','in_progress','changes_requested'].includes(t.status)?`<button class="team-task-btn proof" data-team-proof="${t.id}">${t.status==='changes_requested'?'Resubmit proof':'Submit proof'}</button>`:'';
+    const startButton=t.assigned_to===user()?.id && t.status==='assigned'?`<button class="team-task-btn" data-team-start="${t.id}">Start work</button>`:'';
+    const reviewButtons=role==='head'&&t.status==='submitted'?`<button class="team-task-btn approve" data-team-approve="${t.id}">Approve</button><button class="team-task-btn changes" data-team-changes="${t.id}">Request changes</button>`:'';
+    const proofPreview=role==='head'&&t.proof_path?`<button class="team-proof-preview" data-team-proof="${t.id}">View proof</button>`:'';
+    return `<article class="team-task-card ${klass}">
+      <div class="team-task-top"><div><div class="team-task-title-row"><h3>${esc(t.title)}</h3><span class="team-status ${klass}">${esc(status)}</span></div><p>${esc(t.description||'')}</p></div><span class="team-task-date">${esc(due)}</span></div>
+      <div class="team-task-meta"><span>${esc(t.priority)} priority</span><span>${role==='head'?'Assigned to '+esc(assigneeName(t.assigned_to)):esc('Assigned by '+assigneeName(t.created_by))}</span>${t.proof_required?'<span>Proof required</span>':''}</div>
+      ${t.review_note?`<div class="team-review-note"><strong>Review note</strong><span>${esc(t.review_note)}</span></div>`:''}
+      ${t.proof_note?`<div class="team-proof-note"><strong>Proof note</strong><span>${esc(t.proof_note)}</span></div>`:''}
+      <div class="team-task-actions">${startButton}${proofButton}${reviewButtons}${proofPreview}</div>
+    </article>`;
+  }
+  async function createTeam(){
+    const c=client(),u=user();if(!c||!u)return;
+    const name=$('teamCreateName').value.trim(),description=$('teamCreateDescription').value.trim();
+    if(!name){toast('Give your team a name.','error');return;}
+    let created=null,err=null;
+    for(let i=0;i<5&&!created;i++){
+      const ins=await c.from('nexa_teams').insert({name,description:description||null,join_code:teamCode(),created_by:u.id}).select().single();
+      if(!ins.error){created=ins.data;break;} err=ins.error;
+    }
+    if(!created){console.error(err);toast('Could not create the team. Please try again.','error');return;}
+    const dn=window.NEXA_DISPLAY_NAME||u.email?.split('@')[0]||'Head';
+    const mem=await c.from('nexa_team_members').insert({team_id:created.id,user_id:u.id,display_name:dn,role:'head'});
+    if(mem.error){await c.from('nexa_teams').delete().eq('id',created.id);console.error(mem.error);toast('Team creation could not be completed.','error');return;}
+    $('teamCreateName').value='';$('teamCreateDescription').value='';closeModal('teamCreateModal');activeTeamId=created.id;localStorage.setItem('nexa_active_team_id',activeTeamId);toast(`Team “${name}” created.`);await loadTeams();
+  }
+  async function joinTeam(){
+    const c=client();if(!c)return;const code=$('teamJoinInput').value.trim().toUpperCase();if(!code)return;
+    const {data,error}=await c.rpc('join_nexa_team',{p_code:code});
+    if(error||!data?.length){console.error(error);toast(error?.message||'That team code is not valid.','error');return;}
+    $('teamJoinInput').value='';closeModal('teamJoinModal');activeTeamId=data[0].team_id;localStorage.setItem('nexa_active_team_id',activeTeamId);toast(`Joined ${data[0].team_name}.`);await loadTeams();
+  }
+  async function createTeamTask(e){
+    e.preventDefault();const c=client(),u=user(),t=currentTeam();if(!c||!u||!t)return;
+    const assigned=$('teamTaskAssignee').value;if(!assigned){toast('Invite a member before assigning work.','error');return;}
+    const row={team_id:t.id,created_by:u.id,assigned_to:assigned,title:$('teamTaskTitle').value.trim(),description:$('teamTaskDescription').value.trim()||null,priority:$('teamTaskPriority').value,due_date:$('teamTaskDueDate').value||null,proof_required:true,status:'assigned'};
+    if(!row.title){toast('Give the task a title.','error');return;}
+    const {error}=await c.from('nexa_team_tasks').insert(row);if(error){console.error(error);toast('Could not assign the task.','error');return;}
+    e.target.reset();toast('Task assigned. Proof will be required before approval.');await refreshCurrentTeam();
+  }
+  async function updateTeamTaskStatus(id,status){
+    const c=client();if(!c)return;const t=teamTasks.find(x=>x.id===id);if(!t)return;
+    const {error}=await c.from('nexa_team_tasks').update({status,updated_at:new Date().toISOString()}).eq('id',id);if(error){console.error(error);toast('Could not update the task.','error');return;}toast(status==='in_progress'?'Work started.':'Task updated.');await refreshCurrentTeam();
+  }
+  async function openTeamProof(id){
+    const t=teamTasks.find(x=>x.id===id);if(!t)return;
+    teamProofTaskId=id;teamProofData='';$('teamProofTaskName').textContent=t.title;$('teamProofFile').value='';$('teamProofNote').value=t.proof_note||'';$('teamProofPreview').style.display='none';$('teamProofSubmit').disabled=true;openModal('teamProofModal');
+    if(t.proof_path && currentRole()==='head'){
+      try{const s=await client().storage.from('nexa-files').createSignedUrl(t.proof_path,3600);if(s.data?.signedUrl){$('teamProofPreview').src=s.data.signedUrl;$('teamProofPreview').style.display='block';}}catch(e){}
+      $('teamProofSubmit').style.display='none';
+    } else {$('teamProofSubmit').style.display='block';}
+  }
+  $('teamProofFile')?.addEventListener('change',async e=>{
+    const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){toast('Choose an image proof.','error');e.target.value='';return;}if(file.size>5*1024*1024){toast('Keep the proof image below 5 MB.','error');e.target.value='';return;}
+    try{teamProofData=await compressProofImage(await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)}));$('teamProofPreview').src=teamProofData;$('teamProofPreview').style.display='block';$('teamProofSubmit').disabled=false;}catch(err){console.error(err);toast('Could not read that image.','error');}
+  });
+  async function submitTeamProof(){
+    const c=client(),u=user(),t=currentTeam(),task=teamTasks.find(x=>x.id===teamProofTaskId);if(!c||!u||!t||!task||!teamProofData)return;
+    const btn=$('teamProofSubmit');btn.disabled=true;btn.textContent='Saving…';
+    try{
+      const response=await fetch(teamProofData);const blob=await response.blob();const path=`${u.id}/team/${t.id}/${task.id}.jpg`;
+      const up=await c.storage.from('nexa-files').upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});if(up.error)throw up.error;
+      const {error}=await c.from('nexa_team_tasks').update({proof_path:path,proof_note:$('teamProofNote').value.trim()||null,status:'submitted',submitted_at:new Date().toISOString(),review_note:null,reviewed_at:null,updated_at:new Date().toISOString()}).eq('id',task.id);if(error)throw error;
+      closeModal('teamProofModal');toast('Proof submitted. It is now waiting for review.');await refreshCurrentTeam();
+    }catch(error){console.error(error);toast(typeof friendlyCloudError==='function'?friendlyCloudError(error):'Proof could not be submitted.','error');btn.disabled=false;btn.textContent='Submit proof';}
+  }
+  async function reviewTeamTask(id,status){
+    const c=client(),task=teamTasks.find(x=>x.id===id);if(!c||!task)return;
+    let note='';if(status==='changes_requested'){note=await nexaPrompt('What needs to change?',task.review_note||'',{title:'Request changes',kicker:'TEAM REVIEW'});if(note===null)return;note=note.trim();if(!note){toast('Add a short review note.','error');return;}}
+    const {error}=await c.from('nexa_team_tasks').update({status,review_note:note||null,reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',id);if(error){console.error(error);toast('Could not update the review.','error');return;}toast(status==='approved'?'Proof approved. Task completed.':'Changes requested. The member can resubmit proof.');await refreshCurrentTeam();
+  }
+  function openCreate(){openModal('teamCreateModal');setTimeout(()=>$('teamCreateName')?.focus(),30)}
+  function openJoin(){openModal('teamJoinModal');setTimeout(()=>$('teamJoinInput')?.focus(),30)}
+  $('teamCreateOpen')?.addEventListener('click',openCreate);$('teamCreateOpenAlt')?.addEventListener('click',openCreate);$('teamJoinOpen')?.addEventListener('click',openJoin);$('teamJoinOpenAlt')?.addEventListener('click',openJoin);
+  $('teamCreateClose')?.addEventListener('click',()=>closeModal('teamCreateModal'));$('teamJoinClose')?.addEventListener('click',()=>closeModal('teamJoinModal'));$('teamProofClose')?.addEventListener('click',()=>closeModal('teamProofModal'));
+  $('teamCreateForm')?.addEventListener('submit',createTeam);$('teamJoinForm')?.addEventListener('submit',e=>{e.preventDefault();joinTeam()});$('teamTaskForm')?.addEventListener('submit',createTeamTask);$('teamProofSubmit')?.addEventListener('click',submitTeamProof);
+  $('teamCopyCode')?.addEventListener('click',async()=>{const code=$('teamJoinCode')?.textContent?.trim();if(!code||code==='—')return;try{await navigator.clipboard.writeText(code);toast('Team code copied.')}catch{toast('Could not copy the code.','error')}});
+  $('teamCopyLink')?.addEventListener('click',async()=>{const link=$('teamJoinCode')?.dataset?.inviteLink;if(!link)return;try{await navigator.clipboard.writeText(link);toast('Invite link copied.')}catch{toast('Could not copy the invite link.','error')}});
+  ['teamCreateModal','teamJoinModal','teamProofModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
+  let inviteHandled=false;
+  function renderTeams(){
+    if(!user()){teamRows=[];teamMembers=[];teamTasks=[];renderTeamShell();return;}
+    loadTeams().then(()=>{
+      if(inviteHandled)return;
+      const code=new URLSearchParams(location.search).get('join');
+      if(code){inviteHandled=true;$('teamJoinInput').value=code.toUpperCase();openModal('teamJoinModal');}
+    });
+  }
+  window.renderTeams=renderTeams;
+  if(user())setTimeout(renderTeams,150);
 })();
