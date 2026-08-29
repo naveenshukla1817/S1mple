@@ -12181,6 +12181,7 @@ body.light .team-danger-zone strong{color:#9c5148}
   .team-workspace > .team-grid { margin-bottom: 12px; }
 }
 
+
 /* ============================================================
    TEAM P2
 ============================================================ */
@@ -12230,3 +12231,4 @@ body.light .team-proof-filter-btn{border-color:#d6c8b9;color:#786e63}
 body.light .team-proof-filter-btn.active{background:#fffaf2;color:#3f352b;border-color:#c8baaa}
 @media(max-width:900px){.team-attention-list{grid-template-columns:1fr 1fr}.team-secondary-grid{grid-template-columns:1fr}.team-proof-filter{justify-content:flex-start}.team-head-tools{margin-left:0}}
 @media(max-width:620px){.team-attention-list{grid-template-columns:1fr}.team-notifications-popover{right:-8px}.team-head-tools{width:auto}.team-icon-btn{width:40px;height:40px}}
+
