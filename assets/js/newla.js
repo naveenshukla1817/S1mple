@@ -5039,6 +5039,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   let teamProofTaskId='';
   let teamProofData='';
   let teamTaskView='all';
+  let activeJoinCode='';
 
   const TEAM_STATUSES={assigned:'Assigned',in_progress:'In progress',submitted:'Awaiting review',approved:'Approved',changes_requested:'Changes requested'};
   const TEAM_STATUS_CLASS={assigned:'assigned',in_progress:'progress',submitted:'submitted',approved:'approved',changes_requested:'changes'};
@@ -5060,7 +5061,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   async function loadTeams(){
     const c=client(),u=user();
     if(!c||!u){teamRows=[];teamMembers=[];teamTasks=[];renderTeamShell();return;}
-    const {data,error}=await c.from('nexa_teams').select('id,name,description,join_code,created_by,created_at').order('created_at',{ascending:false});
+    const {data,error}=await c.from('nexa_teams').select('id,name,description,created_by,created_at').order('created_at',{ascending:false});
     if(error){console.warn('Teams load failed',error);toast('Could not load your teams. Please try again.','error');return;}
     teamRows=data||[];
     if(activeTeamId && !teamRows.some(t=>t.id===activeTeamId)) activeTeamId='';
@@ -5068,8 +5069,9 @@ document.querySelectorAll(".modal").forEach(modal=>{
     await refreshCurrentTeam();
   }
   async function refreshCurrentTeam(){
-    const c=client(),t=currentTeam();
-    if(!c||!t){teamMembers=[];teamTasks=[];renderTeamShell();return;}
+    const c=client(),t=currentTeam(),u=user();
+    if(!c||!t){teamMembers=[];teamTasks=[];activeJoinCode='';renderTeamShell();return;}
+    activeJoinCode='';
     // Keep the team display name aligned with the canonical Newla profile name.
     // The RPC is security-definer so members can refresh only their own name safely.
     const displayName=String(window.NEXA_DISPLAY_NAME||'').trim();
@@ -5082,6 +5084,14 @@ document.querySelectorAll(".modal").forEach(modal=>{
     ]);
     if(m.error)console.warn('Team members load failed',m.error); else teamMembers=m.data||[];
     if(tt.error)console.warn('Team tasks load failed',tt.error); else teamTasks=tt.data||[];
+    const role=teamMembers.find(x=>x.user_id===u?.id)?.role||'member';
+    if(role==='head') {
+      try {
+        const {data:invite,error:inviteError}=await c.rpc('get_nexa_team_invite_info',{p_team_id:t.id});
+        if(inviteError) throw inviteError;
+        activeJoinCode=invite?.[0]?.join_code||'';
+      } catch(e) { console.warn('Team invite info load failed',e); }
+    }
     renderTeamShell();
   }
   function setMembersPopover(open){
@@ -5116,8 +5126,11 @@ document.querySelectorAll(".modal").forEach(modal=>{
     $('teamRolePill').textContent=role==='head'?'Head':'Member';
     const leaveBtn=$('teamLeaveOpen');
     if(leaveBtn){ leaveBtn.style.display='inline-flex'; leaveBtn.title=role==='head'?'Team head cannot leave yet':'Leave team'; leaveBtn.setAttribute('aria-label', role==='head'?'Team head cannot leave':'Leave team'); }
-    $('teamJoinCode').textContent=t.join_code;
-    $('teamJoinCode').dataset.inviteLink=teamInviteLink(t.join_code);
+    const code=activeJoinCode||'';
+    const codeWrap=$('teamJoinCode')?.closest('.team-code-wrap');
+    if(codeWrap) codeWrap.style.display=role==='head'&&code?'grid':'none';
+    if($('teamJoinCode')) $('teamJoinCode').textContent=code||'—';
+    if($('teamJoinCode')) $('teamJoinCode').dataset.inviteLink=code?teamInviteLink(code):'';
     $('teamMemberCount').textContent=String(teamMembers.length);
     renderTeamMembersPopover();
     const counts=teamTasks.reduce((a,x)=>{a[x.status]=(a[x.status]||0)+1;return a;},{assigned:0,in_progress:0,submitted:0,approved:0});
@@ -5322,7 +5335,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   $('teamLeaveConfirm')?.addEventListener('click',leaveTeam);
   $('teamCreateClose')?.addEventListener('click',()=>closeModal('teamCreateModal'));$('teamJoinClose')?.addEventListener('click',()=>closeModal('teamJoinModal'));$('teamProofClose')?.addEventListener('click',()=>closeModal('teamProofModal'));
   $('teamCreateForm')?.addEventListener('submit',createTeam);$('teamJoinForm')?.addEventListener('submit',e=>{e.preventDefault();joinTeam()});$('teamTaskForm')?.addEventListener('submit',createTeamTask);$('teamProofSubmit')?.addEventListener('click',submitTeamProof);$('teamEditForm')?.addEventListener('submit',saveTeamEdit);$('teamEditClose')?.addEventListener('click',()=>closeModal('teamEditModal'));$('teamViewMyWork')?.addEventListener('click',()=>{teamTaskView='mine';renderTeamTasks()});$('teamViewAll')?.addEventListener('click',()=>{teamTaskView='all';renderTeamTasks()});
-  $('teamCopyCode')?.addEventListener('click',async()=>{const code=$('teamJoinCode')?.textContent?.trim();if(!code||code==='—')return;try{await navigator.clipboard.writeText(code);toast('Team code copied.')}catch{toast('Could not copy the code.','error')}});
+  $('teamCopyCode')?.addEventListener('click',async()=>{const code=activeJoinCode||'';if(!code)return;try{await navigator.clipboard.writeText(code);toast('Team code copied.')}catch{toast('Could not copy the code.','error')}});
   $('teamCopyLink')?.addEventListener('click',async()=>{const link=$('teamJoinCode')?.dataset?.inviteLink;if(!link)return;try{await navigator.clipboard.writeText(link);toast('Invite link copied.')}catch{toast('Could not copy the invite link.','error')}});
   ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal','teamLeaveModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
   let inviteHandled=false;
