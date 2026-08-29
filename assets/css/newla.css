@@ -12006,7 +12006,7 @@ body.light #view-about .about-linkedin { color:#574c40; background:#fbf5e9; bord
 .team-role-pill{padding:5px 9px;border:1px solid #544b3e;border-radius:999px;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#c7b99f}
 .team-copy-btn{border:1px solid #3d372f;background:transparent;color:#d7ccbb;border-radius:8px;padding:6px 9px;font-size:10px}
 .team-copy-btn:hover{border-color:#68885d;color:#b6d77d;transform:scale(1.03)}
-.team-grid{display:grid;grid-template-columns:.7fr 1.3fr;gap:14px}
+.team-grid{display:grid;grid-template-columns:1fr;gap:14px}
 .team-panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
 .team-count{min-width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:#2d2922;border:1px solid #494136;color:#d5c9b6;font-size:11px}
 .team-members-list{display:grid;gap:9px}
@@ -12130,3 +12130,17 @@ body.light .team-stat span,body.light .team-proof-wall-meta small{color:#786e63}
 body.light .team-stat strong,body.light .team-proof-wall-meta strong{color:#3f352b}
 body.light .team-view-switch{background:#eee5d7;border-color:#d8cbbb}
 body.light .team-view-btn.active{background:#fffaf2;color:#3f352b}
+
+/* Team P1 final polish: full-width head work panel + compact leave control */
+.team-hero-actions{align-items:center}
+.team-leave-trigger{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:1px solid #4b4039;border-radius:11px;background:#201d1a;color:#d78d84;cursor:pointer;transition:border-color .18s ease,color .18s ease,background .18s ease,transform .18s ease}
+.team-leave-trigger:hover{color:#efaaa1;border-color:#79524c;background:#26211f;transform:scale(1.035)}
+.team-leave-trigger svg{width:18px;height:18px}
+.team-leave-trigger[disabled]{opacity:.65;cursor:default;transform:none}
+.team-danger-zone{margin:10px 0 0;padding:11px 12px;border:1px solid #613f3a;border-radius:10px;background:#241b1a;color:#dba098;font-size:10px;line-height:1.55}
+.team-danger-zone strong{display:block;margin-bottom:4px;color:#efaaa1;text-transform:uppercase;letter-spacing:.12em;font-size:9px}
+body.light .team-leave-trigger{background:#f4ede3;border-color:#c6b6a7;color:#a34d45}
+body.light .team-leave-trigger:hover{background:#eee4da;border-color:#a87168;color:#8f3f37}
+body.light .team-danger-zone{background:#f8ece8;border-color:#d8aaa1;color:#80504a}
+body.light .team-danger-zone strong{color:#9c5148}
+@media(max-width:760px){.team-leave-trigger{width:42px;height:42px}}
