@@ -5114,6 +5114,8 @@ document.querySelectorAll(".modal").forEach(modal=>{
     if(sw){sw.innerHTML=teamRows.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');sw.value=t.id;sw.onchange=async()=>{activeTeamId=sw.value;localStorage.setItem('nexa_active_team_id',activeTeamId);await refreshCurrentTeam();};}
     const role=currentRole();
     $('teamRolePill').textContent=role==='head'?'Head':'Member';
+    const leaveBtn=$('teamLeaveOpen');
+    if(leaveBtn){ leaveBtn.style.display='inline-flex'; leaveBtn.title=role==='head'?'Team head cannot leave yet':'Leave team'; leaveBtn.setAttribute('aria-label', role==='head'?'Team head cannot leave':'Leave team'); }
     $('teamJoinCode').textContent=t.join_code;
     $('teamJoinCode').dataset.inviteLink=teamInviteLink(t.join_code);
     $('teamMemberCount').textContent=String(teamMembers.length);
@@ -5183,12 +5185,28 @@ document.querySelectorAll(".modal").forEach(modal=>{
       <div class="team-task-actions">${startButton}${proofButton}${reviewButtons}${proofPreview}${editButton}</div>
     </article>`;
   }
+  function openLeaveTeamModal(){
+    const role=currentRole();
+    const msg=$('teamLeaveMessage');
+    const danger=$('teamLeaveDangerText');
+    const confirm=$('teamLeaveConfirm');
+    if(role==='head'){
+      if(msg) msg.textContent='You are the team head. Transfer headship before leaving.';
+      if(danger) danger.textContent='A head cannot leave this team yet because the team needs a head.';
+      if(confirm) confirm.style.display='none';
+    }else{
+      if(msg) msg.textContent='You are about to leave this team. Your membership will be removed.';
+      if(danger) danger.textContent='You will lose access to this team and its shared work immediately.';
+      if(confirm) confirm.style.display='inline-flex';
+    }
+    openModal('teamLeaveModal');
+  }
   async function leaveTeam(){
     const c=client(),u=user(),t=currentTeam();if(!c||!u||!t)return;
-    if(currentRole()==='head'){toast('You are the team head. Transfer headship before leaving.','error');return;}
-    if(typeof nexaConfirm==='function' && !(await nexaConfirm(`Leave “${t.name}”?`,{title:'Leave team',kicker:'TEAM',danger:true})))return;
+    if(currentRole()==='head'){closeModal('teamLeaveModal');return;}
     const {error}=await c.from('nexa_team_members').delete().eq('team_id',t.id).eq('user_id',u.id);
     if(error){console.error(error);toast(error.message||'Could not leave the team.','error');return;}
+    closeModal('teamLeaveModal');
     const remaining=teamRows.filter(x=>x.id!==t.id);teamRows=remaining;activeTeamId=remaining[0]?.id||'';if(activeTeamId)localStorage.setItem('nexa_active_team_id',activeTeamId);else localStorage.removeItem('nexa_active_team_id');setMembersPopover(false);toast('You left the team.');await loadTeams();
   }
   async function removeTeamMember(memberId){
@@ -5298,11 +5316,15 @@ document.querySelectorAll(".modal").forEach(modal=>{
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape')setMembersPopover(false)});
   $('teamCreateOpen')?.addEventListener('click',openCreate);$('teamCreateOpenAlt')?.addEventListener('click',openCreate);$('teamJoinOpen')?.addEventListener('click',openJoin);$('teamJoinOpenAlt')?.addEventListener('click',openJoin);
+  $('teamLeaveOpen')?.addEventListener('click',openLeaveTeamModal);
+  $('teamLeaveClose')?.addEventListener('click',()=>closeModal('teamLeaveModal'));
+  $('teamLeaveCancel')?.addEventListener('click',()=>closeModal('teamLeaveModal'));
+  $('teamLeaveConfirm')?.addEventListener('click',leaveTeam);
   $('teamCreateClose')?.addEventListener('click',()=>closeModal('teamCreateModal'));$('teamJoinClose')?.addEventListener('click',()=>closeModal('teamJoinModal'));$('teamProofClose')?.addEventListener('click',()=>closeModal('teamProofModal'));
   $('teamCreateForm')?.addEventListener('submit',createTeam);$('teamJoinForm')?.addEventListener('submit',e=>{e.preventDefault();joinTeam()});$('teamTaskForm')?.addEventListener('submit',createTeamTask);$('teamProofSubmit')?.addEventListener('click',submitTeamProof);$('teamEditForm')?.addEventListener('submit',saveTeamEdit);$('teamEditClose')?.addEventListener('click',()=>closeModal('teamEditModal'));$('teamViewMyWork')?.addEventListener('click',()=>{teamTaskView='mine';renderTeamTasks()});$('teamViewAll')?.addEventListener('click',()=>{teamTaskView='all';renderTeamTasks()});
   $('teamCopyCode')?.addEventListener('click',async()=>{const code=$('teamJoinCode')?.textContent?.trim();if(!code||code==='—')return;try{await navigator.clipboard.writeText(code);toast('Team code copied.')}catch{toast('Could not copy the code.','error')}});
   $('teamCopyLink')?.addEventListener('click',async()=>{const link=$('teamJoinCode')?.dataset?.inviteLink;if(!link)return;try{await navigator.clipboard.writeText(link);toast('Invite link copied.')}catch{toast('Could not copy the invite link.','error')}});
-  ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
+  ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal','teamLeaveModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
   let inviteHandled=false;
   function renderTeams(){
     if(!user()){teamRows=[];teamMembers=[];teamTasks=[];renderTeamShell();return;}
