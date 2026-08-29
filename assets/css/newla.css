@@ -12053,20 +12053,24 @@ body.light .team-intro-card,body.light .team-choice-card,body.light .team-panel,
   box-shadow: none;
 }
 
-/* Team creation/join actions use a restrained red accent. */
+/* Team actions: quiet by default; color-only hover. */
 #teamCreateOpen,
 #teamJoinOpen,
 #teamCreateOpenAlt,
 #teamJoinOpenAlt {
-  color: #df9289;
-  border-color: #674640;
+  color: #d7ccbb;
+  border-color: #3d372f;
+  transition: color .18s ease;
 }
 #teamCreateOpen:hover,
 #teamJoinOpen:hover,
 #teamCreateOpenAlt:hover,
 #teamJoinOpenAlt:hover {
-  color: #efaaa1;
-  border-color: #83524b;
+  color: #9fdd8d;
+  border-color: #3d372f;
+  background: transparent;
+  transform: none;
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -12079,7 +12083,7 @@ body.light .team-intro-card,body.light .team-choice-card,body.light .team-panel,
 .team-members-popover-wrap{position:relative;display:inline-flex}
 .team-members-trigger{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:68px;height:44px;padding:0 12px;border:1px solid #4a4338;border-radius:11px;background:#201e1a;color:#bdb3a5;font-size:12px;cursor:pointer;transition:border-color .18s ease,color .18s ease,background .18s ease}
 .team-members-trigger:hover,.team-members-trigger[aria-expanded="true"]{border-color:#667a5c;color:#b6d77d;background:#25221d}
-.team-members-icon{font-size:19px;line-height:1}
+.team-members-icon{display:inline-flex;align-items:center;justify-content:center;line-height:1}.team-members-icon svg{width:18px;height:18px;stroke-width:1.8}
 .team-members-popover{position:absolute;top:calc(100% + 10px);right:0;width:min(320px,calc(100vw - 30px));padding:16px;border:1px solid #3e3830;border-radius:14px;background:#201e1a;box-shadow:0 18px 48px rgba(0,0,0,.35);opacity:0;visibility:hidden;transform:translateY(-5px) scale(.985);transform-origin:top right;transition:opacity .16s ease,transform .16s ease,visibility .16s ease;z-index:40}
 .team-members-popover.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 .team-members-popover-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid #38332c;margin-bottom:12px}
@@ -12144,3 +12148,21 @@ body.light .team-leave-trigger:hover{background:#eee4da;border-color:#a87168;col
 body.light .team-danger-zone{background:#f8ece8;border-color:#d8aaa1;color:#80504a}
 body.light .team-danger-zone strong{color:#9c5148}
 @media(max-width:760px){.team-leave-trigger{width:42px;height:42px}}
+
+
+/* Final Team controls + card spacing polish. */
+.team-workspace{gap:18px}
+.team-overview{gap:12px}
+.team-leave-trigger{
+  color:#bdb3a5;
+  border-color:#3d372f;
+  background:transparent;
+  transition:color .18s ease;
+}
+.team-leave-trigger:hover{
+  color:#df9289;
+  border-color:#3d372f;
+  background:transparent;
+  transform:none;
+}
+.team-leave-trigger svg{transition:none}
