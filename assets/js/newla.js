@@ -731,10 +731,55 @@ document.querySelectorAll(".task-filter").forEach(button => {
 
 let archiveTaskId = null;
 
+const ARCHIVE_RETENTION_MS = 72 * 60 * 60 * 1000;
+
+function archiveExpiresAt(task){
+  if(!task?.deletedAt) return null;
+  const deleted=Date.parse(task.deletedAt);
+  return Number.isFinite(deleted) ? deleted + ARCHIVE_RETENTION_MS : null;
+}
+
+function isArchiveExpired(task, now=Date.now()){
+  const expiresAt=archiveExpiresAt(task);
+  return Boolean(expiresAt && expiresAt <= now);
+}
+
+function pruneExpiredArchivedTasks({persist=true}={}){
+  const before=tasks.length;
+  tasks=tasks.filter(task=>!(task?.deletedAt && isArchiveExpired(task)));
+  const removed=before-tasks.length;
+  if(removed && persist) save(KEYS.TASKS,tasks);
+  return removed;
+}
+
 function archivedTasks(){
+  pruneExpiredArchivedTasks();
   return tasks.filter(t=>t && t.deletedAt).sort((a,b)=>{
     return new Date(b.deletedAt).getTime()-new Date(a.deletedAt).getTime();
   });
+}
+
+async function purgeExpiredArchivedTasksCloud(){
+  if(!client||!window.NEXA_USER) return;
+  const uid=window.NEXA_USER.id;
+  const cutoff=new Date(Date.now()-ARCHIVE_RETENTION_MS).toISOString();
+  const {data:expired,error:readError}=await client.from('tasks')
+    .select('id,proof_path')
+    .eq('user_id',uid)
+    .not('deleted_at','is',null)
+    .lte('deleted_at',cutoff);
+  if(readError) throw readError;
+  if(!expired?.length) return;
+  const ids=expired.map(row=>row.id).filter(Boolean);
+  const paths=expired.map(row=>row.proof_path).filter(Boolean);
+  if(paths.length){
+    const {error:storageError}=await client.storage.from('nexa-files').remove(paths);
+    if(storageError) console.warn('Expired archive proof cleanup skipped',storageError);
+    const {error:proofError}=await client.from('proofs').delete().eq('user_id',uid).in('file_path',paths);
+    if(proofError) console.warn('Expired archive proof record cleanup skipped',proofError);
+  }
+  const {error:taskError}=await client.from('tasks').delete().eq('user_id',uid).in('id',ids);
+  if(taskError) throw taskError;
 }
 
 function openDeleteReasonModal(task){
@@ -779,13 +824,16 @@ function renderArchivedWork(){
     list.innerHTML=archived.map(task=>{
       const reason=task.deleteReason||"Archived";
       const date=task.deletedAt?new Date(task.deletedAt).toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"}):"";
+      const expiresAt=archiveExpiresAt(task);
+      const remaining=expiresAt?Math.max(0,expiresAt-Date.now()):0;
+      const remainingHours=Math.max(1,Math.ceil(remaining/(60*60*1000)));
       return `<article class="archive-item">
         <div class="archive-item-head">
           <div><h3>${escapeHtml(task.title||"Untitled task")}</h3><div class="archive-item-reason">${escapeHtml(reason)}</div></div>
-          <span class="archive-item-date">${escapeHtml(date)}</span>
+          <div class="archive-item-date-wrap"><span class="archive-item-date">${escapeHtml(date)}</span><span class="archive-expiry">Auto-clears in ${remainingHours}h</span></div>
         </div>
         ${task.deleteReasonNote?`<div class="archive-item-note">${escapeHtml(task.deleteReasonNote)}</div>`:""}
-        <div class="archive-item-actions"><button class="task-action" data-restore-task="${task.id}">Restore</button></div>
+        <div class="archive-item-actions"><button class="task-action archive-restore-btn" data-restore-task="${task.id}">Restore</button></div>
       </article>`;
     }).join("");
     list.querySelectorAll("[data-restore-task]").forEach(btn=>{
@@ -839,7 +887,7 @@ async function confirmArchiveTask(){
   closeDeleteReasonModal();
   renderAll();
   renderArchivedWork();
-  toast("Task archived. You can restore it anytime.");
+  toast("Task archived. Kept here for 72 hours.");
 }
 
 $("archiveTop")?.addEventListener("click",openArchiveModal);
@@ -3410,7 +3458,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const {error}=await client.from('settings').upsert({user_id:window.NEXA_USER.id,theme:document.body.classList.contains('light')?'light':'dark',preferences,updated_at:new Date().toISOString()},{onConflict:'user_id'});
     if(error)throw error;
   }
-  async function hydrate(){if(!client||!window.NEXA_USER)return;const uid=window.NEXA_USER.id;const [t,n,b,f,s]=await Promise.all([client.from('tasks').select('*').eq('user_id',uid).order('created_at',{ascending:false}),client.from('notes').select('*').eq('user_id',uid).order('updated_at',{ascending:false}),client.from('brainstorms').select('*').eq('user_id',uid).order('updated_at',{ascending:false}).limit(1).maybeSingle(),client.from('focus_sessions').select('id,duration_seconds,started_at,completed_at').eq('user_id',uid).eq('session_type','focus').order('started_at',{ascending:true}),client.from('settings').select('theme,preferences').eq('user_id',uid).maybeSingle()]);for(const r of [t,n,b,f,s])if(r.error)throw r.error;
+  async function hydrate(){if(!client||!window.NEXA_USER)return;const uid=window.NEXA_USER.id;try{await purgeExpiredArchivedTasksCloud();}catch(error){console.warn('Expired archive cleanup skipped',error)}const [t,n,b,f,s]=await Promise.all([client.from('tasks').select('*').eq('user_id',uid).order('created_at',{ascending:false}),client.from('notes').select('*').eq('user_id',uid).order('updated_at',{ascending:false}),client.from('brainstorms').select('*').eq('user_id',uid).order('updated_at',{ascending:false}).limit(1).maybeSingle(),client.from('focus_sessions').select('id,duration_seconds,started_at,completed_at').eq('user_id',uid).eq('session_type','focus').order('started_at',{ascending:true}),client.from('settings').select('theme,preferences').eq('user_id',uid).maybeSingle()]);for(const r of [t,n,b,f,s])if(r.error)throw r.error;
     const hydratedTasks=(t.data||[]).map(mapTaskFromDb);
     for(const task of hydratedTasks){if(task.proofPath){try{const signed=await client.storage.from('nexa-files').createSignedUrl(task.proofPath,3600);if(signed.data?.signedUrl)task.proofDataUrl=signed.data.signedUrl}catch(e){}}}
     saveJson('naveen_spa_tasks_v3',hydratedTasks);
