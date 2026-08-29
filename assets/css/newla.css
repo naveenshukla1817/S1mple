@@ -12082,7 +12082,7 @@ body.light .team-intro-card,body.light .team-choice-card,body.light .team-panel,
 .team-hero-actions-popover{position:relative;align-items:flex-start}
 .team-members-popover-wrap{position:relative;display:inline-flex}
 .team-members-trigger{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:68px;height:44px;padding:0 12px;border:1px solid #4a4338;border-radius:11px;background:#201e1a;color:#bdb3a5;font-size:12px;cursor:pointer;transition:border-color .18s ease,color .18s ease,background .18s ease}
-.team-members-trigger:hover,.team-members-trigger[aria-expanded="true"]{border-color:#667a5c;color:#b6d77d;background:#25221d}
+.team-members-trigger:hover,.team-members-trigger[aria-expanded="true"]{border-color:#40382e;color:#4da3ff;background:#1d1a16}
 .team-members-icon{display:inline-flex;align-items:center;justify-content:center;line-height:1}.team-members-icon svg{width:18px;height:18px;stroke-width:1.8}
 .team-members-popover{position:absolute;top:calc(100% + 10px);right:0;width:min(320px,calc(100vw - 30px));padding:16px;border:1px solid #3e3830;border-radius:14px;background:#201e1a;box-shadow:0 18px 48px rgba(0,0,0,.35);opacity:0;visibility:hidden;transform:translateY(-5px) scale(.985);transform-origin:top right;transition:opacity .16s ease,transform .16s ease,visibility .16s ease;z-index:40}
 .team-members-popover.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
