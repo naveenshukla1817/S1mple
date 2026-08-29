@@ -12305,3 +12305,9 @@ body.light .team-session-item strong{color:#3f352b}
   .team-invite-meta{text-align:left}
   .team-session-item{align-items:flex-start;flex-direction:column}
 }
+
+.team-team-danger-zone{margin-top:18px;border-top:1px solid rgba(190,95,82,.28);padding-top:18px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.team-team-danger-zone>div{display:grid;gap:4px}.team-team-danger-zone strong{color:#d18b80;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.team-team-danger-zone span{color:#8f867a;font-size:12px;line-height:1.5}
+.team-danger-action{color:#d4877c!important;border-color:rgba(184,88,77,.45)!important;background:transparent!important}
+.team-danger-action:hover{color:#ff8f80!important;border-color:rgba(221,108,94,.7)!important}
+@media(max-width:620px){.team-team-danger-zone{align-items:flex-start;flex-direction:column}.team-danger-action{width:100%}}
