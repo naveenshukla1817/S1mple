@@ -5469,6 +5469,24 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const idx=teamRows.findIndex(x=>x.id===t.id);if(idx>=0)teamRows[idx]={...teamRows[idx],name:data?.name||name,description:data?.description||description||null};
     closeModal('teamSettingsModal');toast('Team settings saved.');await loadTeams();
   }
+  async function deleteCurrentTeamPermanently(){
+    const c=client(),t=currentTeam(),u=user();
+    if(!c||!t||!u||currentRole()!=='head')return;
+    if(typeof nexaConfirm==='function') {
+      const ok=await nexaConfirm(`This permanently deletes <strong>${esc(t.name||'this team')}</strong>, its members, tasks, activity, notifications and access history. This cannot be undone.`,{title:'Delete team permanently',kicker:'DANGER ZONE',danger:true,confirmText:'Delete permanently',cancelText:'Keep team'});
+      if(!ok)return;
+    }
+    const proofPaths=[...new Set(teamTasks.map(x=>x.proof_path).filter(Boolean))];
+    const {error}=await c.rpc('delete_nexa_team_permanently',{p_team_id:t.id});
+    if(error){console.error('Permanent team deletion failed',error);toast(error.message||'Could not delete the team.','error');return;}
+    if(proofPaths.length){try{await c.storage.from('nexa-files').remove(proofPaths);}catch(e){console.warn('Team proof cleanup skipped',e);}}
+    teamRows=teamRows.filter(x=>x.id!==t.id);
+    activeTeamId=teamRows[0]?.id||'';
+    if(activeTeamId)localStorage.setItem('nexa_active_team_id',activeTeamId); else localStorage.removeItem('nexa_active_team_id');
+    closeModal('teamSettingsModal');
+    toast('Team permanently deleted.','success');
+    if(teamRows.length) await loadTeams(); else renderTeamShell();
+  }
   async function regenerateTeamCode(){
     const c=client(),t=currentTeam();if(!c||!t||currentRole()!=='head')return;
     if(typeof nexaConfirm==='function'&&!(await nexaConfirm('The current invite code will stop working immediately.',{title:'Regenerate invite code',kicker:'TEAM',danger:true})))return;
@@ -5492,6 +5510,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   $('teamSettingsOpen')?.addEventListener('click',openTeamSettings);
   $('teamSettingsClose')?.addEventListener('click',()=>closeModal('teamSettingsModal'));
   $('teamSettingsForm')?.addEventListener('submit',saveTeamSettings);
+  $('teamDeletePermanent')?.addEventListener('click',deleteCurrentTeamPermanently);
   $('teamRegenerateCode')?.addEventListener('click',regenerateTeamCode);
   document.querySelectorAll('[data-proof-filter]').forEach(b=>b.addEventListener('click',()=>{teamProofFilter=b.dataset.proofFilter;document.querySelectorAll('[data-proof-filter]').forEach(x=>x.classList.toggle('active',x===b));renderProofWall(currentRole())}));
   document.addEventListener('click',e=>{
