@@ -12166,3 +12166,17 @@ body.light .team-danger-zone strong{color:#9c5148}
   transform:none;
 }
 .team-leave-trigger svg{transition:none}
+
+/* ---------- TEAM CARD BREATHING ROOM ---------- */
+/* Keep each major Team section visually separated instead of reading as one stacked surface. */
+.team-workspace > .team-toolbar { margin-bottom: 14px; }
+.team-workspace > .team-overview { margin-bottom: 14px; }
+.team-workspace > .team-grid { margin-bottom: 14px; }
+.team-workspace > .team-overview { gap: 12px; }
+.team-workspace > .team-grid { gap: 14px; }
+
+@media (max-width: 760px) {
+  .team-workspace > .team-toolbar,
+  .team-workspace > .team-overview,
+  .team-workspace > .team-grid { margin-bottom: 12px; }
+}
