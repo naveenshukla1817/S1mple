@@ -977,14 +977,18 @@ async function taskAction(action,id) {
   }
 
   if (action==="delete") {
-    // Completed personal tasks are permanent/completed history items: remove directly.
-    // Open/pending tasks keep the reason-required soft-delete flow.
     if (task.status === "completed") {
+      try {
+        if (task.proofDataUrl && typeof window.NEXA_DELETE_PROOF_CLOUD === "function") {
+          await window.NEXA_DELETE_PROOF_CLOUD(task);
+        }
+      } catch (e) {
+        console.warn("Completed task proof cleanup skipped", e);
+      }
       tasks = tasks.filter(t => t.id !== id);
       save(KEYS.TASKS, tasks);
       renderAll();
-      renderDashboard();
-      renderV2Dashboard();
+      try { renderArchivedWork(); } catch {}
       toast("Completed task deleted.");
       return;
     }
