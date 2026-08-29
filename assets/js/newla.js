@@ -5040,6 +5040,9 @@ document.querySelectorAll(".modal").forEach(modal=>{
   let teamProofData='';
   let teamTaskView='all';
   let activeJoinCode='';
+  let teamProofFilter='all';
+  let teamActivity=[];
+  let teamNotifications=[];
 
   const TEAM_STATUSES={assigned:'Assigned',in_progress:'In progress',submitted:'Awaiting review',approved:'Approved',changes_requested:'Changes requested'};
   const TEAM_STATUS_CLASS={assigned:'assigned',in_progress:'progress',submitted:'submitted',approved:'approved',changes_requested:'changes'};
@@ -5078,12 +5081,16 @@ document.querySelectorAll(".modal").forEach(modal=>{
     if(displayName){
       try{ await c.rpc('sync_nexa_team_member_display_name',{p_display_name:displayName}); }catch(e){ console.warn('Team member name sync skipped',e); }
     }
-    const [m,tt]=await Promise.all([
+    const [m,tt,aa,nn]=await Promise.all([
       c.from('nexa_team_members').select('id,team_id,user_id,display_name,role,joined_at').eq('team_id',t.id).order('joined_at',{ascending:true}),
-      c.from('nexa_team_tasks').select('id,team_id,created_by,assigned_to,title,description,priority,due_date,proof_required,status,proof_path,proof_note,review_note,submitted_at,reviewed_at,created_at,updated_at').eq('team_id',t.id).order('created_at',{ascending:false})
+      c.from('nexa_team_tasks').select('id,team_id,created_by,assigned_to,title,description,priority,due_date,proof_required,status,proof_path,proof_note,review_note,submitted_at,reviewed_at,created_at,updated_at').eq('team_id',t.id).order('created_at',{ascending:false}),
+      c.from('nexa_team_activity').select('id,team_id,actor_id,event_type,target_id,message,created_at').eq('team_id',t.id).order('created_at',{ascending:false}).limit(12),
+      c.from('nexa_team_notifications').select('id,team_id,activity_id,notification_type,title,body,read_at,created_at').eq('user_id',u.id).eq('team_id',t.id).order('created_at',{ascending:false}).limit(20)
     ]);
     if(m.error)console.warn('Team members load failed',m.error); else teamMembers=m.data||[];
     if(tt.error)console.warn('Team tasks load failed',tt.error); else teamTasks=tt.data||[];
+    if(aa.error)console.warn('Team activity load failed',aa.error); else teamActivity=aa.data||[];
+    if(nn.error)console.warn('Team notifications load failed',nn.error); else teamNotifications=nn.data||[];
     const role=teamMembers.find(x=>x.user_id===u?.id)?.role||'member';
     if(role==='head') {
       try {
@@ -5132,7 +5139,16 @@ document.querySelectorAll(".modal").forEach(modal=>{
     if($('teamJoinCode')) $('teamJoinCode').textContent=code||'—';
     if($('teamJoinCode')) $('teamJoinCode').dataset.inviteLink=code?teamInviteLink(code):'';
     $('teamMemberCount').textContent=String(teamMembers.length);
+    $('teamSummaryName').textContent=t.name||'Team';
+    $('teamSummaryDescription').textContent=t.description||'No description yet.';
+    const unread=teamNotifications.filter(n=>!n.read_at).length;
+    const notifDot=$('teamNotificationCount'); if(notifDot){notifDot.textContent=String(unread);notifDot.hidden=!unread;}
+    $('teamSettingsOpen').style.display=role==='head'?'inline-flex':'none';
+    $('teamRegenerateCode').style.display=role==='head'?'inline-flex':'none';
     renderTeamMembersPopover();
+    renderTeamActivity();
+    renderTeamAttention();
+    renderTeamNotifications();
     const counts=teamTasks.reduce((a,x)=>{a[x.status]=(a[x.status]||0)+1;return a;},{assigned:0,in_progress:0,submitted:0,approved:0});
     $('teamStatMembers').textContent=String(teamMembers.length);
     $('teamStatAssigned').textContent=String(counts.assigned||0);
@@ -5166,10 +5182,13 @@ document.querySelectorAll(".modal").forEach(modal=>{
   async function renderProofWall(role){
     const panel=$('teamProofWallPanel'),list=$('teamProofWallList');if(!panel||!list)return;
     if(role!=='head'){panel.style.display='none';return;}
-    const submitted=teamTasks.filter(t=>t.status==='submitted'&&t.proof_path);
-    panel.style.display=submitted.length?'block':'none';$('teamProofWallCount').textContent=String(submitted.length);
-    if(!submitted.length){list.innerHTML='';return;}
-    list.innerHTML=submitted.map(t=>`<article class="team-proof-wall-card"><div class="team-proof-wall-meta"><strong>${esc(assigneeName(t.assigned_to))}</strong><span>${esc(t.title)}</span><small>${t.submitted_at?new Date(t.submitted_at).toLocaleString():''}</small></div><button class="team-proof-wall-image" type="button" data-wall-proof="${esc(t.id)}"><img alt="Proof for ${esc(t.title)}" data-wall-src="${esc(t.id)}"></button><div class="team-task-actions"><button class="team-task-btn approve" data-wall-approve="${esc(t.id)}">Approve</button><button class="team-task-btn changes" data-wall-changes="${esc(t.id)}">Request changes</button></div></article>`).join('');
+    const source=teamProofFilter==='all'?teamTasks:teamTasks.filter(t=>t.status===teamProofFilter);
+    const items=source.filter(t=>t.proof_path && ['submitted','approved','changes_requested'].includes(t.status));
+    panel.style.display='block'; $('teamProofWallCount').textContent=String(items.length);
+    list.innerHTML=items.length?items.map(t=>{
+      const status=TEAM_STATUSES[t.status]||t.status;
+      return `<article class="team-proof-wall-card"><div class="team-proof-wall-meta"><strong>${esc(assigneeName(t.assigned_to))}</strong><span>${esc(t.title)}</span><small>${t.submitted_at?new Date(t.submitted_at).toLocaleString():''} · ${esc(status)}</small></div><button class="team-proof-wall-image" type="button" data-wall-proof="${esc(t.id)}"><img alt="Proof for ${esc(t.title)}" data-wall-src="${esc(t.id)}"></button><div class="team-task-actions">${t.status==='submitted'?`<button class="team-task-btn approve" data-wall-approve="${esc(t.id)}">Approve</button><button class="team-task-btn changes" data-wall-changes="${esc(t.id)}">Request changes</button>`:''}</div></article>`;
+    }).join(''):`<div class="team-empty-mini">No proof matches this filter yet.</div>`;
     list.querySelectorAll('[data-wall-proof]').forEach(b=>b.onclick=()=>openTeamProof(b.dataset.wallProof));
     list.querySelectorAll('[data-wall-approve]').forEach(b=>b.onclick=()=>reviewTeamTask(b.dataset.wallApprove,'approved'));
     list.querySelectorAll('[data-wall-changes]').forEach(b=>b.onclick=()=>reviewTeamTask(b.dataset.wallChanges,'changes_requested'));
@@ -5177,6 +5196,23 @@ document.querySelectorAll(".modal").forEach(modal=>{
       const t=teamTasks.find(x=>x.id===img.dataset.wallSrc); if(!t?.proof_path) continue;
       try{const r=await client().storage.from('nexa-files').createSignedUrl(t.proof_path,3600);if(r.data?.signedUrl)img.src=r.data.signedUrl;}catch(e){console.warn('Proof wall preview failed',e)}
     }
+  }
+  function renderTeamAttention(){
+    const panel=$('teamAttentionPanel'),list=$('teamAttentionList');if(!panel||!list)return;
+    const role=currentRole(); if(role!=='head'){panel.style.display='none';return;}
+    const items=[...teamTasks.filter(t=>t.status==='submitted').map(t=>({label:'Proof awaiting review',task:t})),...teamTasks.filter(t=>t.status==='assigned'&&t.assigned_to).map(t=>({label:'Assigned work not started',task:t})),...teamTasks.filter(t=>t.status==='in_progress'&&t.due_date&&new Date(t.due_date+'T23:59:59')<new Date()).map(t=>({label:'Overdue work',task:t}))].slice(0,6);
+    panel.style.display='block';$('teamAttentionCount').textContent=String(items.length);
+    list.innerHTML=items.length?items.map(x=>`<button class="team-attention-item" type="button" data-attention-task="${esc(x.task.id)}"><strong>${esc(x.label)}</strong><span>${esc(x.task.title)}</span></button>`).join(''):`<div class="team-empty-mini">Nothing needs your attention.</div>`;
+    list.querySelectorAll('[data-attention-task]').forEach(b=>b.onclick=()=>{const t=teamTasks.find(x=>x.id===b.dataset.attentionTask);if(t?.status==='submitted')openTeamProof(t.id);});
+  }
+  function renderTeamActivity(){
+    const list=$('teamActivityList');if(!list)return;
+    list.innerHTML=teamActivity.length?teamActivity.slice(0,10).map(a=>`<div class="team-activity-item"><span class="team-activity-dot"></span><div><strong>${esc(a.message)}</strong><small>${new Date(a.created_at).toLocaleString()}</small></div></div>`).join(''):`<div class="team-empty-mini">Your team activity will appear here.</div>`;
+  }
+  function renderTeamNotifications(){
+    const list=$('teamNotificationsList');if(!list)return;
+    list.innerHTML=teamNotifications.length?teamNotifications.slice(0,8).map(n=>`<button type="button" class="team-notification-item ${n.read_at?'read':''}" data-notif-id="${esc(n.id)}"><strong>${esc(n.title)}</strong><span>${esc(n.body)}</span><small>${new Date(n.created_at).toLocaleString()}</small></button>`).join(''):`<div class="team-empty-mini">You're all caught up.</div>`;
+    list.querySelectorAll('[data-notif-id]').forEach(b=>b.onclick=async()=>{const n=teamNotifications.find(x=>x.id===b.dataset.notifId);if(!n)return;await client().from('nexa_team_notifications').update({read_at:new Date().toISOString()}).eq('id',n.id).eq('user_id',user().id);n.read_at=new Date().toISOString();renderTeamNotifications();renderTeamShell();});
   }
   function assigneeName(uid){return teamMembers.find(m=>m.user_id===uid)?.display_name||'Member';}
   function teamTaskCard(t,role){
@@ -5316,6 +5352,24 @@ document.querySelectorAll(".modal").forEach(modal=>{
     let note='';if(status==='changes_requested'){note=await nexaPrompt('What needs to change?',task.review_note||'',{title:'Request changes',kicker:'TEAM REVIEW'});if(note===null)return;note=note.trim();if(!note){toast('Add a short review note.','error');return;}}
     const {error}=await c.from('nexa_team_tasks').update({status,review_note:note||null,reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',id);if(error){console.error(error);toast('Could not update the review.','error');return;}toast(status==='approved'?'Proof approved. Task completed.':'Changes requested. The member can resubmit proof.');await refreshCurrentTeam();
   }
+  function openTeamSettings(){
+    const t=currentTeam();if(!t||currentRole()!=='head')return;
+    $('teamSettingsName').value=t.name||'';$('teamSettingsDescription').value=t.description||'';$('teamSettingsRoleNote').textContent='Only the team head can change workspace settings.';openModal('teamSettingsModal');
+  }
+  async function saveTeamSettings(e){
+    e.preventDefault();const c=client(),t=currentTeam();if(!c||!t||currentRole()!=='head')return;
+    const name=$('teamSettingsName').value.trim(),description=$('teamSettingsDescription').value.trim();if(!name){toast('Give your team a name.','error');return;}
+    const {data,error}=await c.rpc('update_nexa_team_details',{p_team_id:t.id,p_name:name,p_description:description||null});
+    if(error){console.error(error);toast(error.message||'Could not save team settings.','error');return;}
+    const idx=teamRows.findIndex(x=>x.id===t.id);if(idx>=0)teamRows[idx]={...teamRows[idx],name:data?.name||name,description:data?.description||description||null};
+    closeModal('teamSettingsModal');toast('Team settings saved.');await loadTeams();
+  }
+  async function regenerateTeamCode(){
+    const c=client(),t=currentTeam();if(!c||!t||currentRole()!=='head')return;
+    if(typeof nexaConfirm==='function'&&!(await nexaConfirm('The current invite code will stop working immediately.',{title:'Regenerate invite code',kicker:'TEAM',danger:true})))return;
+    const {data,error}=await c.rpc('regenerate_nexa_team_invite_code',{p_team_id:t.id});if(error){toast(error.message||'Could not regenerate the code.','error');return;}
+    activeJoinCode=data||'';if($('teamJoinCode'))$('teamJoinCode').textContent=activeJoinCode;if($('teamJoinCode'))$('teamJoinCode').dataset.inviteLink=teamInviteLink(activeJoinCode);toast('New invite code created.');
+  }
   function openCreate(){openModal('teamCreateModal');setTimeout(()=>$('teamCreateName')?.focus(),30)}
   function openJoin(){openModal('teamJoinModal');setTimeout(()=>$('teamJoinInput')?.focus(),30)}
   $('teamMembersToggle')?.addEventListener('click',()=>{
@@ -5323,9 +5377,17 @@ document.querySelectorAll(".modal").forEach(modal=>{
     setMembersPopover(!pop?.classList.contains('open'));
   });
   $('teamMembersClose')?.addEventListener('click',()=>setMembersPopover(false));
+  $('teamNotificationsToggle')?.addEventListener('click',async()=>{const pop=$('teamNotificationsPopover');pop?.classList.toggle('open');pop?.setAttribute('aria-hidden',pop?.classList.contains('open')?'false':'true');if(pop?.classList.contains('open')){await client()?.rpc('mark_nexa_team_notifications_read',{p_team_id:currentTeam()?.id||null});teamNotifications.forEach(n=>{n.read_at=n.read_at||new Date().toISOString()});renderTeamNotifications();const dot=$('teamNotificationCount');if(dot)dot.hidden=true;}});
+  $('teamNotificationsClose')?.addEventListener('click',()=>{$('teamNotificationsPopover')?.classList.remove('open')});
+  $('teamSettingsOpen')?.addEventListener('click',openTeamSettings);
+  $('teamSettingsClose')?.addEventListener('click',()=>closeModal('teamSettingsModal'));
+  $('teamSettingsForm')?.addEventListener('submit',saveTeamSettings);
+  $('teamRegenerateCode')?.addEventListener('click',regenerateTeamCode);
+  document.querySelectorAll('[data-proof-filter]').forEach(b=>b.addEventListener('click',()=>{teamProofFilter=b.dataset.proofFilter;document.querySelectorAll('[data-proof-filter]').forEach(x=>x.classList.toggle('active',x===b));renderProofWall(currentRole())}));
   document.addEventListener('click',e=>{
     const wrap=document.querySelector('.team-members-popover-wrap');
     if(wrap && !wrap.contains(e.target)) setMembersPopover(false);
+    const np=document.querySelector('.team-head-tools');if(np&&!np.contains(e.target))$('teamNotificationsPopover')?.classList.remove('open');
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape')setMembersPopover(false)});
   $('teamCreateOpen')?.addEventListener('click',openCreate);$('teamCreateOpenAlt')?.addEventListener('click',openCreate);$('teamJoinOpen')?.addEventListener('click',openJoin);$('teamJoinOpenAlt')?.addEventListener('click',openJoin);
@@ -5337,7 +5399,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   $('teamCreateForm')?.addEventListener('submit',createTeam);$('teamJoinForm')?.addEventListener('submit',e=>{e.preventDefault();joinTeam()});$('teamTaskForm')?.addEventListener('submit',createTeamTask);$('teamProofSubmit')?.addEventListener('click',submitTeamProof);$('teamEditForm')?.addEventListener('submit',saveTeamEdit);$('teamEditClose')?.addEventListener('click',()=>closeModal('teamEditModal'));$('teamViewMyWork')?.addEventListener('click',()=>{teamTaskView='mine';renderTeamTasks()});$('teamViewAll')?.addEventListener('click',()=>{teamTaskView='all';renderTeamTasks()});
   $('teamCopyCode')?.addEventListener('click',async()=>{const code=activeJoinCode||'';if(!code)return;try{await navigator.clipboard.writeText(code);toast('Team code copied.')}catch{toast('Could not copy the code.','error')}});
   $('teamCopyLink')?.addEventListener('click',async()=>{const link=$('teamJoinCode')?.dataset?.inviteLink;if(!link)return;try{await navigator.clipboard.writeText(link);toast('Invite link copied.')}catch{toast('Could not copy the invite link.','error')}});
-  ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal','teamLeaveModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
+  ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal','teamLeaveModal','teamSettingsModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
   let inviteHandled=false;
   function renderTeams(){
     if(!user()){teamRows=[];teamMembers=[];teamTasks=[];renderTeamShell();return;}
