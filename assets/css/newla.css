@@ -12021,3 +12021,55 @@ body.light .team-intro-card,body.light .team-choice-card,body.light .team-panel,
 @media(max-width:760px){.team-hero-row{flex-direction:column;align-items:flex-start}.team-hero-actions{justify-content:flex-start}.team-switch-line{flex-wrap:wrap}.team-switch-line select{min-width:0;width:100%}.team-toolbar{padding:15px}.team-form-grid{grid-template-columns:1fr}.team-task-top{gap:8px}.team-empty-grid{margin-top:16px}.team-intro-card,.team-choice-card,.team-panel,.team-toolbar{padding:15px}.team-task-title-row h3{font-size:14px}}
 
 .team-code-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+
+/* ---------- TEAM UI POLISH ---------- */
+/* Center all Team info dialogs even when JS opens them with display:flex. */
+.nexa-info-modal {
+  align-items: center;
+  justify-content: center;
+}
+
+/* Copy actions: keep the control itself still; only the label changes on hover. */
+.team-copy-btn {
+  transition: color .18s ease;
+}
+.team-copy-btn:hover {
+  border-color: #3d372f;
+  color: #9fdd8d;
+  transform: none;
+}
+
+/* Creator link: blue text treatment without moving/scaling the button. */
+.about-linkedin {
+  transition: color .18s ease;
+}
+.about-linkedin:hover,
+.about-linkedin:focus-visible {
+  color: #4da3ff;
+  border-color: #40382e;
+  background: #1d1a16;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Team creation/join actions use a restrained red accent. */
+#teamCreateOpen,
+#teamJoinOpen,
+#teamCreateOpenAlt,
+#teamJoinOpenAlt {
+  color: #df9289;
+  border-color: #674640;
+}
+#teamCreateOpen:hover,
+#teamJoinOpen:hover,
+#teamCreateOpenAlt:hover,
+#teamJoinOpenAlt:hover {
+  color: #efaaa1;
+  border-color: #83524b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-copy-btn,
+  .about-linkedin { transition: none !important; }
+}
