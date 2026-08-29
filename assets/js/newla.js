@@ -5129,9 +5129,10 @@ document.querySelectorAll(".modal").forEach(modal=>{
       <div class="team-task-actions">${startButton}${proofButton}${reviewButtons}${proofPreview}</div>
     </article>`;
   }
-  async function createTeam(){
-    const c=client();
-    if(!c||!user())return;
+  async function createTeam(e){
+    e?.preventDefault();
+    const c=client(),u=user();
+    if(!c||!u)return;
     const name=$('teamCreateName').value.trim(),description=$('teamCreateDescription').value.trim();
     if(!name){toast('Give your team a name.','error');return;}
     let result=null,lastError=null;
@@ -5190,7 +5191,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     try{
       const response=await fetch(teamProofData);const blob=await response.blob();const path=`${u.id}/team/${t.id}/${task.id}.jpg`;
       const up=await c.storage.from('nexa-files').upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});if(up.error)throw up.error;
-      const {error}=await c.from('nexa_team_tasks').update({proof_path:path,proof_note:$('teamProofNote').value.trim()||null,status:'submitted',submitted_at:new Date().toISOString(),review_note:null,updated_at:new Date().toISOString()}).eq('id',task.id);if(error)throw error;
+      const {error}=await c.from('nexa_team_tasks').update({proof_path:path,proof_note:$('teamProofNote').value.trim()||null,status:'submitted',submitted_at:new Date().toISOString(),review_note:null,reviewed_at:null,updated_at:new Date().toISOString()}).eq('id',task.id);if(error)throw error;
       closeModal('teamProofModal');toast('Proof submitted. It is now waiting for review.');await refreshCurrentTeam();
     }catch(error){console.error(error);toast(typeof friendlyCloudError==='function'?friendlyCloudError(error):'Proof could not be submitted.','error');btn.disabled=false;btn.textContent='Submit proof';}
   }
