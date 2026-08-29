@@ -12232,3 +12232,16 @@ body.light .team-proof-filter-btn.active{background:#fffaf2;color:#3f352b;border
 @media(max-width:900px){.team-attention-list{grid-template-columns:1fr 1fr}.team-secondary-grid{grid-template-columns:1fr}.team-proof-filter{justify-content:flex-start}.team-head-tools{margin-left:0}}
 @media(max-width:620px){.team-attention-list{grid-template-columns:1fr}.team-notifications-popover{right:-8px}.team-head-tools{width:auto}.team-icon-btn{width:40px;height:40px}}
 
+
+/* P2 cleanup: comfortable section spacing and completed-task delete control */
+.team-workspace{gap:16px}
+.team-overview{margin-bottom:0}
+.team-settings-summary-panel{margin-bottom:0}
+.team-tasks-panel{margin-top:0}
+.team-activity-last{margin-top:0}
+.team-task-date-wrap{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:112px}
+.team-delete-task-btn{width:34px;height:34px;display:inline-grid;place-items:center;border:1px solid #40382f;border-radius:9px;background:transparent;color:#aaa095;cursor:pointer;transition:color .18s ease,border-color .18s ease,background .18s ease}
+.team-delete-task-btn svg{width:15px;height:15px;transition:transform .18s ease}
+.team-delete-task-btn:hover{color:#df9289;border-color:#694640;background:#211a18}
+.team-delete-task-btn:hover svg{transform:rotate(-10deg) translateY(-1px)}
+.team-delete-task-btn:focus-visible{outline:2px solid #df9289;outline-offset:2px}
