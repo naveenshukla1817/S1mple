@@ -37,8 +37,8 @@ function toast(message,type="success"){
 function updateGreeting(){
   const hour=new Date().getHours();
   const part=hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
-  const pending=tasks.filter(t=>t.status!=="completed").length;
-  const overdue=tasks.filter(isOverdue).length;
+  const pending=tasks.filter(t=>!t.deletedAt&&t.status!=="completed").length;
+  const overdue=tasks.filter(t=>!t.deletedAt&&isOverdue(t)).length;
 
   $("greetingLine").textContent =
     pending
@@ -724,6 +724,144 @@ document.querySelectorAll(".task-filter").forEach(button => {
 });
 
 
+
+/* ============================================================
+   ARCHIVED WORK
+============================================================ */
+
+let archiveTaskId = null;
+
+function archivedTasks(){
+  return tasks.filter(t=>t && t.deletedAt).sort((a,b)=>{
+    return new Date(b.deletedAt).getTime()-new Date(a.deletedAt).getTime();
+  });
+}
+
+function openDeleteReasonModal(task){
+  archiveTaskId=task?.id||null;
+  const modal=$("deleteReasonModal");
+  if(!modal||!task)return;
+  $("deleteReasonTaskName").textContent=`“${task.title||"Untitled task"}”`;
+  document.querySelectorAll('input[name="deleteReason"]').forEach(r=>r.checked=false);
+  $("deleteReasonNote").value="";
+  $("deleteReasonNote").classList.add("hidden");
+  $("confirmArchiveBtn").disabled=true;
+  modal.style.display="flex";
+}
+
+function closeDeleteReasonModal(){
+  archiveTaskId=null;
+  $("deleteReasonModal").style.display="none";
+}
+
+function renderArchiveStats(){
+  const archived=archivedTasks();
+  const active=tasks.filter(t=>t&&!t.deletedAt);
+  const created=tasks.length;
+  const completed=active.filter(t=>t.status==="completed").length;
+  const stillOpen=active.filter(t=>t.status!=="completed").length;
+  $("archiveStats").innerHTML=[
+    ["Created",created],
+    ["Completed",completed],
+    ["Dropped",archived.length],
+    ["Still open",stillOpen]
+  ].map(([label,value])=>`<div class="archive-stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+}
+
+function renderArchivedWork(){
+  const list=$("archiveList");
+  if(!list)return;
+  const archived=archivedTasks();
+  renderArchiveStats();
+  if(!archived.length){
+    list.innerHTML=`<div class="archive-empty"><strong>No archived work yet.</strong><br><span>Your dropped tasks will live here with their reason.</span></div>`;
+  }else{
+    list.innerHTML=archived.map(task=>{
+      const reason=task.deleteReason||"Archived";
+      const date=task.deletedAt?new Date(task.deletedAt).toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"}):"";
+      return `<article class="archive-item">
+        <div class="archive-item-head">
+          <div><h3>${escapeHtml(task.title||"Untitled task")}</h3><div class="archive-item-reason">${escapeHtml(reason)}</div></div>
+          <span class="archive-item-date">${escapeHtml(date)}</span>
+        </div>
+        ${task.deleteReasonNote?`<div class="archive-item-note">${escapeHtml(task.deleteReasonNote)}</div>`:""}
+        <div class="archive-item-actions"><button class="task-action" data-restore-task="${task.id}">Restore</button></div>
+      </article>`;
+    }).join("");
+    list.querySelectorAll("[data-restore-task]").forEach(btn=>{
+      btn.onclick=()=>restoreArchivedTask(btn.dataset.restoreTask);
+    });
+  }
+  const count=$("archiveCount");
+  if(count){
+    count.textContent=archived.length;
+    count.classList.toggle("hidden",archived.length===0);
+  }
+  try{if(typeof safeIcons==="function")safeIcons()}catch{}
+}
+
+function openArchiveModal(){
+  renderArchivedWork();
+  $("archiveModal").style.display="flex";
+}
+
+function closeArchiveModal(){
+  $("archiveModal").style.display="none";
+}
+
+function restoreArchivedTask(id){
+  const task=tasks.find(t=>t.id===id);
+  if(!task)return;
+  task.deletedAt=null;
+  task.deleteReason=null;
+  task.deleteReasonNote=null;
+  save(KEYS.TASKS,tasks);
+  renderAll();
+  renderArchivedWork();
+  toast("Task restored.");
+}
+
+async function confirmArchiveTask(){
+  const id=archiveTaskId;
+  const task=tasks.find(t=>t.id===id);
+  const selected=document.querySelector('input[name="deleteReason"]:checked');
+  if(!task||!selected)return;
+  const reason=selected.value;
+  const note=$("deleteReasonNote").value.trim();
+  if(reason==="Other"&&!note){
+    void nexaAlert("Add a short reason so you can understand this decision later.",{title:"Reason needed",kicker:"TASK HISTORY"});
+    return;
+  }
+  task.deletedAt=new Date().toISOString();
+  task.deleteReason=reason;
+  task.deleteReasonNote=note||null;
+  save(KEYS.TASKS,tasks);
+  closeDeleteReasonModal();
+  renderAll();
+  renderArchivedWork();
+  toast("Task archived. You can restore it anytime.");
+}
+
+$("archiveTop")?.addEventListener("click",openArchiveModal);
+$("closeArchiveModal")?.addEventListener("click",closeArchiveModal);
+$("closeDeleteReason")?.addEventListener("click",closeDeleteReasonModal);
+$("keepTaskBtn")?.addEventListener("click",closeDeleteReasonModal);
+$("confirmArchiveBtn")?.addEventListener("click",confirmArchiveTask);
+document.querySelectorAll('input[name="deleteReason"]').forEach(r=>{
+  r.addEventListener("change",()=>{
+    const other=document.querySelector('input[name="deleteReason"][value="Other"]')?.checked;
+    $("deleteReasonNote").classList.toggle("hidden",!other);
+    $("confirmArchiveBtn").disabled=false;
+    if(!other)$("deleteReasonNote").value="";
+  });
+});
+$("deleteReasonNote")?.addEventListener("input",()=>{
+  const other=document.querySelector('input[name="deleteReason"][value="Other"]')?.checked;
+  $("confirmArchiveBtn").disabled=other && !$("deleteReasonNote").value.trim();
+});
+$("archiveModal")?.addEventListener("click",e=>{if(e.target===$("archiveModal"))closeArchiveModal()});
+$("deleteReasonModal")?.addEventListener("click",e=>{if(e.target===$("deleteReasonModal"))closeDeleteReasonModal()});
+
 /* ============================================================
    TASK ACTIONS
 ============================================================ */
@@ -775,12 +913,7 @@ async function taskAction(action,id) {
   }
 
   if (action==="delete") {
-    if (!(await nexaConfirm(`Delete "${task.title}"?`, {title:"Delete task",kicker:"TASK",danger:true}))) return;
-
-    tasks = tasks.filter(t => t.id!==id);
-    save(KEYS.TASKS,tasks);
-    renderAll();
-    toast("Task deleted.");
+    openDeleteReasonModal(task);
   }
 }
 
@@ -1779,12 +1912,12 @@ function updateSummary() {
   const today=todayKey();
 
   const todayCount=tasks.filter(
-    t=>t.dueDate===today || t.reminderDate===today
+    t=>!t.deletedAt && (t.dueDate===today || t.reminderDate===today)
   ).length;
 
-  const pending=tasks.filter(t=>t.status!=="completed").length;
-  const overdue=tasks.filter(isOverdue).length;
-  const completed=tasks.filter(t=>t.status==="completed").length;
+  const pending=tasks.filter(t=>!t.deletedAt&&t.status!=="completed").length;
+  const overdue=tasks.filter(t=>!t.deletedAt&&isOverdue(t)).length;
+  const completed=tasks.filter(t=>!t.deletedAt&&t.status==="completed").length;
 
   $("dashToday").textContent=todayCount;
   $("dashPending").textContent=pending;
@@ -2123,6 +2256,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
 
   window.filteredTasks=function(){
     return tasks.filter(task=>{
+      if(task.deletedAt)return false;
       if(taskFilter==="pending" && task.status==="completed")return false;
       if(taskFilter==="completed" && task.status!=="completed")return false;
       if(searchTerm && !(`${task.title} ${task.description||""} ${task.category||""}`.toLowerCase().includes(searchTerm)))return false;
@@ -2192,10 +2326,10 @@ document.querySelectorAll(".modal").forEach(modal=>{
   window.renderTasks=function(){
     renderTaskList("mainTaskList",filteredTasks());
     const today=todayKey();
-    $("taskToday").textContent=tasks.filter(t=>t.dueDate===today||t.reminderDate===today).length;
-    $("taskPending").textContent=tasks.filter(t=>t.status!=="completed").length;
-    $("taskOverdue").textContent=tasks.filter(isOverdue).length;
-    $("taskCompleted").textContent=tasks.filter(t=>t.status==="completed").length;
+    $("taskToday").textContent=tasks.filter(t=>!t.deletedAt&&(t.dueDate===today||t.reminderDate===today)).length;
+    $("taskPending").textContent=tasks.filter(t=>!t.deletedAt&&t.status!=="completed").length;
+    $("taskOverdue").textContent=tasks.filter(t=>!t.deletedAt&&isOverdue(t)).length;
+    $("taskCompleted").textContent=tasks.filter(t=>!t.deletedAt&&t.status==="completed").length;
   };
 
   /* -------- Dashboard analytics -------- */
@@ -2288,12 +2422,12 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const ach=achievements();
     if($("achievementCount"))$("achievementCount").textContent=`${ach.filter(a=>a.ok).length} / ${ach.length}`;
     if($("achievementRow"))$("achievementRow").innerHTML=ach.map(a=>`<div class="achievement ${a.ok?"unlocked":""}" title="${a.title}">${a.icon}</div>`).join("");
-    $("dashToday") && ($("dashToday").textContent=tasks.filter(t=>t.dueDate===todayKey()||t.reminderDate===todayKey()).length);
-    $("dashPending") && ($("dashPending").textContent=tasks.filter(t=>t.status!=="completed").length);
-    $("dashOverdue") && ($("dashOverdue").textContent=tasks.filter(isOverdue).length);
+    $("dashToday") && ($("dashToday").textContent=tasks.filter(t=>!t.deletedAt&&(t.dueDate===todayKey()||t.reminderDate===todayKey())).length);
+    $("dashPending") && ($("dashPending").textContent=tasks.filter(t=>!t.deletedAt&&t.status!=="completed").length);
+    $("dashOverdue") && ($("dashOverdue").textContent=tasks.filter(t=>!t.deletedAt&&isOverdue(t)).length);
     $("dashCompleted") && ($("dashCompleted").textContent=completed);
   }
-  window.renderDashboard=function(){ renderV2Dashboard(); const upcoming=tasks.filter(t=>t.status!=="completed").sort((a,b)=>(reminderDate(a)?.getTime()||Infinity)-(reminderDate(b)?.getTime()||Infinity)).slice(0,4); renderTaskList("dashboardTaskList",upcoming); };
+  window.renderDashboard=function(){ renderV2Dashboard(); const upcoming=tasks.filter(t=>!t.deletedAt&&t.status!=="completed").sort((a,b)=>(reminderDate(a)?.getTime()||Infinity)-(reminderDate(b)?.getTime()||Infinity)).slice(0,4); renderTaskList("dashboardTaskList",upcoming); try{renderArchivedWork()}catch{} };
 
   $("dashboardFocus")?.addEventListener("click",()=>startFocusFromTask());
 
@@ -3106,7 +3240,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
   function priorityNorm(v){const s=String(v||'medium').toLowerCase();return ['urgent','high','medium','low'].includes(s)?s:'medium'}
   function statusNorm(v){return v==='completed'?'completed':v==='in_progress'?'in_progress':'todo'}
-  function mapTaskFromDb(t){return {id:t.id,title:t.title,description:t.description||'',priority:priorityNorm(t.priority),dueDate:t.due_date||'',reminderDate:t.reminder_date||'',reminderTime:t.reminder_time||'',category:t.category||'Project',recurring:t.recurring||'none',subtasks:Array.isArray(t.subtasks)?t.subtasks:[],status:statusNorm(t.status),proofDataUrl:null,proofPath:t.proof_path||null,completedAt:t.completed_at||null,remindedAt:null,createdAt:t.created_at||new Date().toISOString(),updatedAt:t.updated_at||t.created_at||new Date().toISOString()}}
+  function mapTaskFromDb(t){return {id:t.id,title:t.title,description:t.description||'',priority:priorityNorm(t.priority),dueDate:t.due_date||'',reminderDate:t.reminder_date||'',reminderTime:t.reminder_time||'',category:t.category||'Project',recurring:t.recurring||'none',subtasks:Array.isArray(t.subtasks)?t.subtasks:[],status:statusNorm(t.status),proofDataUrl:null,proofPath:t.proof_path||null,completedAt:t.completed_at||null,remindedAt:null,createdAt:t.created_at||new Date().toISOString(),updatedAt:t.updated_at||t.created_at||new Date().toISOString(),deletedAt:t.deleted_at||null,deleteReason:t.delete_reason||null,deleteReasonNote:t.delete_reason_note||null}}
   async function syncProofRecord(task, proofPath, blob){
     if(!client||!window.NEXA_USER||!task||!proofPath)return;
     const uid=window.NEXA_USER.id;
@@ -3201,7 +3335,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
           if(up.error)throw up.error;
         }catch(e){console.warn('Task proof upload skipped',e)}
       }
-      const row={id:t.id,user_id:uid,title:t.title||'Untitled',description:t.description||null,priority:priorityNorm(t.priority),status:statusNorm(t.status),due_date:t.dueDate||null,reminder_date:t.reminderDate||null,reminder_time:t.reminderTime||null,category:t.category||'Project',recurring:t.recurring||'none',subtasks:Array.isArray(t.subtasks)?t.subtasks:[],proof_path:proofPath,completed_at:t.status==='completed'?(t.completedAt||new Date().toISOString()):null};
+      const row={id:t.id,user_id:uid,title:t.title||'Untitled',description:t.description||null,priority:priorityNorm(t.priority),status:statusNorm(t.status),due_date:t.dueDate||null,reminder_date:t.reminderDate||null,reminder_time:t.reminderTime||null,category:t.category||'Project',recurring:t.recurring||'none',subtasks:Array.isArray(t.subtasks)?t.subtasks:[],proof_path:proofPath,completed_at:t.status==='completed'?(t.completedAt||new Date().toISOString()):null,deleted_at:t.deletedAt||null,delete_reason:t.deleteReason||null,delete_reason_note:t.deleteReasonNote||null};
       const {error}=await client.from('tasks').upsert(row,{onConflict:'id'});
       if(error)throw error;
       if(proofPath){
