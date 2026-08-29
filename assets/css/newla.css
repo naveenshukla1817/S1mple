@@ -12245,3 +12245,34 @@ body.light .team-proof-filter-btn.active{background:#fffaf2;color:#3f352b;border
 .team-delete-task-btn:hover{color:#df9289;border-color:#694640;background:#211a18}
 .team-delete-task-btn:hover svg{transform:rotate(-10deg) translateY(-1px)}
 .team-delete-task-btn:focus-visible{outline:2px solid #df9289;outline-offset:2px}
+
+/* Activity compactness + clear control */
+.team-activity-panel{margin-bottom:0;}
+.team-activity-head{align-items:center;}
+.team-activity-clear{width:36px;height:36px;flex:0 0 36px;}
+.team-activity-clear:hover{color:#df9289;border-color:#3d372f;background:transparent;}
+.team-activity-list{max-height:250px;overflow:auto;padding-right:3px;}
+.team-activity-item{padding:7px 0;}
+.team-activity-item strong{font-size:9px;}
+.team-activity-item small{font-size:7px;margin-top:2px;}
+.team-activity-dot{margin-top:4px;}
+
+/* Keep major team sections separated consistently. */
+.team-workspace > .team-toolbar,
+.team-workspace > .team-overview,
+.team-workspace > .team-attention-panel,
+.team-workspace > .team-settings-summary-panel,
+.team-workspace > .team-grid,
+.team-workspace > .team-tasks-panel,
+.team-workspace > .team-activity-panel{margin-bottom:14px;}
+.team-workspace > .team-activity-panel{margin-bottom:0;}
+.team-workspace > .team-overview{gap:12px;}
+.team-workspace > .team-grid{gap:14px;}
+@media (max-width:760px){
+  .team-workspace > .team-toolbar,
+  .team-workspace > .team-overview,
+  .team-workspace > .team-attention-panel,
+  .team-workspace > .team-settings-summary-panel,
+  .team-workspace > .team-grid,
+  .team-workspace > .team-tasks-panel{margin-bottom:12px;}
+}
