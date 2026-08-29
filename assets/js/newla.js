@@ -432,7 +432,8 @@ const viewNames = {
   proofs:"Proofs",
   calendar:"Calendar",
   notes:"Knowledge",
-  settings:"Settings"
+  settings:"Settings",
+  about:"About Newla"
 };
 
 function switchView(view) {
@@ -446,9 +447,10 @@ function switchView(view) {
   });
 
   document.querySelectorAll("[data-view]").forEach(button => {
+    const isSettingsAbout = view === "about" && button.dataset.view === "settings";
     button.classList.toggle(
       "active",
-      button.dataset.view === view
+      button.dataset.view === view || isSettingsAbout
     );
   });
 
@@ -463,6 +465,17 @@ function switchView(view) {
 document.querySelectorAll("[data-view]").forEach(button => {
   button.addEventListener("click",() => switchView(button.dataset.view));
 });
+
+const aboutTrigger = $("aboutNewlaTrigger");
+const aboutBackButton = $("aboutBackButton");
+aboutTrigger?.addEventListener("click",() => switchView("about"));
+aboutTrigger?.addEventListener("keydown", event => {
+  if(event.key === "Enter" || event.key === " "){
+    event.preventDefault();
+    switchView("about");
+  }
+});
+aboutBackButton?.addEventListener("click",() => switchView("settings"));
 
 
 /* ============================================================
