@@ -591,11 +591,20 @@ Write your notes here..."></textarea>
       <h1>Work together. Keep the proof.</h1>
       <p class="hero-note">Assign real work, submit evidence, and review it in one quiet place.</p>
     </div>
-    <div class="team-hero-actions">
-      <button class="team-members-toggle" id="teamMembersToggle" type="button" aria-expanded="false" aria-controls="teamMembersDrawer" aria-label="Show team members">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7.5 2a3.5 3.5 0 1 0 0-7m4 15v-1.5a3.5 3.5 0 0 0-2.5-3.35" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span id="teamMembersToggleCount">0</span>
-      </button>
+    <div class="team-hero-actions team-hero-actions-popover">
+      <div class="team-members-popover-wrap">
+        <button class="team-members-trigger" id="teamMembersToggle" type="button" aria-expanded="false" aria-controls="teamMembersPopover" title="View team members">
+          <span class="team-members-icon" aria-hidden="true">♧</span>
+          <span id="teamMemberCount">0</span>
+        </button>
+        <div class="team-members-popover" id="teamMembersPopover" role="dialog" aria-label="Team members" aria-hidden="true">
+          <div class="team-members-popover-head">
+            <div><p class="kicker">PEOPLE</p><h3>Members</h3></div>
+            <button class="team-members-close" id="teamMembersClose" type="button" aria-label="Close members">×</button>
+          </div>
+          <div id="teamMembersList" class="team-members-list"></div>
+        </div>
+      </div>
       <button class="btn-accent" id="teamCreateOpen" type="button">+ Create team</button>
       <button class="btn-dark" id="teamJoinOpen" type="button">Join with code</button>
     </div>
@@ -644,7 +653,7 @@ Write your notes here..."></textarea>
       </div>
     </div>
 
-    <div class="team-grid team-main-grid">
+    <div class="team-grid">
       <section class="team-panel dark-card" id="teamHeadPanel" style="display:none">
         <div class="team-panel-head"><div><p class="kicker">HEAD</p><h2>Assign work</h2></div></div>
         <form id="teamTaskForm" class="team-task-form">
@@ -660,15 +669,6 @@ Write your notes here..."></textarea>
         </form>
       </section>
     </div>
-
-    <aside class="team-members-drawer" id="teamMembersDrawer" aria-hidden="true" aria-label="Team members">
-      <div class="team-members-drawer-head">
-        <div><p class="kicker">PEOPLE</p><h2>Members</h2><p id="teamMembersDrawerMeta" class="team-members-drawer-meta">0 people</p></div>
-        <button class="team-members-close" id="teamMembersClose" type="button" aria-label="Close members panel">×</button>
-      </div>
-      <div id="teamMembersList" class="team-members-list"></div>
-    </aside>
-    <div class="team-members-backdrop" id="teamMembersBackdrop" hidden></div>
 
     <section class="team-panel dark-card team-tasks-panel">
       <div class="team-panel-head"><div><p class="kicker">TEAM WORK</p><h2>Tasks</h2></div><span id="teamTaskCount" class="team-count">0</span></div>
