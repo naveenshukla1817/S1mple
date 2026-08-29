@@ -5507,7 +5507,10 @@ document.querySelectorAll(".modal").forEach(modal=>{
   $('teamInvitePolicySave')?.addEventListener('click',saveInvitePolicy);
   $('teamSecurityRefresh')?.addEventListener('click',async()=>{const t=currentTeam();if(!t||currentRole()!=='head')return;const r=await client()?.rpc('get_nexa_team_sessions',{p_team_id:t.id});if(!r?.error){teamSessions=r.data||[];renderTeamSecurity();}});
   $('teamNotificationsClose')?.addEventListener('click',()=>{$('teamNotificationsPopover')?.classList.remove('open')});
+  // Team settings must remain clickable even if Team UI re-renders.
+  window.__nexaOpenTeamSettings = openTeamSettings;
   $('teamSettingsOpen')?.addEventListener('click',openTeamSettings);
+
   $('teamSettingsClose')?.addEventListener('click',()=>closeModal('teamSettingsModal'));
   $('teamSettingsForm')?.addEventListener('submit',saveTeamSettings);
   $('teamDeletePermanent')?.addEventListener('click',deleteCurrentTeamPermanently);
@@ -5541,3 +5544,13 @@ document.querySelectorAll(".modal").forEach(modal=>{
   window.renderTeams=renderTeams;
   if(user())setTimeout(renderTeams,150);
 })();
+
+// Fallback delegated handler for the Team Settings control. This survives DOM re-renders.
+document.addEventListener('click', (event) => {
+  const button = event.target?.closest?.('#teamSettingsOpen');
+  if (!button) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (typeof window.__nexaOpenTeamSettings === 'function') window.__nexaOpenTeamSettings();
+}, true);
+
