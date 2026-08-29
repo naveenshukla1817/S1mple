@@ -5140,7 +5140,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     if($('teamJoinCode')) $('teamJoinCode').dataset.inviteLink=code?teamInviteLink(code):'';
     $('teamMemberCount').textContent=String(teamMembers.length);
     $('teamSummaryName').textContent=t.name||'Team';
-    $('teamSummaryDescription').textContent=t.description||'No description yet.';
+    const summaryDescription=$('teamSummaryDescription'); if(summaryDescription) summaryDescription.textContent=t.description||'No description yet.';
     const unread=teamNotifications.filter(n=>!n.read_at).length;
     const notifDot=$('teamNotificationCount'); if(notifDot){notifDot.textContent=String(unread);notifDot.hidden=!unread;}
     $('teamSettingsOpen').style.display=role==='head'?'inline-flex':'none';
@@ -5170,14 +5170,15 @@ document.querySelectorAll(".modal").forEach(modal=>{
     $('teamTaskCount').textContent=String(visible.length);
     $('teamViewMyWork')?.classList.toggle('active',teamTaskView==='mine');
     $('teamViewAll')?.classList.toggle('active',teamTaskView!=='mine');
-    if(!visible.length){list.innerHTML=`<div class="team-empty-mini">${teamTaskView==='mine'?'Nothing is assigned to you yet.':'No team tasks yet. Assign the first piece of work above.'}</div>`;renderProofWall(role);return;}
+    if(!visible.length){list.innerHTML=`<div class="team-empty-mini">${teamTaskView==='mine'?'Nothing is assigned to you yet.':'No team tasks yet. Assign the first piece of work above.'}</div>`;return;}
     list.innerHTML=visible.map(t=>teamTaskCard(t,role)).join('');
     list.querySelectorAll('[data-team-start]').forEach(b=>b.onclick=()=>updateTeamTaskStatus(b.dataset.teamStart,'in_progress'));
     list.querySelectorAll('[data-team-proof]').forEach(b=>b.onclick=()=>openTeamProof(b.dataset.teamProof));
     list.querySelectorAll('[data-team-approve]').forEach(b=>b.onclick=()=>reviewTeamTask(b.dataset.teamApprove,'approved'));
     list.querySelectorAll('[data-team-changes]').forEach(b=>b.onclick=()=>reviewTeamTask(b.dataset.teamChanges,'changes_requested'));
     list.querySelectorAll('[data-team-edit]').forEach(b=>b.onclick=()=>openTeamEdit(b.dataset.teamEdit));
-    renderProofWall(role);
+    list.querySelectorAll('[data-team-delete]').forEach(b=>b.onclick=()=>deleteCompletedTeamTask(b.dataset.teamDelete));
+    if(window.lucide?.createIcons)window.lucide.createIcons();
   }
   async function renderProofWall(role){
     const panel=$('teamProofWallPanel'),list=$('teamProofWallList');if(!panel||!list)return;
@@ -5225,9 +5226,10 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const reviewButtons=role==='head'&&t.status==='submitted'?`<button class="team-task-btn approve" data-team-approve="${t.id}">Approve</button><button class="team-task-btn changes" data-team-changes="${t.id}">Request changes</button>`:'';
     const proofPreview=role==='head'&&t.proof_path?`<button class="team-proof-preview" data-team-proof="${t.id}">View proof</button>`:'';
     const editButton=role==='head'&&t.status!=='submitted'?`<button class="team-task-btn" data-team-edit="${t.id}">Edit</button>`:'';
+    const deleteButton=role==='head'&&t.status==='approved'?`<button class="team-delete-task-btn" type="button" data-team-delete="${t.id}" aria-label="Delete completed task" title="Delete completed task"><i data-lucide="trash-2"></i></button>`:'';
     const assignee=t.assigned_to?assigneeName(t.assigned_to):'Unassigned';
     return `<article class="team-task-card ${klass}">
-      <div class="team-task-top"><div><div class="team-task-title-row"><h3>${esc(t.title)}</h3><span class="team-status ${klass}">${esc(status)}</span></div><p>${esc(t.description||'')}</p></div><span class="team-task-date">${esc(due)}</span></div>
+      <div class="team-task-top"><div><div class="team-task-title-row"><h3>${esc(t.title)}</h3><span class="team-status ${klass}">${esc(status)}</span></div><p>${esc(t.description||'')}</p></div><div class="team-task-date-wrap"><span class="team-task-date">${esc(due)}</span>${deleteButton}</div></div>
       <div class="team-task-meta"><span>${esc(t.priority)} priority</span><span>${role==='head'?'Assigned to '+esc(assignee):esc(t.assigned_to===user()?.id?'Assigned to you':'')}</span>${t.proof_required?'<span>Proof required</span>':''}</div>
       ${t.review_note?`<div class="team-review-note"><strong>Review note</strong><span>${esc(t.review_note)}</span></div>`:''}
       ${t.proof_note?`<div class="team-proof-note"><strong>Proof note</strong><span>${esc(t.proof_note)}</span></div>`:''}
@@ -5265,6 +5267,17 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const {error}=await c.from('nexa_team_members').delete().eq('team_id',t.id).eq('user_id',memberId);
     if(error){console.error(error);toast(error.message||'Could not remove the member.','error');return;}
     toast(`${m.display_name||'Member'} removed. Their open work is now unassigned.`);await refreshCurrentTeam();
+  }
+  async function deleteCompletedTeamTask(id){
+    const c=client(),t=currentTeam(),task=teamTasks.find(x=>x.id===id);if(!c||!t||!task||currentRole()!=='head')return;
+    if(task.status!=='approved'){toast('Only approved tasks can be deleted.','error');return;}
+    if(typeof nexaConfirm==='function' && !(await nexaConfirm(`Delete “${task.title}”? This completed team task will be removed.`,{title:'Delete completed task',kicker:'DANGER ZONE',danger:true})))return;
+    const proofPath=task.proof_path||null;
+    const {error}=await c.rpc('delete_nexa_team_task',{p_task_id:id});
+    if(error){console.error(error);toast(error.message||'Could not delete the completed task.','error');return;}
+    if(proofPath){try{await c.storage.from('nexa-files').remove([proofPath]);}catch(e){console.warn('Completed task proof cleanup failed',e)}}
+    toast('Completed task deleted.');
+    await refreshCurrentTeam();
   }
   function openTeamEdit(id){
     const role=currentRole(),t=currentTeam(),task=teamTasks.find(x=>x.id===id);if(role!=='head'||!t||!task)return;
