@@ -5096,8 +5096,11 @@ document.querySelectorAll(".modal").forEach(modal=>{
     $('teamRolePill').textContent=role==='head'?'Head':'Member';
     $('teamJoinCode').textContent=t.join_code;
     $('teamJoinCode').dataset.inviteLink=teamInviteLink(t.join_code);
-    $('teamMemberCount').textContent=String(teamMembers.length);
-    $('teamMembersList').innerHTML=teamMembers.length?teamMembers.map(m=>`<div class="team-member-row"><div class="team-member-avatar">${esc((m.display_name||'M').charAt(0).toUpperCase())}</div><div><strong>${esc(m.display_name||'Member')}</strong><small>${m.role==='head'?'Head':'Member'}</small></div></div>`).join(''):'<div class="team-empty-mini">No members yet. Share the join code.</div>';
+    const memberMarkup=teamMembers.length?teamMembers.map(m=>`<div class="team-member-row"><div class="team-member-avatar">${esc((m.display_name||'M').charAt(0).toUpperCase())}</div><div><strong>${esc(m.display_name||'Member')}</strong><small>${m.role==='head'?'Head':'Member'}</small></div></div>`).join(''):'<div class="team-empty-mini">No members yet. Share the join code.</div>';
+    $('teamMembersList').innerHTML=memberMarkup;
+    const memberCount=$('teamMemberCount'); if(memberCount) memberCount.textContent=String(teamMembers.length);
+    const toggleCount=$('teamMembersToggleCount'); if(toggleCount) toggleCount.textContent=String(teamMembers.length);
+    const drawerMeta=$('teamMembersDrawerMeta'); if(drawerMeta) drawerMeta.textContent=`${teamMembers.length} ${teamMembers.length===1?'person':'people'}`;
     const head=$('teamHeadPanel');
     head.style.display=role==='head'?'block':'none';
     if(role==='head'){
@@ -5207,6 +5210,25 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
   function openCreate(){openModal('teamCreateModal');setTimeout(()=>$('teamCreateName')?.focus(),30)}
   function openJoin(){openModal('teamJoinModal');setTimeout(()=>$('teamJoinInput')?.focus(),30)}
+  const toggleMembersDrawer=()=>{
+    const drawer=$('teamMembersDrawer'),backdrop=$('teamMembersBackdrop'),toggle=$('teamMembersToggle');
+    if(!drawer)return;
+    const open=drawer.classList.toggle('open');
+    drawer.setAttribute('aria-hidden',String(!open));
+    if(backdrop){backdrop.hidden=!open;backdrop.classList.toggle('visible',open);}
+    if(toggle){toggle.setAttribute('aria-expanded',String(open));toggle.classList.toggle('is-open',open);}
+  };
+  const closeMembersDrawer=()=>{
+    const drawer=$('teamMembersDrawer'),backdrop=$('teamMembersBackdrop'),toggle=$('teamMembersToggle');
+    if(drawer) {drawer.classList.remove('open');drawer.setAttribute('aria-hidden','true');}
+    if(backdrop){backdrop.hidden=true;backdrop.classList.remove('visible');}
+    if(toggle){toggle.setAttribute('aria-expanded','false');toggle.classList.remove('is-open');}
+  };
+  $('teamMembersToggle')?.addEventListener('click',toggleMembersDrawer);
+  $('teamMembersClose')?.addEventListener('click',closeMembersDrawer);
+  $('teamMembersBackdrop')?.addEventListener('click',closeMembersDrawer);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMembersDrawer()});
+
   $('teamCreateOpen')?.addEventListener('click',openCreate);$('teamCreateOpenAlt')?.addEventListener('click',openCreate);$('teamJoinOpen')?.addEventListener('click',openJoin);$('teamJoinOpenAlt')?.addEventListener('click',openJoin);
   $('teamCreateClose')?.addEventListener('click',()=>closeModal('teamCreateModal'));$('teamJoinClose')?.addEventListener('click',()=>closeModal('teamJoinModal'));$('teamProofClose')?.addEventListener('click',()=>closeModal('teamProofModal'));
   $('teamCreateForm')?.addEventListener('submit',createTeam);$('teamJoinForm')?.addEventListener('submit',e=>{e.preventDefault();joinTeam()});$('teamTaskForm')?.addEventListener('submit',createTeamTask);$('teamProofSubmit')?.addEventListener('click',submitTeamProof);
