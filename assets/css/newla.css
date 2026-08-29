@@ -12311,3 +12311,9 @@ body.light .team-session-item strong{color:#3f352b}
 .team-danger-action{color:#d4877c!important;border-color:rgba(184,88,77,.45)!important;background:transparent!important}
 .team-danger-action:hover{color:#ff8f80!important;border-color:rgba(221,108,94,.7)!important}
 @media(max-width:620px){.team-team-danger-zone{align-items:flex-start;flex-direction:column}.team-danger-action{width:100%}}
+
+.about-social-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.about-github{display:inline-flex;align-items:center;gap:8px;color:#cfc7b9;border:1px solid #473f34;border-radius:12px;padding:10px 14px;text-decoration:none;transition:color .18s ease,border-color .18s ease}
+.about-github svg{width:15px;height:15px;fill:currentColor}
+.about-github:hover,.about-github:focus-visible{color:#f0ebe1;border-color:#756755}
+@media (max-width:640px){.about-social-links{width:100%}.about-github,.about-linkedin{width:fit-content}}
