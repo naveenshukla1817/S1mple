@@ -650,7 +650,7 @@ Write your notes here..."></textarea>
       <div class="team-code-wrap">
         <span class="kicker">JOIN CODE</span>
         <strong id="teamJoinCode">—</strong>
-        <div class="team-code-actions"><button class="team-copy-btn" id="teamCopyCode" type="button">Copy code</button><button class="team-copy-btn" id="teamCopyLink" type="button">Copy invite link</button><button class="team-copy-btn team-regenerate-btn" id="teamRegenerateCode" type="button">Regenerate</button></div>
+        <div class="team-code-actions"><button class="team-copy-btn" id="teamCopyCode" type="button">Copy code</button><button class="team-copy-btn" id="teamCopyLink" type="button">Copy invite link</button><button class="team-copy-btn team-regenerate-btn" id="teamRegenerateCode" type="button">Regenerate</button></div><small id="teamInviteMeta" class="team-invite-meta"></small>
       </div>
       <div class="team-head-tools">
         <button class="team-icon-btn" id="teamNotificationsToggle" type="button" aria-label="Team notifications" aria-expanded="false"><i data-lucide="bell"></i><span id="teamNotificationCount" class="team-notification-dot" hidden>0</span></button>
@@ -712,7 +712,7 @@ Write your notes here..."></textarea>
     </section>
 
     <section class="team-panel dark-card team-activity-panel team-activity-last">
-      <div class="team-panel-head team-activity-head"><div><p class="kicker">ACTIVITY</p><h2>What changed</h2></div><button id="teamActivityClear" class="team-icon-btn team-activity-clear" type="button" aria-label="Clear team activity" title="Clear activity"><i data-lucide="trash-2"></i></button></div>
+      <div class="team-panel-head team-activity-head"><div><p class="kicker">ACTIVITY</p><h2>What changed</h2></div><div class="team-activity-actions"><button id="teamExportCsv" class="team-task-btn" type="button">CSV</button><button id="teamExportPdf" class="team-task-btn" type="button">PDF</button><button id="teamActivityClear" class="team-icon-btn team-activity-clear" type="button" aria-label="Clear team activity" title="Clear activity"><i data-lucide="trash-2"></i></button></div></div>
       <div id="teamActivityList" class="team-activity-list"></div>
     </section>
 
@@ -765,7 +765,17 @@ Write your notes here..."></textarea>
     <div class="nexa-info-head"><div><p class="kicker">TEAM SETTINGS</p><h2 id="teamSettingsTitle">Team settings</h2></div><button class="btn-light" id="teamSettingsClose" type="button">×</button></div>
     <form id="teamSettingsForm" class="team-task-form">
       <label>Team name<input id="teamSettingsName" maxlength="80" required/></label>
-      <label>Description<textarea id="teamSettingsDescription" rows="3" maxlength="240"></textarea></label>
+      <p class="team-modal-note">Team description is kept intentionally minimal on the workspace.</p>
+      <section class="team-security-block" aria-labelledby="teamSecurityTitle">
+        <div><p class="kicker">SECURITY</p><h3 id="teamSecurityTitle">Invite & access control</h3></div>
+        <div class="team-form-grid team-security-grid">
+          <label>Invite expires<select id="teamInviteExpiry"><option value="1">1 hour</option><option value="24">24 hours</option><option value="168">7 days</option><option value="0">Never</option></select></label>
+          <label>Maximum uses<select id="teamInviteMaxUses"><option value="1">1 use</option><option value="5">5 uses</option><option value="10">10 uses</option><option value="25">25 uses</option><option value="0">Unlimited</option></select></label>
+        </div>
+        <div class="team-security-actions"><button class="team-task-btn" id="teamInvitePolicySave" type="button">Save invite policy</button><button class="team-task-btn" id="teamSecurityRefresh" type="button">Refresh access</button></div>
+        <p class="team-modal-note" id="teamInvitePolicyNote">New invite links expire automatically and can be capped by use count.</p>
+        <div class="team-session-list-wrap"><div class="team-panel-head"><div><p class="kicker">RECENT ACCESS</p><h3>Sessions & devices</h3></div></div><div id="teamSessionList" class="team-session-list"></div></div>
+      </section>
       <p class="team-modal-note" id="teamSettingsRoleNote"></p>
       <button class="btn-accent" id="teamSettingsSave" type="submit">Save changes</button>
     </form>
