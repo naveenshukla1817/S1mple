@@ -5069,6 +5069,12 @@ document.querySelectorAll(".modal").forEach(modal=>{
   async function refreshCurrentTeam(){
     const c=client(),t=currentTeam();
     if(!c||!t){teamMembers=[];teamTasks=[];renderTeamShell();return;}
+    // Keep the team display name aligned with the canonical Newla profile name.
+    // The RPC is security-definer so members can refresh only their own name safely.
+    const displayName=String(window.NEXA_DISPLAY_NAME||'').trim();
+    if(displayName){
+      try{ await c.rpc('sync_nexa_team_member_display_name',{p_display_name:displayName}); }catch(e){ console.warn('Team member name sync skipped',e); }
+    }
     const [m,tt]=await Promise.all([
       c.from('nexa_team_members').select('id,team_id,user_id,display_name,role,joined_at').eq('team_id',t.id).order('joined_at',{ascending:true}),
       c.from('nexa_team_tasks').select('id,team_id,created_by,assigned_to,title,description,priority,due_date,proof_required,status,proof_path,proof_note,review_note,submitted_at,reviewed_at,created_at,updated_at').eq('team_id',t.id).order('created_at',{ascending:false})
@@ -5129,10 +5135,9 @@ document.querySelectorAll(".modal").forEach(modal=>{
       <div class="team-task-actions">${startButton}${proofButton}${reviewButtons}${proofPreview}</div>
     </article>`;
   }
-  async function createTeam(e){
-    e?.preventDefault();
-    const c=client(),u=user();
-    if(!c||!u)return;
+  async function createTeam(){
+    const c=client();
+    if(!c||!user())return;
     const name=$('teamCreateName').value.trim(),description=$('teamCreateDescription').value.trim();
     if(!name){toast('Give your team a name.','error');return;}
     let result=null,lastError=null;
@@ -5191,7 +5196,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     try{
       const response=await fetch(teamProofData);const blob=await response.blob();const path=`${u.id}/team/${t.id}/${task.id}.jpg`;
       const up=await c.storage.from('nexa-files').upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});if(up.error)throw up.error;
-      const {error}=await c.from('nexa_team_tasks').update({proof_path:path,proof_note:$('teamProofNote').value.trim()||null,status:'submitted',submitted_at:new Date().toISOString(),review_note:null,reviewed_at:null,updated_at:new Date().toISOString()}).eq('id',task.id);if(error)throw error;
+      const {error}=await c.from('nexa_team_tasks').update({proof_path:path,proof_note:$('teamProofNote').value.trim()||null,status:'submitted',submitted_at:new Date().toISOString(),review_note:null,updated_at:new Date().toISOString()}).eq('id',task.id);if(error)throw error;
       closeModal('teamProofModal');toast('Proof submitted. It is now waiting for review.');await refreshCurrentTeam();
     }catch(error){console.error(error);toast(typeof friendlyCloudError==='function'?friendlyCloudError(error):'Proof could not be submitted.','error');btn.disabled=false;btn.textContent='Submit proof';}
   }
