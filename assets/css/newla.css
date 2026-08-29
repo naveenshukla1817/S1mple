@@ -12276,3 +12276,32 @@ body.light .team-proof-filter-btn.active{background:#fffaf2;color:#3f352b;border
   .team-workspace > .team-grid,
   .team-workspace > .team-tasks-panel{margin-bottom:12px;}
 }
+
+/* P3: team proof control polish */
+.team-proof-required strong{color:#4da3ff!important;font-size:10px!important;font-weight:400!important;letter-spacing:.01em}
+.team-activity-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.team-activity-actions .team-task-btn{min-height:34px}
+.team-invite-meta{display:block;margin-top:2px;color:#756d62;font-size:8px;line-height:1.35;text-align:right;max-width:280px}
+.team-security-block{display:grid;gap:12px;padding:12px;border:1px solid #3d372f;border-radius:12px;background:#211f1a}
+.team-security-block h3{margin:0;color:#eee5d6;font-family:Georgia,serif;font-size:18px}
+.team-security-grid{grid-template-columns:1fr 1fr}
+.team-security-actions{display:flex;gap:7px;flex-wrap:wrap}
+.team-security-actions .team-task-btn:hover{transform:none}
+.team-session-list-wrap{display:grid;gap:8px}
+.team-session-list{display:grid;gap:6px;max-height:220px;overflow:auto}
+.team-session-item{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:9px 10px;border:1px solid #38332c;border-radius:9px;background:#1c1a17}
+.team-session-item strong{display:block;font-size:10px;color:#eee5d6}
+.team-session-item small{display:block;margin-top:2px;color:#8f877b;font-size:8px;line-height:1.35}
+.team-session-item.suspicious{border-color:#76514a}
+.team-session-flag{display:inline-block;margin-top:4px;padding:3px 5px;border-radius:999px;border:1px solid #76514a;color:#df9289!important;font-size:7px!important}
+body.light .team-invite-meta{color:#83776a}
+body.light .team-security-block{background:#f4ede3;border-color:#d8cbbb}
+body.light .team-security-block h3{color:#3f352b}
+body.light .team-session-item{background:#f9f3ea;border-color:#d8cbbb}
+body.light .team-session-item strong{color:#3f352b}
+@media(max-width:620px){
+  .team-security-grid{grid-template-columns:1fr}
+  .team-activity-actions{justify-content:flex-end}
+  .team-invite-meta{text-align:left}
+  .team-session-item{align-items:flex-start;flex-direction:column}
+}
