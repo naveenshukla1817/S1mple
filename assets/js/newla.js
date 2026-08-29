@@ -977,6 +977,17 @@ async function taskAction(action,id) {
   }
 
   if (action==="delete") {
+    // Completed personal tasks are permanent/completed history items: remove directly.
+    // Open/pending tasks keep the reason-required soft-delete flow.
+    if (task.status === "completed") {
+      tasks = tasks.filter(t => t.id !== id);
+      save(KEYS.TASKS, tasks);
+      renderAll();
+      renderDashboard();
+      renderV2Dashboard();
+      toast("Completed task deleted.");
+      return;
+    }
     openDeleteReasonModal(task);
   }
 }
@@ -5043,6 +5054,9 @@ document.querySelectorAll(".modal").forEach(modal=>{
   let teamProofFilter='all';
   let teamActivity=[];
   let teamNotifications=[];
+  let activeInviteInfo={};
+  let teamSessions=[];
+  const sessionRecorded=new Set();
 
   const TEAM_STATUSES={assigned:'Assigned',in_progress:'In progress',submitted:'Awaiting review',approved:'Approved',changes_requested:'Changes requested'};
   const TEAM_STATUS_CLASS={assigned:'assigned',in_progress:'progress',submitted:'submitted',approved:'approved',changes_requested:'changes'};
@@ -5075,6 +5089,8 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const c=client(),t=currentTeam(),u=user();
     if(!c||!t){teamMembers=[];teamTasks=[];activeJoinCode='';renderTeamShell();return;}
     activeJoinCode='';
+    activeInviteInfo={};
+    teamSessions=[];
     // Keep the team display name aligned with the canonical Newla profile name.
     // The RPC is security-definer so members can refresh only their own name safely.
     const displayName=String(window.NEXA_DISPLAY_NAME||'').trim();
@@ -5096,10 +5112,29 @@ document.querySelectorAll(".modal").forEach(modal=>{
       try {
         const {data:invite,error:inviteError}=await c.rpc('get_nexa_team_invite_info',{p_team_id:t.id});
         if(inviteError) throw inviteError;
-        activeJoinCode=invite?.[0]?.join_code||'';
+        activeInviteInfo=invite?.[0]||{};
+        activeJoinCode=activeInviteInfo.join_code||'';
       } catch(e) { console.warn('Team invite info load failed',e); }
     }
+    if(role==='head') {
+      try {
+        const {data:sessions,error:sessionError}=await c.rpc('get_nexa_team_sessions',{p_team_id:t.id});
+        if(!sessionError) teamSessions=sessions||[];
+      } catch(e) { console.warn('Team sessions load failed',e); }
+    }
     renderTeamShell();
+    const sessionKey=`${t.id}:${u.id}`;
+    if(!sessionRecorded.has(sessionKey)) {
+      sessionRecorded.add(sessionKey);
+      const deviceId=localStorage.getItem('nexa_device_id')||(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random());
+      localStorage.setItem('nexa_device_id',deviceId);
+      const ua=navigator.userAgent||'';
+      const deviceLabel=/Mobile|Android|iPhone|iPad/i.test(ua)?'Mobile device':'Desktop browser';
+      c.rpc('record_nexa_team_session',{p_team_id:t.id,p_device_id:deviceId,p_device_label:deviceLabel,p_user_agent:ua}).then(r=>{
+        if(r?.data?.[0]?.is_suspicious && currentRole()==='head') toast('A new device accessed this team.','error');
+        if(currentRole()==='head') c.rpc('get_nexa_team_sessions',{p_team_id:t.id}).then(x=>{if(!x.error){teamSessions=x.data||[];renderTeamSecurity();}});
+      }).catch(e=>console.warn('Team session record skipped',e));
+    }
   }
   function setMembersPopover(open){
     const pop=$('teamMembersPopover'), trigger=$('teamMembersToggle');
@@ -5138,6 +5173,14 @@ document.querySelectorAll(".modal").forEach(modal=>{
     if(codeWrap) codeWrap.style.display=role==='head'&&code?'grid':'none';
     if($('teamJoinCode')) $('teamJoinCode').textContent=code||'—';
     if($('teamJoinCode')) $('teamJoinCode').dataset.inviteLink=code?teamInviteLink(code):'';
+    const inviteMeta=$('teamInviteMeta');
+    if(inviteMeta){
+      if(role==='head'&&code){
+        const expires=activeInviteInfo.invite_expires_at?new Date(activeInviteInfo.invite_expires_at).toLocaleString():'Never';
+        const max=Number(activeInviteInfo.invite_max_uses||0), used=Number(activeInviteInfo.invite_used_count||0);
+        inviteMeta.textContent=`${max?`${used}/${max} uses`:'Unlimited uses'} · expires ${expires}`;
+      } else inviteMeta.textContent='';
+    }
     $('teamMemberCount').textContent=String(teamMembers.length);
     $('teamSummaryName').textContent=t.name||'Team';
     const summaryDescription=$('teamSummaryDescription'); if(summaryDescription) summaryDescription.textContent=t.description||'No description yet.';
@@ -5146,6 +5189,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     $('teamSettingsOpen').style.display=role==='head'?'inline-flex':'none';
     $('teamRegenerateCode').style.display=role==='head'?'inline-flex':'none';
     const activityClear=$('teamActivityClear'); if(activityClear) activityClear.style.display=role==='head'?'inline-flex':'none';
+    const expCsv=$('teamExportCsv'),expPdf=$('teamExportPdf'); if(expCsv) expCsv.style.display=role==='head'?'inline-flex':'none'; if(expPdf) expPdf.style.display=role==='head'?'inline-flex':'none';
     renderTeamMembersPopover();
     renderTeamActivity();
     renderTeamAttention();
@@ -5220,6 +5264,39 @@ document.querySelectorAll(".modal").forEach(modal=>{
     teamActivity=[];
     renderTeamActivity();
     toast('Activity cleared.','success');
+  }
+  function renderTeamSecurity(){
+    const list=$('teamSessionList');
+    if(list){
+      list.innerHTML=teamSessions.length?teamSessions.slice(0,12).map(s=>`<div class="team-session-item ${s.is_suspicious?'suspicious':''}"><div><strong>${esc(s.display_name||'Member')}</strong><small>${esc(s.role==='head'?'Head':'Member')} · ${esc(s.device_label||'Unknown device')}</small></div><div><small>${new Date(s.last_seen_at).toLocaleString()}</small>${s.is_suspicious?'<span class="team-session-flag">New device</span>':''}</div></div>`).join(''):'<div class="team-empty-mini">No team access recorded yet.</div>';
+    }
+    const ex=$('teamInviteExpiry'),mu=$('teamInviteMaxUses');
+    if(ex) ex.value=activeInviteInfo.invite_expires_at===null?'0':(activeInviteInfo.invite_expires_at?'168':'0');
+    if(mu) mu.value=String(activeInviteInfo.invite_max_uses??10);
+  }
+  async function saveInvitePolicy(){
+    const c=client(),t=currentTeam(); if(!c||!t||currentRole()!=='head')return;
+    const expiry=Number($('teamInviteExpiry')?.value||24), maxUses=Number($('teamInviteMaxUses')?.value||10);
+    const {data,error}=await c.rpc('update_nexa_team_invite_policy',{p_team_id:t.id,p_expiry_hours:expiry,p_max_uses:maxUses});
+    if(error){toast(error.message||'Could not save invite policy.','error');return;}
+    activeInviteInfo={...activeInviteInfo,...(data?.[0]||{})}; renderTeamShell(); renderTeamSecurity(); toast('Invite security updated.');
+  }
+  function exportTeamCsv(){
+    const t=currentTeam(); if(!t||currentRole()!=='head')return;
+    const header=['Task','Member','Assigned date','Submitted date','Approved date','Status'];
+    const rows=teamTasks.map(x=>[x.title,assigneeName(x.assigned_to)||'Unassigned',x.created_at?new Date(x.created_at).toLocaleString():'',x.submitted_at?new Date(x.submitted_at).toLocaleString():'',x.status==='approved'&&x.reviewed_at?new Date(x.reviewed_at).toLocaleString():'',TEAM_STATUSES[x.status]||x.status]);
+    const escCsv=v=>`"${String(v??'').replaceAll('"','""')}"`;
+    const csv=[header.join(','),...rows.map(r=>r.map(escCsv).join(','))].join('\n');
+    const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download=`newla-${t.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-team-report.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Team report exported as CSV.');
+  }
+  function exportTeamPdf(){
+    const t=currentTeam(); if(!t||currentRole()!=='head')return;
+    const rows=teamTasks.map(x=>`<tr><td>${esc(x.title)}</td><td>${esc(assigneeName(x.assigned_to)||'Unassigned')}</td><td>${x.created_at?new Date(x.created_at).toLocaleString():''}</td><td>${x.submitted_at?new Date(x.submitted_at).toLocaleString():''}</td><td>${x.status==='approved'&&x.reviewed_at?new Date(x.reviewed_at).toLocaleString():''}</td><td>${esc(TEAM_STATUSES[x.status]||x.status)}</td></tr>`).join('');
+    const activity=teamActivity.map(a=>`<li>${esc(a.message)} <small>${new Date(a.created_at).toLocaleString()}</small></li>`).join('');
+    const w=window.open('','_blank');
+    if(!w){toast('Allow popups to export the PDF report.','error');return;}
+    w.document.write(`<!doctype html><html><head><title>${esc(t.name)} — Newla team report</title><style>body{font-family:Arial,sans-serif;color:#222;padding:32px}h1{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #ccc;padding:7px;text-align:left}th{background:#eee}small{color:#666}section{margin-top:28px}</style></head><body><h1>${esc(t.name)}</h1><p>Newla team report · ${new Date().toLocaleString()}</p><h2>Work</h2><table><thead><tr><th>Task</th><th>Member</th><th>Assigned date</th><th>Submitted date</th><th>Approved date</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6">No team tasks.</td></tr>'}</tbody></table><section><h2>Activity</h2><ul>${activity||'<li>No activity.</li>'}</ul></section><script>window.onload=()=>window.print();</script></body></html>`);w.document.close();
   }
   function renderTeamNotifications(){
     const list=$('teamNotificationsList');if(!list)return;
@@ -5378,7 +5455,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
   function openTeamSettings(){
     const t=currentTeam();if(!t||currentRole()!=='head')return;
-    $('teamSettingsName').value=t.name||'';$('teamSettingsDescription').value=t.description||'';$('teamSettingsRoleNote').textContent='Only the team head can change workspace settings.';openModal('teamSettingsModal');
+    $('teamSettingsName').value=t.name||'';$('teamSettingsDescription').value=t.description||'';$('teamSettingsRoleNote').textContent='Only the team head can change workspace settings.';renderTeamSecurity();openModal('teamSettingsModal');
   }
   async function saveTeamSettings(e){
     e.preventDefault();const c=client(),t=currentTeam();if(!c||!t||currentRole()!=='head')return;
@@ -5403,6 +5480,10 @@ document.querySelectorAll(".modal").forEach(modal=>{
   $('teamMembersClose')?.addEventListener('click',()=>setMembersPopover(false));
   $('teamNotificationsToggle')?.addEventListener('click',async()=>{const pop=$('teamNotificationsPopover');pop?.classList.toggle('open');pop?.setAttribute('aria-hidden',pop?.classList.contains('open')?'false':'true');if(pop?.classList.contains('open')){await client()?.rpc('mark_nexa_team_notifications_read',{p_team_id:currentTeam()?.id||null});teamNotifications.forEach(n=>{n.read_at=n.read_at||new Date().toISOString()});renderTeamNotifications();const dot=$('teamNotificationCount');if(dot)dot.hidden=true;}});
   $('teamActivityClear')?.addEventListener('click',clearTeamActivity);
+  $('teamExportCsv')?.addEventListener('click',exportTeamCsv);
+  $('teamExportPdf')?.addEventListener('click',exportTeamPdf);
+  $('teamInvitePolicySave')?.addEventListener('click',saveInvitePolicy);
+  $('teamSecurityRefresh')?.addEventListener('click',async()=>{const t=currentTeam();if(!t||currentRole()!=='head')return;const r=await client()?.rpc('get_nexa_team_sessions',{p_team_id:t.id});if(!r?.error){teamSessions=r.data||[];renderTeamSecurity();}});
   $('teamNotificationsClose')?.addEventListener('click',()=>{$('teamNotificationsPopover')?.classList.remove('open')});
   $('teamSettingsOpen')?.addEventListener('click',openTeamSettings);
   $('teamSettingsClose')?.addEventListener('click',()=>closeModal('teamSettingsModal'));
