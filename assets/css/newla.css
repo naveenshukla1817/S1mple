@@ -11821,7 +11821,20 @@ body.light .about-setting-trigger:focus-visible { border-color: #b6a993; }
 #view-about { padding-bottom: 34px; }
 .about-hero-row { align-items: flex-start; }
 .about-hero-note { max-width: 620px; }
-.about-back { flex: 0 0 auto; margin-top: 4px; }
+.about-back {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  position: sticky;
+  top: 78px;
+  z-index: 22;
+  transition: .18s ease;
+  box-shadow: 0 10px 24px rgba(20,16,12,.10);
+}
+.about-back:hover,
+.about-back:focus-visible {
+  transform: translateY(-1px) scale(1.03);
+}
+body.light .about-back { box-shadow: 0 10px 24px rgba(74,57,38,.12); }
 .about-page { max-width: 1120px; margin: 24px auto 0; display: grid; gap: 16px; }
 .about-card {
   border: 1px solid #353028;
@@ -11954,4 +11967,17 @@ body.light #view-about .about-linkedin { color:#574c40; background:#fbf5e9; bord
   .about-setting-trigger,
   .about-open-row,
   .about-linkedin { transition: none !important; }
+}
+
+
+/* ---------- ABOUT BACK BUTTON PIN ---------- */
+.about-hero-row .about-back {
+  position: sticky;
+  top: 78px;
+}
+@media (max-width: 760px) {
+  .about-hero-row .about-back {
+    top: 72px;
+    margin-top: 0;
+  }
 }
