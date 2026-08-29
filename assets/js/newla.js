@@ -5145,6 +5145,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const notifDot=$('teamNotificationCount'); if(notifDot){notifDot.textContent=String(unread);notifDot.hidden=!unread;}
     $('teamSettingsOpen').style.display=role==='head'?'inline-flex':'none';
     $('teamRegenerateCode').style.display=role==='head'?'inline-flex':'none';
+    const activityClear=$('teamActivityClear'); if(activityClear) activityClear.style.display=role==='head'?'inline-flex':'none';
     renderTeamMembersPopover();
     renderTeamActivity();
     renderTeamAttention();
@@ -5209,6 +5210,17 @@ document.querySelectorAll(".modal").forEach(modal=>{
   function renderTeamActivity(){
     const list=$('teamActivityList');if(!list)return;
     list.innerHTML=teamActivity.length?teamActivity.slice(0,10).map(a=>`<div class="team-activity-item"><span class="team-activity-dot"></span><div><strong>${esc(a.message)}</strong><small>${new Date(a.created_at).toLocaleString()}</small></div></div>`).join(''):`<div class="team-empty-mini">Your team activity will appear here.</div>`;
+  }
+  async function clearTeamActivity(){
+    const c=client(),t=currentTeam();
+    if(!c||!t||currentRole()!=='head')return;
+    if(!teamActivity.length){toast('Activity is already clear.','info');return;}
+    if(!window.confirm("Clear this team's activity history?"))return;
+    const {error}=await c.rpc('clear_nexa_team_activity',{p_team_id:t.id});
+    if(error){console.warn('Clear team activity failed',error);toast('Could not clear activity.','error');return;}
+    teamActivity=[];
+    renderTeamActivity();
+    toast('Activity cleared.','success');
   }
   function renderTeamNotifications(){
     const list=$('teamNotificationsList');if(!list)return;
@@ -5391,6 +5403,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   });
   $('teamMembersClose')?.addEventListener('click',()=>setMembersPopover(false));
   $('teamNotificationsToggle')?.addEventListener('click',async()=>{const pop=$('teamNotificationsPopover');pop?.classList.toggle('open');pop?.setAttribute('aria-hidden',pop?.classList.contains('open')?'false':'true');if(pop?.classList.contains('open')){await client()?.rpc('mark_nexa_team_notifications_read',{p_team_id:currentTeam()?.id||null});teamNotifications.forEach(n=>{n.read_at=n.read_at||new Date().toISOString()});renderTeamNotifications();const dot=$('teamNotificationCount');if(dot)dot.hidden=true;}});
+  $('teamActivityClear')?.addEventListener('click',clearTeamActivity);
   $('teamNotificationsClose')?.addEventListener('click',()=>{$('teamNotificationsPopover')?.classList.remove('open')});
   $('teamSettingsOpen')?.addEventListener('click',openTeamSettings);
   $('teamSettingsClose')?.addEventListener('click',()=>closeModal('teamSettingsModal'));
