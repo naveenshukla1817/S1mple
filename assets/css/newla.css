@@ -8675,6 +8675,106 @@ body.light #view-calendar .calendar-day-view-v11 {
 }
 
 
+
+/* ---------- ABOUT / CREATOR ---------- */
+#view-settings .setting-about {
+  grid-column: 1 / -1;
+  min-height: 225px;
+}
+#view-settings .about-proof-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: #5b5145;
+  font-size: 12px;
+  font-weight: 700;
+}
+#view-settings .about-proof-line span:nth-child(even) {
+  color: #a4937b;
+  font-weight: 500;
+}
+#view-settings .about-footer {
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 1px solid #d9c9af;
+}
+#view-settings .about-brandline {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+#view-settings .about-brandline strong {
+  font-family: Georgia, serif;
+  font-size: 17px;
+  color: #2d2822;
+}
+#view-settings .about-brandline span {
+  color: #8a7c6a;
+  font-size: 10px;
+}
+#view-settings .about-linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid #cfbea1;
+  border-radius: 10px;
+  color: #574c40;
+  background: #fbf5e9;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 800;
+  transition: .18s ease;
+  flex: 0 0 auto;
+}
+#view-settings .about-linkedin svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+#view-settings .about-arrow {
+  font-size: 12px;
+  line-height: 1;
+}
+#view-settings .about-linkedin:hover {
+  color: #68885d;
+  border-color: #8ca981;
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 8px 18px rgba(72, 101, 64, .12);
+}
+body:not(.light) #view-settings .setting-about {
+  background: linear-gradient(180deg, #242019 0%, #211e19 100%);
+  border-color: #3d372e;
+}
+body:not(.light) #view-settings .about-proof-line { color: #ded2c1; }
+body:not(.light) #view-settings .about-proof-line span:nth-child(even) { color: #9d8d76; }
+body:not(.light) #view-settings .about-footer { border-top-color: #3d372e; }
+body:not(.light) #view-settings .about-brandline strong { color: #f0e6d7; }
+body:not(.light) #view-settings .about-brandline span { color: #9c9080; }
+body:not(.light) #view-settings .about-linkedin {
+  color: #ded2c1;
+  background: #1d1a16;
+  border-color: #40382e;
+}
+body:not(.light) #view-settings .about-linkedin:hover {
+  color: #b6d77d;
+  border-color: #66805a;
+  box-shadow: 0 8px 18px rgba(89, 119, 77, .18);
+}
+@media (max-width: 760px) {
+  #view-settings .setting-about { grid-column: auto; min-height: 0; }
+  #view-settings .about-footer { align-items: flex-start; flex-direction: column; }
+  #view-settings .about-brandline { flex-wrap: wrap; }
+  #view-settings .about-linkedin { width: fit-content; }
+}
+
 /* Source style block 27 */
 
 #view-settings .hero-row {
