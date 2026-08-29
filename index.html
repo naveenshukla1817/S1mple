@@ -653,6 +653,14 @@ Write your notes here..."></textarea>
       </div>
     </div>
 
+    <div class="team-overview" id="teamOverview" aria-label="Team overview">
+      <div class="team-stat"><span>Members</span><strong id="teamStatMembers">0</strong></div>
+      <div class="team-stat"><span>Assigned</span><strong id="teamStatAssigned">0</strong></div>
+      <div class="team-stat"><span>In progress</span><strong id="teamStatProgress">0</strong></div>
+      <div class="team-stat"><span>Awaiting review</span><strong id="teamStatReview">0</strong></div>
+      <div class="team-stat"><span>Approved</span><strong id="teamStatApproved">0</strong></div>
+    </div>
+
     <div class="team-grid">
       <section class="team-panel dark-card" id="teamHeadPanel" style="display:none">
         <div class="team-panel-head"><div><p class="kicker">HEAD</p><h2>Assign work</h2></div></div>
@@ -671,8 +679,22 @@ Write your notes here..."></textarea>
     </div>
 
     <section class="team-panel dark-card team-tasks-panel">
-      <div class="team-panel-head"><div><p class="kicker">TEAM WORK</p><h2>Tasks</h2></div><span id="teamTaskCount" class="team-count">0</span></div>
+      <div class="team-panel-head team-task-panel-head">
+        <div><p class="kicker">TEAM WORK</p><h2>Tasks</h2></div>
+        <div class="team-task-panel-tools">
+          <div class="team-view-switch" role="tablist" aria-label="Task view">
+            <button id="teamViewMyWork" type="button" class="team-view-btn" role="tab">My Work</button>
+            <button id="teamViewAll" type="button" class="team-view-btn active" role="tab">Team Tasks</button>
+          </div>
+          <span id="teamTaskCount" class="team-count">0</span>
+        </div>
+      </div>
       <div id="teamTasksList" class="team-tasks-list"></div>
+    </section>
+
+    <section class="team-panel dark-card team-proof-wall-panel" id="teamProofWallPanel" style="display:none">
+      <div class="team-panel-head"><div><p class="kicker">PROOF WALL</p><h2>Latest submissions</h2></div><span id="teamProofWallCount" class="team-count">0</span></div>
+      <div id="teamProofWallList" class="team-proof-wall-list"></div>
     </section>
   </div>
 </section>
@@ -695,6 +717,24 @@ Write your notes here..."></textarea>
       <label>Join code<input id="teamJoinInput" maxlength="16" required placeholder="NLA-7K42Q" autocomplete="off"/></label>
       <p class="team-modal-note">You need a Newla account to join. Joining makes you a member of the team.</p>
       <button class="btn-accent" type="submit">Join team</button>
+    </form>
+  </div>
+</div>
+
+<div class="nexa-info-modal" id="teamEditModal" aria-hidden="true">
+  <div class="nexa-info-card team-modal-card" role="dialog" aria-modal="true" aria-labelledby="teamEditTitle">
+    <div class="nexa-info-head"><div><p class="kicker">TEAM TASK</p><h2 id="teamEditTitle">Edit task</h2></div><button class="btn-light" id="teamEditClose" type="button">×</button></div>
+    <form id="teamEditForm" class="team-task-form">
+      <input id="teamEditId" type="hidden"/>
+      <label>Task title<input id="teamEditTaskTitle" maxlength="140" required/></label>
+      <label>Description<textarea id="teamEditTaskDescription" rows="3"></textarea></label>
+      <div class="team-form-grid">
+        <label>Assign to<select id="teamEditAssignee"><option value="">Unassigned</option></select></label>
+        <label>Priority<select id="teamEditPriority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
+        <label>Due date<input id="teamEditDueDate" type="date"/></label>
+      </div>
+      <p id="teamEditLockNote" class="team-modal-note"></p>
+      <button class="btn-accent" type="submit">Save changes</button>
     </form>
   </div>
 </div>
