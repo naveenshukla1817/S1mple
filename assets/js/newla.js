@@ -5130,19 +5130,29 @@ document.querySelectorAll(".modal").forEach(modal=>{
     </article>`;
   }
   async function createTeam(){
-    const c=client(),u=user();if(!c||!u)return;
+    const c=client();
+    if(!c||!user())return;
     const name=$('teamCreateName').value.trim(),description=$('teamCreateDescription').value.trim();
     if(!name){toast('Give your team a name.','error');return;}
-    let created=null,err=null;
-    for(let i=0;i<5&&!created;i++){
-      const ins=await c.from('nexa_teams').insert({name,description:description||null,join_code:teamCode(),created_by:u.id}).select().single();
-      if(!ins.error){created=ins.data;break;} err=ins.error;
+    let result=null,lastError=null;
+    for(let i=0;i<8&&!result;i++){
+      const code=teamCode();
+      const rpc=await c.rpc('create_nexa_team',{p_name:name,p_description:description||null,p_join_code:code});
+      if(!rpc.error&&rpc.data?.length){result=rpc.data[0];break;}
+      lastError=rpc.error;
     }
-    if(!created){console.error(err);toast('Could not create the team. Please try again.','error');return;}
-    const dn=window.NEXA_DISPLAY_NAME||u.email?.split('@')[0]||'Head';
-    const mem=await c.from('nexa_team_members').insert({team_id:created.id,user_id:u.id,display_name:dn,role:'head'});
-    if(mem.error){await c.from('nexa_teams').delete().eq('id',created.id);console.error(mem.error);toast('Team creation could not be completed.','error');return;}
-    $('teamCreateName').value='';$('teamCreateDescription').value='';closeModal('teamCreateModal');activeTeamId=created.id;localStorage.setItem('nexa_active_team_id',activeTeamId);toast(`Team “${name}” created.`);await loadTeams();
+    if(!result){
+      console.error('Team creation failed:',lastError);
+      toast(lastError?.message||'Could not create the team. Please try again.','error');
+      return;
+    }
+    $('teamCreateName').value='';
+    $('teamCreateDescription').value='';
+    closeModal('teamCreateModal');
+    activeTeamId=result.team_id;
+    localStorage.setItem('nexa_active_team_id',activeTeamId);
+    toast(`Team “${name}” created.`);
+    await loadTeams();
   }
   async function joinTeam(){
     const c=client();if(!c)return;const code=$('teamJoinInput').value.trim().toUpperCase();if(!code)return;
@@ -5180,7 +5190,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     try{
       const response=await fetch(teamProofData);const blob=await response.blob();const path=`${u.id}/team/${t.id}/${task.id}.jpg`;
       const up=await c.storage.from('nexa-files').upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});if(up.error)throw up.error;
-      const {error}=await c.from('nexa_team_tasks').update({proof_path:path,proof_note:$('teamProofNote').value.trim()||null,status:'submitted',submitted_at:new Date().toISOString(),review_note:null,reviewed_at:null,updated_at:new Date().toISOString()}).eq('id',task.id);if(error)throw error;
+      const {error}=await c.from('nexa_team_tasks').update({proof_path:path,proof_note:$('teamProofNote').value.trim()||null,status:'submitted',submitted_at:new Date().toISOString(),review_note:null,updated_at:new Date().toISOString()}).eq('id',task.id);if(error)throw error;
       closeModal('teamProofModal');toast('Proof submitted. It is now waiting for review.');await refreshCurrentTeam();
     }catch(error){console.error(error);toast(typeof friendlyCloudError==='function'?friendlyCloudError(error):'Proof could not be submitted.','error');btn.disabled=false;btn.textContent='Submit proof';}
   }
