@@ -5215,7 +5215,6 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const c=client(),t=currentTeam();
     if(!c||!t||currentRole()!=='head')return;
     if(!teamActivity.length){toast('Activity is already clear.','info');return;}
-    if(!(await nexaConfirm("All activity entries for this team will be removed. This cannot be undone.",{title:"Clear activity history",kicker:"DANGER ZONE",danger:true,confirmText:"Clear activity",cancelText:"Keep activity"})))return;
     const {error}=await c.rpc('clear_nexa_team_activity',{p_team_id:t.id});
     if(error){console.warn('Clear team activity failed',error);toast('Could not clear activity.','error');return;}
     teamActivity=[];
