@@ -675,15 +675,9 @@ Write your notes here..."></textarea>
         <div id="teamAttentionList" class="team-attention-list"></div>
       </section>
 
-      <section class="team-grid team-secondary-grid">
-        <section class="team-panel dark-card team-activity-panel">
-          <div class="team-panel-head"><div><p class="kicker">ACTIVITY</p><h2>What changed</h2></div></div>
-          <div id="teamActivityList" class="team-activity-list"></div>
-        </section>
-        <section class="team-panel dark-card team-settings-summary-panel" id="teamSettingsSummary">
-          <div class="team-panel-head"><div><p class="kicker">TEAM</p><h2>Workspace</h2></div></div>
-          <div class="team-workspace-summary"><strong id="teamSummaryName">—</strong><p id="teamSummaryDescription">No description yet.</p></div>
-        </section>
+      <section class="team-panel dark-card team-settings-summary-panel" id="teamSettingsSummary">
+        <div class="team-panel-head"><div><p class="kicker">TEAM</p><h2>Workspace</h2></div></div>
+        <div class="team-workspace-summary"><strong id="teamSummaryName">—</strong></div>
       </section>
 
     <div class="team-grid">
@@ -717,10 +711,11 @@ Write your notes here..."></textarea>
       <div id="teamTasksList" class="team-tasks-list"></div>
     </section>
 
-    <section class="team-panel dark-card team-proof-wall-panel" id="teamProofWallPanel" style="display:none">
-      <div class="team-panel-head"><div><p class="kicker">PROOF WALL</p><h2>Latest submissions</h2></div><div class="team-proof-filter" role="tablist"><button class="team-proof-filter-btn active" data-proof-filter="all" type="button">All</button><button class="team-proof-filter-btn" data-proof-filter="submitted" type="button">Awaiting review</button><button class="team-proof-filter-btn" data-proof-filter="approved" type="button">Approved</button><button class="team-proof-filter-btn" data-proof-filter="changes_requested" type="button">Changes requested</button></div></div>
-      <div id="teamProofWallList" class="team-proof-wall-list"></div>
+    <section class="team-panel dark-card team-activity-panel team-activity-last">
+      <div class="team-panel-head"><div><p class="kicker">ACTIVITY</p><h2>What changed</h2></div></div>
+      <div id="teamActivityList" class="team-activity-list"></div>
     </section>
+
   </div>
 </section>
 
