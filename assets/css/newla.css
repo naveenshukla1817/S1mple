@@ -12335,3 +12335,13 @@ body.light .team-session-item strong{color:#3f352b}
 .about-github svg{width:15px;height:15px;fill:currentColor}
 .about-github:hover,.about-github:focus-visible{color:#f0ebe1;border-color:#756755}
 @media (max-width:640px){.about-social-links{width:100%}.about-github,.about-linkedin{width:fit-content}}
+
+/* Final audit safeguards */
+html,body{max-width:100%;overflow-x:hidden;}
+img,video,canvas,svg{max-width:100%;}
+input,textarea,select,button{font:inherit;max-width:100%;}
+@media(max-width:760px){
+  .view{min-width:0!important;}
+  .team-layout,.team-grid,.team-stats,.stats-grid{min-width:0!important;grid-template-columns:minmax(0,1fr)!important;}
+  .team-panel,.team-card,.task-card{min-width:0;max-width:100%;}
+}
