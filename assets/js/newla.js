@@ -5069,6 +5069,9 @@ document.querySelectorAll(".modal").forEach(modal=>{
   let activeInviteInfo={};
   let teamSessions=[];
   const sessionRecorded=new Set();
+  let teamLoadPromise=null;
+  let teamDataReady=false;
+  let teamLoading=false;
 
   const TEAM_STATUSES={assigned:'Assigned',in_progress:'In progress',submitted:'Awaiting review',approved:'Approved',changes_requested:'Changes requested'};
   const TEAM_STATUS_CLASS={assigned:'assigned',in_progress:'progress',submitted:'submitted',approved:'approved',changes_requested:'changes'};
@@ -5088,14 +5091,26 @@ document.querySelectorAll(".modal").forEach(modal=>{
   function closeModal(id){const el=$(id);if(!el)return;el.style.display='none';el.setAttribute('aria-hidden','true');}
   function formatTeamDate(v){if(!v)return 'No due date';try{return new Date(v+'T00:00:00').toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'})}catch{return v}}
   async function loadTeams(){
-    const c=client(),u=user();
-    if(!c||!u){teamRows=[];teamMembers=[];teamTasks=[];renderTeamShell();return;}
-    const {data,error}=await c.from('nexa_teams').select('id,name,description,created_by,created_at').order('created_at',{ascending:false});
-    if(error){console.warn('Teams load failed',error);toast('Could not load your teams. Please try again.','error');return;}
-    teamRows=data||[];
-    if(activeTeamId && !teamRows.some(t=>t.id===activeTeamId)) activeTeamId='';
-    if(!activeTeamId&&teamRows[0]){activeTeamId=teamRows[0].id;localStorage.setItem('nexa_active_team_id',activeTeamId)}
-    await refreshCurrentTeam();
+    if(teamLoadPromise) return teamLoadPromise;
+    teamLoading=true;
+    teamDataReady=false;
+    renderTeamShell();
+    teamLoadPromise=(async()=>{
+      const c=client(),u=user();
+      if(!c||!u){teamRows=[];teamMembers=[];teamTasks=[];teamDataReady=true;renderTeamShell();return;}
+      const {data,error}=await c.from('nexa_teams').select('id,name,description,created_by,created_at').order('created_at',{ascending:false});
+      if(error){
+        console.warn('Teams load failed',error);
+        teamRows=[];teamMembers=[];teamTasks=[];teamDataReady=true;renderTeamShell();
+        toast('Could not load your teams. Please try again.','error');
+        return;
+      }
+      teamRows=data||[];
+      if(activeTeamId && !teamRows.some(t=>t.id===activeTeamId)) activeTeamId='';
+      if(!activeTeamId&&teamRows[0]){activeTeamId=teamRows[0].id;localStorage.setItem('nexa_active_team_id',activeTeamId)}
+      await refreshCurrentTeam();
+    })().finally(()=>{teamLoading=false;teamLoadPromise=null;teamDataReady=true;renderTeamShell();});
+    return teamLoadPromise;
   }
   async function refreshCurrentTeam(){
     const c=client(),t=currentTeam(),u=user();
@@ -5120,21 +5135,23 @@ document.querySelectorAll(".modal").forEach(modal=>{
     if(aa.error)console.warn('Team activity load failed',aa.error); else teamActivity=aa.data||[];
     if(nn.error)console.warn('Team notifications load failed',nn.error); else teamNotifications=nn.data||[];
     const role=teamMembers.find(x=>x.user_id===u?.id)?.role||'member';
+    // Core team content can render as soon as members/tasks/activity/notifications arrive.
+    // Invite/security extras load afterward so the page never waits on secondary RPCs.
+    teamDataReady=true;
+    renderTeamShell();
     if(role==='head') {
-      try {
-        const {data:invite,error:inviteError}=await c.rpc('get_nexa_team_invite_info',{p_team_id:t.id});
+      c.rpc('get_nexa_team_invite_info',{p_team_id:t.id}).then(({data:invite,error:inviteError})=>{
         if(inviteError) throw inviteError;
         activeInviteInfo=invite?.[0]||{};
         activeJoinCode=activeInviteInfo.join_code||'';
-      } catch(e) { console.warn('Team invite info load failed',e); }
+        renderTeamShell();
+      }).catch(e=>console.warn('Team invite info load failed',e));
     }
     if(role==='head') {
-      try {
-        const {data:sessions,error:sessionError}=await c.rpc('get_nexa_team_sessions',{p_team_id:t.id});
-        if(!sessionError) teamSessions=sessions||[];
-      } catch(e) { console.warn('Team sessions load failed',e); }
+      c.rpc('get_nexa_team_sessions',{p_team_id:t.id}).then(({data:sessions,error:sessionError})=>{
+        if(!sessionError){teamSessions=sessions||[];renderTeamSecurity();}
+      }).catch(e=>console.warn('Team sessions load failed',e));
     }
-    renderTeamShell();
     const sessionKey=`${t.id}:${u.id}`;
     if(!sessionRecorded.has(sessionKey)) {
       sessionRecorded.add(sessionKey);
@@ -5168,8 +5185,10 @@ document.querySelectorAll(".modal").forEach(modal=>{
     list.querySelectorAll('[data-team-leave]').forEach(b=>b.onclick=leaveTeam);
   }
   function renderTeamShell(){
-    const empty=$('teamEmptyState'),ws=$('teamWorkspace');
+    const empty=$('teamEmptyState'),ws=$('teamWorkspace'),loading=$('teamLoadingState');
     if(!empty||!ws)return;
+    if(loading) loading.style.display=teamLoading&&!teamDataReady?'grid':'none';
+    if(!teamDataReady){ empty.style.display='none';ws.style.display='none';return; }
     const has=teamRows.length>0;
     empty.style.display=has?'none':'grid';ws.style.display=has?'block':'none';
     if(!has)return;
@@ -5558,7 +5577,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal','teamLeaveModal','teamRenameModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
   let inviteHandled=false;
   function renderTeams(){
-    if(!user()){teamRows=[];teamMembers=[];teamTasks=[];renderTeamShell();return;}
+    if(!user()){teamRows=[];teamMembers=[];teamTasks=[];teamDataReady=true;renderTeamShell();return;}
     loadTeams().then(()=>{
       if(inviteHandled)return;
       const code=new URLSearchParams(location.search).get('join');
@@ -5566,7 +5585,6 @@ document.querySelectorAll(".modal").forEach(modal=>{
     });
   }
   window.renderTeams=renderTeams;
-  if(user())setTimeout(renderTeams,150);
 })();
 
 
