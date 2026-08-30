@@ -12295,6 +12295,13 @@ body.light .team-proof-filter-btn.active{background:#fffaf2;color:#3f352b;border
   .team-workspace > .team-tasks-panel{margin-bottom:12px;}
 }
 
+.team-loading-state{min-height:260px;margin-bottom:14px;display:grid;place-items:center;align-content:center;gap:14px;border:1px solid #38332c;border-radius:16px;background:#1c1a17;color:#9b9184}
+.team-loading-line{width:min(420px,55%);height:10px;border-radius:999px;background:linear-gradient(90deg,#29251f 0%,#3a342d 45%,#29251f 100%);background-size:200% 100%;animation:team-loading-shimmer 1.4s ease-in-out infinite}
+.team-loading-copy{display:grid;gap:4px;text-align:center}.team-loading-copy span{font:600 14px/1.4 Georgia,serif;color:#eee5d6}.team-loading-copy small{font-size:9px;color:#81786d}
+@keyframes team-loading-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+body.light .team-loading-state{background:#f4ede3;border-color:#d8cbbb;color:#83776a}.team-loading-copy span{color:#eee5d6}.team-loading-copy small{color:#83776a}body.light .team-loading-copy span{color:#3f352b}
+@media(max-width:620px){.team-loading-state{min-height:220px}.team-loading-line{width:70%}}
+
 /* P3: team proof control polish */
 .team-proof-required strong{color:#4da3ff!important;font-size:10px!important;font-weight:400!important;letter-spacing:.01em}
 .team-activity-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
