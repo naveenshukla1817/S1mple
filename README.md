@@ -103,3 +103,12 @@ LinkedIn: https://www.linkedin.com/in/naveenshukla99/
 
 
 Do the work. Keep the proof. Keep moving.
+
+
+## License
+
+Copyright © 2026 Naveen Shukla. All rights reserved.
+
+This repository is publicly available for viewing and reference.
+No permission is granted to copy, modify, distribute, publish, or use
+this code or any substantial portion of it without prior written permission.
