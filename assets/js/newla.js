@@ -2070,7 +2070,6 @@ function checkReminders() {
   });
   if(changed){save(KEYS.TASKS,tasks);renderAll();}
 }
-setInterval(checkReminders,30000);
 setTimeout(checkReminders,5000);
 setInterval(checkReminders,15000);
 
@@ -3238,7 +3237,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
 
 (function(){
   const CFG={url:"https://ueyivshnnbfnzjoqhwzs.supabase.co",key:"sb_publishable_buUiXmdH8BEHrynIL0el0w_nOYf86xB"};
-  let client=null, authMode="login", booting=true;
+  let client=null, authMode="login", booting=true, hydratedUserId=null, hydrationPromise=null;
   // Cloud sync is intentionally queued so rapid local writes cannot be dropped.
   // Each logical key is coalesced, retried with backoff, and flushed again if a
   // local change arrives while an earlier request is in flight.
@@ -3590,8 +3589,15 @@ document.querySelectorAll(".modal").forEach(modal=>{
 
   async function applySession(session){
     if(!session?.user){
-      window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';booting=false;authShow();return;
+      window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';hydratedUserId=null;hydrationPromise=null;booting=false;authShow();return;
     }
+    if(hydratedUserId===session.user.id && !booting){
+      appShow();
+      return;
+    }
+    if(hydrationPromise && hydratedUserId===session.user.id) return hydrationPromise;
+    hydratedUserId=session.user.id;
+    hydrationPromise=(async()=>{
     window.NEXA_USER=session.user;
     const {data:p,error:profileError}=await client.from('profiles').select('full_name').eq('id',session.user.id).maybeSingle();
     if(profileError) console.warn('Newla profile lookup failed',profileError);
@@ -3607,6 +3613,8 @@ document.querySelectorAll(".modal").forEach(modal=>{
     }
     booting=false;
     appShow();
+    })().finally(()=>{ hydrationPromise=null; });
+    return hydrationPromise;
   }
   async function init(){
     setMode('login');
@@ -3620,7 +3628,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     let appliedInitialSession=false;
     let recoveryFlow=recoveryFromUrl;
     client.auth.onAuthStateChange((_event,session)=>{
-      if(_event==='SIGNED_OUT'){window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';booting=false;setMode('login');authShow();authStatus('You’re signed out. Sign in again to continue.');return;}
+      if(_event==='SIGNED_OUT'){window.NEXA_USER=null;window.NEXA_DISPLAY_NAME='there';hydratedUserId=null;hydrationPromise=null;booting=false;setMode('login');authShow();authStatus('You’re signed out. Sign in again to continue.');return;}
       if(_event==='PASSWORD_RECOVERY'){
         recoveryFlow=true;
         booting=false;
@@ -5190,7 +5198,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const summaryDescription=$('teamSummaryDescription'); if(summaryDescription) summaryDescription.textContent=t.description||'No description yet.';
     const unread=teamNotifications.filter(n=>!n.read_at).length;
     const notifDot=$('teamNotificationCount'); if(notifDot){notifDot.textContent=String(unread);notifDot.hidden=!unread;}
-    $('teamSettingsOpen').style.display=role==='head'?'inline-flex':'none';
+    $('teamRenameOpen').style.display=role==='head'?'inline-flex':'none';
     $('teamRegenerateCode').style.display=role==='head'?'inline-flex':'none';
     const activityClear=$('teamActivityClear'); if(activityClear) activityClear.style.display=role==='head'?'inline-flex':'none';
     const expCsv=$('teamExportCsv'),expPdf=$('teamExportPdf'); if(expCsv) expCsv.style.display=role==='head'?'inline-flex':'none'; if(expPdf) expPdf.style.display=role==='head'?'inline-flex':'none';
@@ -5457,17 +5465,36 @@ document.querySelectorAll(".modal").forEach(modal=>{
     let note='';if(status==='changes_requested'){note=await nexaPrompt('What needs to change?',task.review_note||'',{title:'Request changes',kicker:'TEAM REVIEW'});if(note===null)return;note=note.trim();if(!note){toast('Add a short review note.','error');return;}}
     const {error}=await c.from('nexa_team_tasks').update({status,review_note:note||null,reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',id);if(error){console.error(error);toast('Could not update the review.','error');return;}toast(status==='approved'?'Proof approved. Task completed.':'Changes requested. The member can resubmit proof.');await refreshCurrentTeam();
   }
-  function openTeamSettings(){
+  function openTeamRename(){
     const t=currentTeam();if(!t||currentRole()!=='head')return;
-    $('teamSettingsName').value=t.name||'';$('teamSettingsDescription').value=t.description||'';$('teamSettingsRoleNote').textContent='Only the team head can change workspace settings.';renderTeamSecurity();openModal('teamSettingsModal');
+    const input=$('teamRenameName');
+    if(input) input.value=t.name||'';
+    openModal('teamRenameModal');
+    setTimeout(()=>input?.focus(),30);
+    input?.select();
   }
-  async function saveTeamSettings(e){
+  async function saveTeamRename(e){
     e.preventDefault();const c=client(),t=currentTeam();if(!c||!t||currentRole()!=='head')return;
-    const name=$('teamSettingsName').value.trim(),description=$('teamSettingsDescription').value.trim();if(!name){toast('Give your team a name.','error');return;}
-    const {data,error}=await c.rpc('update_nexa_team_details',{p_team_id:t.id,p_name:name,p_description:description||null});
-    if(error){console.error(error);toast(error.message||'Could not save team settings.','error');return;}
-    const idx=teamRows.findIndex(x=>x.id===t.id);if(idx>=0)teamRows[idx]={...teamRows[idx],name:data?.name||name,description:data?.description||description||null};
-    closeModal('teamSettingsModal');toast('Team settings saved.');await loadTeams();
+    const name=$('teamRenameName')?.value.trim()||'';if(!name){toast('Give your team a name.','error');return;}
+    const btn=$('teamRenameSave');if(btn)btn.disabled=true;
+    try{
+      const {data,error}=await c.rpc('rename_nexa_team',{p_team_id:t.id,p_name:name});
+      if(error)throw error;
+      const savedName=data?.name||name;
+      const idx=teamRows.findIndex(x=>x.id===t.id);
+      if(idx>=0) teamRows[idx]={...teamRows[idx],name:savedName,updated_at:data?.updated_at||teamRows[idx].updated_at};
+      const switcher=$('teamSwitcher');
+      if(switcher){ const option=[...switcher.options].find(o=>o.value===t.id); if(option) option.textContent=savedName; }
+      if($('teamSummaryName')) $('teamSummaryName').textContent=savedName;
+      closeModal('teamRenameModal');
+      toast('Team name updated.','success');
+      renderTeamShell();
+    }catch(error){
+      console.error('Team rename failed',error);
+      toast(error?.message||'Could not rename the team.','error');
+    }finally{
+      if(btn)btn.disabled=false;
+    }
   }
   async function deleteCurrentTeamPermanently(){
     const c=client(),t=currentTeam(),u=user();
@@ -5483,7 +5510,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     teamRows=teamRows.filter(x=>x.id!==t.id);
     activeTeamId=teamRows[0]?.id||'';
     if(activeTeamId)localStorage.setItem('nexa_active_team_id',activeTeamId); else localStorage.removeItem('nexa_active_team_id');
-    closeModal('teamSettingsModal');
+    closeModal('teamRenameModal');
     toast('Team permanently deleted.','success');
     if(teamRows.length) await loadTeams(); else renderTeamShell();
   }
@@ -5507,12 +5534,9 @@ document.querySelectorAll(".modal").forEach(modal=>{
   $('teamInvitePolicySave')?.addEventListener('click',saveInvitePolicy);
   $('teamSecurityRefresh')?.addEventListener('click',async()=>{const t=currentTeam();if(!t||currentRole()!=='head')return;const r=await client()?.rpc('get_nexa_team_sessions',{p_team_id:t.id});if(!r?.error){teamSessions=r.data||[];renderTeamSecurity();}});
   $('teamNotificationsClose')?.addEventListener('click',()=>{$('teamNotificationsPopover')?.classList.remove('open')});
-  // Team settings must remain clickable even if Team UI re-renders.
-  window.__nexaOpenTeamSettings = openTeamSettings;
-  $('teamSettingsOpen')?.addEventListener('click',openTeamSettings);
-
-  $('teamSettingsClose')?.addEventListener('click',()=>closeModal('teamSettingsModal'));
-  $('teamSettingsForm')?.addEventListener('submit',saveTeamSettings);
+  $('teamRenameOpen')?.addEventListener('click',openTeamRename);
+  $('teamRenameClose')?.addEventListener('click',()=>closeModal('teamRenameModal'));
+  $('teamRenameForm')?.addEventListener('submit',saveTeamRename);
   $('teamDeletePermanent')?.addEventListener('click',deleteCurrentTeamPermanently);
   $('teamRegenerateCode')?.addEventListener('click',regenerateTeamCode);
   document.querySelectorAll('[data-proof-filter]').forEach(b=>b.addEventListener('click',()=>{teamProofFilter=b.dataset.proofFilter;document.querySelectorAll('[data-proof-filter]').forEach(x=>x.classList.toggle('active',x===b));renderProofWall(currentRole())}));
@@ -5531,7 +5555,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   $('teamCreateForm')?.addEventListener('submit',createTeam);$('teamJoinForm')?.addEventListener('submit',e=>{e.preventDefault();joinTeam()});$('teamTaskForm')?.addEventListener('submit',createTeamTask);$('teamProofSubmit')?.addEventListener('click',submitTeamProof);$('teamEditForm')?.addEventListener('submit',saveTeamEdit);$('teamEditClose')?.addEventListener('click',()=>closeModal('teamEditModal'));$('teamViewMyWork')?.addEventListener('click',()=>{teamTaskView='mine';renderTeamTasks()});$('teamViewAll')?.addEventListener('click',()=>{teamTaskView='all';renderTeamTasks()});
   $('teamCopyCode')?.addEventListener('click',async()=>{const code=activeJoinCode||'';if(!code)return;try{await navigator.clipboard.writeText(code);toast('Team code copied.')}catch{toast('Could not copy the code.','error')}});
   $('teamCopyLink')?.addEventListener('click',async()=>{const link=$('teamJoinCode')?.dataset?.inviteLink;if(!link)return;try{await navigator.clipboard.writeText(link);toast('Invite link copied.')}catch{toast('Could not copy the invite link.','error')}});
-  ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal','teamLeaveModal','teamSettingsModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
+  ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal','teamLeaveModal','teamRenameModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
   let inviteHandled=false;
   function renderTeams(){
     if(!user()){teamRows=[];teamMembers=[];teamTasks=[];renderTeamShell();return;}
@@ -5545,12 +5569,4 @@ document.querySelectorAll(".modal").forEach(modal=>{
   if(user())setTimeout(renderTeams,150);
 })();
 
-// Fallback delegated handler for the Team Settings control. This survives DOM re-renders.
-document.addEventListener('click', (event) => {
-  const button = event.target?.closest?.('#teamSettingsOpen');
-  if (!button) return;
-  event.preventDefault();
-  event.stopPropagation();
-  if (typeof window.__nexaOpenTeamSettings === 'function') window.__nexaOpenTeamSettings();
-}, true);
 
