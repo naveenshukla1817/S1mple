@@ -12345,3 +12345,76 @@ input,textarea,select,button{font:inherit;max-width:100%;}
   .team-layout,.team-grid,.team-stats,.stats-grid{min-width:0!important;grid-template-columns:minmax(0,1fr)!important;}
   .team-panel,.team-card,.task-card{min-width:0;max-width:100%;}
 }
+
+/* ============================================================
+   LIGHT MODE BUTTON BLEND — warm paper accent only
+   Keep dark theme unchanged.
+============================================================ */
+body.light .team-members-trigger {
+  background: #e2c182;
+  border-color: #d2ae6d;
+  color: #2d281f;
+}
+body.light .team-members-trigger:hover,
+body.light .team-members-trigger[aria-expanded="true"] {
+  background: #e2c182;
+  border-color: #c39a58;
+  color: #2d281f;
+}
+
+body.light .team-count {
+  background: #e2c182;
+  border-color: #d2ae6d;
+  color: #2d281f;
+}
+
+body.light .team-view-btn.active {
+  background: #e2c182;
+  color: #2d281f;
+}
+
+body.light .team-task-btn {
+  background: #e2c182;
+  border-color: #d2ae6d;
+  color: #2d281f;
+}
+body.light .team-task-btn:hover {
+  background: #e8ca95;
+  border-color: #c39a58;
+  color: #2d281f;
+}
+body.light .team-task-btn.proof,
+body.light .team-task-btn.approve,
+body.light .team-task-btn.changes {
+  background: #e2c182;
+  color: #2d281f;
+}
+
+body.light .team-copy-btn {
+  background: #f7efe3;
+  border-color: #cfc0ad;
+  color: #4a4034;
+}
+
+body.light .brain-ref-board-menu button,
+body.light .brain-ref-zoom button,
+body.light .brain-ref-tool.active,
+body.light .brain-ref-chrome-btn.dark {
+  background: #e2c182 !important;
+  border-color: #d2ae6d !important;
+  color: #2d281f !important;
+}
+body.light .brain-ref-board-menu button:hover,
+body.light .brain-ref-zoom button:hover,
+body.light .brain-ref-tool.active:hover,
+body.light .brain-ref-chrome-btn.dark:hover {
+  background: #e8ca95 !important;
+  border-color: #c39a58 !important;
+  color: #2d281f !important;
+}
+
+body.light .theme-choice.active,
+body.light .calendar-mode-v11.active {
+  background: #e2c182;
+  color: #2d281f;
+}
