@@ -98,6 +98,8 @@ Built by
 
 Naveen Shukla
 
-LinkedIn · GitHub
+LinkedIn 
+LinkedIn: https://www.linkedin.com/in/naveenshukla99/
+
 
 Do the work. Keep the proof. Keep moving.
