@@ -351,9 +351,9 @@ body.light .stat small {
 }
 
 body.light .btn-dark {
-  background: #3a3128;
-  border-color: #3a3128;
-  color: #fff8ee
+  background: #f4ede3;
+  border-color: #cdbdac;
+  color: #40372d
 }
 
 body.light .btn-accent {
@@ -9841,6 +9841,24 @@ body.light .btn-dark:hover,
 body.light .task-action:hover {
   border-color: #b49a79;
   box-shadow: none
+}
+
+/* Light theme: keep utility buttons visually blended with the paper UI. */
+body.light button.btn-dark,
+body.light .btn-dark:not(.keep-dark),
+body.light .modal .btn-dark,
+body.light .dialog .btn-dark {
+  background: #f4ede3;
+  border-color: #cdbdac;
+  color: #40372d;
+}
+body.light button.btn-dark:hover,
+body.light .btn-dark:not(.keep-dark):hover,
+body.light .modal .btn-dark:hover,
+body.light .dialog .btn-dark:hover {
+  background: #eee4d8;
+  border-color: #bcae9c;
+  color: #2f2821;
 }
 
 /* Prevent decorative orange aura from leaking into idle controls */
