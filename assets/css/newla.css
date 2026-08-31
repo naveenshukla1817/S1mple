@@ -12425,3 +12425,154 @@ body.light .calendar-mode-v11.active {
   background: #e2c182;
   color: #2d281f;
 }
+
+/* =========================================================
+   NEWLA — Curved workspace topbar + GitHub CTA
+   Inspired by the compact, rounded navigation card reference.
+   ========================================================= */
+.topbar {
+  box-sizing: border-box;
+  height: 72px !important;
+  margin: 12px clamp(12px, 1.5vw, 20px) 0 !important;
+  width: calc(100% - clamp(24px, 3vw, 40px)) !important;
+  padding: 0 clamp(12px, 1.2vw, 18px) !important;
+  border: 1px solid #302c27 !important;
+  border-radius: 18px !important;
+  background: linear-gradient(180deg, rgba(26, 24, 21, .96), rgba(22, 20, 18, .94)) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .16), inset 0 1px 0 rgba(255,255,255,.025) !important;
+  backdrop-filter: blur(16px);
+}
+
+.topbar-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-brand {
+  flex: 0 0 auto;
+  width: 126px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.topbar-logo {
+  display: block;
+  width: 126px;
+  height: 40px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.topbar-logo-light { display: none; }
+body.light .topbar-logo-dark { display: none; }
+body.light .topbar-logo-light { display: block; }
+
+.topbar-divider {
+  width: 1px;
+  height: 28px;
+  flex: 0 0 auto;
+  background: rgba(255,255,255,.08);
+}
+
+.topbar .breadcrumb {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.github-star-btn {
+  flex: 0 0 auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: #f7f5f1;
+  color: #27231f;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  box-shadow: 0 3px 9px rgba(0,0,0,.14);
+  transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+
+.github-star-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.1;
+}
+
+.github-star-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+  background: #fffdfa;
+}
+
+.github-star-btn:active { transform: translateY(0); }
+
+body.light .topbar {
+  background: linear-gradient(180deg, rgba(249,245,238,.96), rgba(241,234,224,.95)) !important;
+  border-color: #d2c6b6 !important;
+  box-shadow: 0 10px 26px rgba(81,57,32,.08), inset 0 1px 0 rgba(255,255,255,.5) !important;
+}
+
+body.light .topbar-divider {
+  background: rgba(91,70,46,.12);
+}
+
+body.light .github-star-btn {
+  background: #29251f;
+  color: #f6f1e8;
+  border-color: rgba(70,56,40,.2);
+}
+
+body.light .github-star-btn:hover { background: #201d19; }
+
+@media (max-width: 900px) {
+  .topbar {
+    margin-top: 10px !important;
+    border-radius: 16px !important;
+  }
+  .topbar-brand,
+  .topbar-logo { width: 108px; }
+  .topbar-logo { height: 36px; }
+  .github-star-btn { padding: 0 12px; }
+}
+
+@media (max-width: 700px) {
+  .topbar-left { gap: 8px; }
+  .topbar-brand,
+  .topbar-logo { width: 92px; }
+  .topbar-divider { display: none; }
+  .topbar .breadcrumb { display: none; }
+  .github-star-btn span { display: none; }
+  .github-star-btn { width: 40px; padding: 0; }
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    margin: 8px 8px 0 !important;
+    width: calc(100% - 16px) !important;
+    padding: 0 8px !important;
+    height: 64px !important;
+    border-radius: 15px !important;
+  }
+  .topbar-brand,
+  .topbar-logo { width: 84px; }
+  .topbar .top-actions { gap: 5px; }
+  .topbar .top-btn { padding: 7px 8px; }
+  .topbar .top-btn#quickAddTop { font-size: 10px; }
+  .topbar .clock { font-size: 11px; letter-spacing: .04em; }
+  .github-star-btn { width: 36px; min-height: 36px; }
+}
