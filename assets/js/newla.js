@@ -233,6 +233,7 @@ let taskFilter = "all";
 let editingTaskId = null;
 let proofTaskId = null;
 let proofData = null;
+let proofThumbData = null;
 let brainTool = "select";
 let draggingNote = null;
 let selectedNoteId = null;
@@ -274,24 +275,49 @@ function escapeHtml(value) {
   }[c]));
 }
 
-async function compressProofImage(dataUrl, maxDimension=1600, quality=0.78) {
+async function compressProofImages(dataUrl, fullDimension=1600, fullQuality=0.80, thumbDimension=500, thumbQuality=0.76) {
   return await new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const scale = Math.min(1, maxDimension / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
-      canvas.height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
-      const ctx = canvas.getContext("2d", {alpha:false});
-      if (!ctx) { reject(new Error("Canvas unavailable")); return; }
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL("image/jpeg", quality));
+      const sourceW = img.naturalWidth || img.width;
+      const sourceH = img.naturalHeight || img.height;
+      const draw = (maxDimension, quality) => {
+        const scale = Math.min(1, maxDimension / Math.max(sourceW, sourceH));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(sourceW * scale));
+        canvas.height = Math.max(1, Math.round(sourceH * scale));
+        const ctx = canvas.getContext("2d", {alpha:false});
+        if (!ctx) throw new Error("Canvas unavailable");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const webp = canvas.toDataURL("image/webp", quality);
+        if (webp && webp.startsWith("data:image/webp")) return webp;
+        return canvas.toDataURL("image/jpeg", quality);
+      };
+      try {
+        const fullDataUrl = draw(fullDimension, fullQuality);
+        const thumbDataUrl = draw(thumbDimension, thumbQuality);
+        resolve({fullDataUrl, thumbDataUrl, mime: fullDataUrl.startsWith("data:image/webp") ? "image/webp" : "image/jpeg"});
+      } catch (error) { reject(error); }
     };
     img.onerror = () => reject(new Error("Could not decode proof image"));
     img.src = dataUrl;
   });
+}
+
+async function compressProofImage(dataUrl, maxDimension=1600, quality=0.80) {
+  const result = await compressProofImages(dataUrl, maxDimension, quality, Math.min(500, maxDimension), 0.76);
+  return result.fullDataUrl;
+}
+
+function proofThumbPath(proofPath) {
+  if (!proofPath) return null;
+  return proofPath.replace(/\.[^/.]+$/, "") + "-thumb.webp";
+}
+
+function proofDisplaySrc(task) {
+  return task?.proofThumbDataUrl || task?.proofDataUrl || "";
 }
 
 function formatDate(value) {
@@ -655,7 +681,7 @@ function taskCard(task) {
         ? `
           <div style="display:flex;align-items:center;gap:8px;margin-top:9px;color:#8f877b;font-size:9px">
             Proof:
-            <img class="task-thumb" src="${task.proofDataUrl}" data-proof-view="${task.id}" alt="Proof">
+            <img class="task-thumb" src="${proofDisplaySrc(task)}" loading="lazy" decoding="async" data-proof-view="${task.id}" alt="Proof">
           </div>
         `
         : ""
@@ -789,7 +815,8 @@ async function purgeExpiredArchivedTasksCloud(){
   const ids=expired.map(row=>row.id).filter(Boolean);
   const paths=expired.map(row=>row.proof_path).filter(Boolean);
   if(paths.length){
-    const {error:storageError}=await client.storage.from('nexa-files').remove(paths);
+    const cleanupPaths=[...new Set(paths.flatMap(x=>[x,proofThumbPath(x)]))];
+    const {error:storageError}=await client.storage.from('nexa-files').remove(cleanupPaths);
     if(storageError) console.warn('Expired archive proof cleanup skipped',storageError);
     const {error:proofError}=await client.from('proofs').delete().eq('user_id',uid).in('file_path',paths);
     if(proofError) console.warn('Expired archive proof record cleanup skipped',proofError);
@@ -979,7 +1006,7 @@ async function taskAction(action,id) {
   if (action==="delete") {
     if (task.status === "completed") {
       try {
-        if (task.proofDataUrl && typeof window.NEXA_DELETE_PROOF_CLOUD === "function") {
+        if ((task.proofDataUrl || task.proofPath) && typeof window.NEXA_DELETE_PROOF_CLOUD === "function") {
           await window.NEXA_DELETE_PROOF_CLOUD(task);
         }
       } catch (e) {
@@ -1043,6 +1070,7 @@ function createCalendarEvent(task) {
 function openProofModal(task, replacing=false) {
   proofTaskId=task.id;
   proofData=null;
+  proofThumbData=null;
   $("proofInput").value="";
   $("proofPreview").style.display="none";
   $("submitProof").disabled=true;
@@ -1058,6 +1086,7 @@ function closeProofModal() {
   $("proofModal").style.display="none";
   proofTaskId=null;
   proofData=null;
+  proofThumbData=null;
 }
 
 $("closeProofModal").onclick=closeProofModal;
@@ -1077,13 +1106,16 @@ $("proofInput").addEventListener("change",event => {
   const reader=new FileReader();
   reader.onload=async e => {
     try {
-      proofData = await compressProofImage(e.target.result);
+      const compressed=await compressProofImages(e.target.result,1600,0.80,500,0.76);
+      proofData = compressed.fullDataUrl;
+      proofThumbData = compressed.thumbDataUrl;
       $("proofPreview").src = proofData;
       $("proofPreview").style.display = "block";
       $("submitProof").disabled = false;
     } catch (error) {
       console.error("Proof image compression failed:", error);
       proofData = null;
+      proofThumbData = null;
       $("proofPreview").style.display = "none";
       $("submitProof").disabled = true;
       toast("Could not process that proof image.", "error");
@@ -1102,7 +1134,7 @@ $("submitProof").onclick = async () => {
 
   tasks = tasks.map(task =>
     task.id === completedId
-      ? { ...task, status:"completed", proofDataUrl:proofData, completedAt }
+      ? { ...task, status:"completed", proofDataUrl:proofData, proofThumbDataUrl:proofThumbData, completedAt }
       : task
   );
 
@@ -1164,6 +1196,7 @@ async function deleteProofForTask(task){
     return;
   }
   task.proofDataUrl=null;
+  task.proofThumbDataUrl=null;
   task.proofPath=null;
   save(KEYS.TASKS,tasks);
   $("proofViewer").style.display="none";
@@ -1790,7 +1823,7 @@ function renderProofs() {
         ${list.map(task=>`
           <article class="proof-card" data-proof-card-id="${task.id}">
             <div class="proof-image-wrap">
-              <img src="${task.proofDataUrl}" alt="Proof for ${escapeHtml(task.title)}" data-proof-card="${task.id}">
+              <img src="${proofDisplaySrc(task)}" loading="lazy" decoding="async" alt="Proof for ${escapeHtml(task.title)}" data-proof-card="${task.id}">
               <span class="proof-view-chip">View evidence</span>
             </div>
             <div class="proof-card-body">
@@ -2372,7 +2405,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
         ${subs.map((s,i)=>`<label class="subtask-v2 ${s.done?"done":""}"><input type="checkbox" data-subtask="${task.id}" data-sub-index="${i}" ${s.done?"checked":""}>${esc(s.text)}</label>`).join("")}
       </div>`:""}
       ${task.proofDataUrl?`<div style="display:flex;align-items:center;gap:8px;margin-top:9px;color:#8f877b;font-size:9px">Proof:
-        <img class="task-thumb" src="${task.proofDataUrl}" data-proof-view="${task.id}" alt="Proof">
+        <img class="task-thumb" src="${proofDisplaySrc(task)}" loading="lazy" decoding="async" data-proof-view="${task.id}" alt="Proof">
         <span class="proof-extra-v2">${task.completedAt?new Date(task.completedAt).toLocaleDateString():"Saved"}</span>
       </div>`:""}
       <div class="task-actions">
@@ -3318,14 +3351,16 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
   function priorityNorm(v){const s=String(v||'medium').toLowerCase();return ['urgent','high','medium','low'].includes(s)?s:'medium'}
   function statusNorm(v){return v==='completed'?'completed':v==='in_progress'?'in_progress':'todo'}
-  function mapTaskFromDb(t){return {id:t.id,title:t.title,description:t.description||'',priority:priorityNorm(t.priority),dueDate:t.due_date||'',reminderDate:t.reminder_date||'',reminderTime:t.reminder_time||'',category:t.category||'Project',recurring:t.recurring||'none',subtasks:Array.isArray(t.subtasks)?t.subtasks:[],status:statusNorm(t.status),proofDataUrl:null,proofPath:t.proof_path||null,completedAt:t.completed_at||null,remindedAt:null,createdAt:t.created_at||new Date().toISOString(),updatedAt:t.updated_at||t.created_at||new Date().toISOString(),deletedAt:t.deleted_at||null,deleteReason:t.delete_reason||null,deleteReasonNote:t.delete_reason_note||null}}
+  function mapTaskFromDb(t){return {id:t.id,title:t.title,description:t.description||'',priority:priorityNorm(t.priority),dueDate:t.due_date||'',reminderDate:t.reminder_date||'',reminderTime:t.reminder_time||'',category:t.category||'Project',recurring:t.recurring||'none',subtasks:Array.isArray(t.subtasks)?t.subtasks:[],status:statusNorm(t.status),proofDataUrl:null,proofThumbDataUrl:null,proofPath:t.proof_path||null,completedAt:t.completed_at||null,remindedAt:null,createdAt:t.created_at||new Date().toISOString(),updatedAt:t.updated_at||t.created_at||new Date().toISOString(),deletedAt:t.deleted_at||null,deleteReason:t.delete_reason||null,deleteReasonNote:t.delete_reason_note||null}}
   async function syncProofRecord(task, proofPath, blob){
     if(!client||!window.NEXA_USER||!task||!proofPath)return;
     const uid=window.NEXA_USER.id;
-    const fileName=`${(task.title||'Newla Proof').replace(/[^a-z0-9_-]+/gi,'-').replace(/^-+|-+$/g,'')||'Newla-Proof'}.jpg`;
+    const mime=blob?.type||((proofPath||'').endsWith('.webp')?'image/webp':'image/jpeg');
+    const ext=mime==='image/webp'?'webp':'jpg';
+    const fileName=`${(task.title||'Newla Proof').replace(/[^a-z0-9_-]+/gi,'-').replace(/^-+|-+$/g,'')||'Newla-Proof'}.${ext}`;
     const {data:existing,error:findError}=await client.from('proofs').select('id').eq('user_id',uid).eq('file_path',proofPath).maybeSingle();
     if(findError)throw findError;
-    const row={user_id:uid,file_name:fileName,file_path:proofPath,file_url:null,file_type:'image/jpeg',file_size:blob?.size||null};
+    const row={user_id:uid,file_name:fileName,file_path:proofPath,file_url:null,file_type:mime,file_size:blob?.size||null};
     if(existing?.id){
       const {error}=await client.from('proofs').update(row).eq('id',existing.id).eq('user_id',uid);
       if(error)throw error;
@@ -3337,24 +3372,36 @@ document.querySelectorAll(".modal").forEach(modal=>{
   window.NEXA_SYNC_PROOF_NOW=async function(task){
     if(!client||!window.NEXA_USER||!task?.proofDataUrl)return;
     const uid=window.NEXA_USER.id;
-    let proofPath=task.proofPath||`${uid}/task-proof-${task.id}.jpg`;
+    let proofPath=task.proofPath;
+    if(!proofPath) proofPath=`${uid}/task-proof-${task.id}.webp`;
     const blob=await (await fetch(task.proofDataUrl)).blob();
-    const up=await client.storage.from('nexa-files').upload(proofPath,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
+    const mime=blob.type||((proofPath||'').endsWith('.webp')?'image/webp':'image/jpeg');
+    const up=await client.storage.from('nexa-files').upload(proofPath,blob,{upsert:true,contentType:mime,cacheControl:'3600'});
     if(up.error)throw up.error;
     await syncProofRecord(task,proofPath,blob);
+    if(task.proofThumbDataUrl){
+      const thumbPath=proofThumbPath(proofPath);
+      const thumbBlob=await (await fetch(task.proofThumbDataUrl)).blob();
+      const thumbUp=await client.storage.from('nexa-files').upload(thumbPath,thumbBlob,{upsert:true,contentType:thumbBlob.type||'image/webp',cacheControl:'3600'});
+      if(thumbUp.error)throw thumbUp.error;
+    }
     task.proofPath=proofPath;
     const signed=await client.storage.from('nexa-files').createSignedUrl(proofPath,3600);
     if(signed.data?.signedUrl)task.proofDataUrl=signed.data.signedUrl;
+    const thumbSigned=await client.storage.from('nexa-files').createSignedUrl(proofThumbPath(proofPath),3600);
+    if(thumbSigned.data?.signedUrl)task.proofThumbDataUrl=thumbSigned.data.signedUrl;
   };
   window.NEXA_DELETE_PROOF_CLOUD=async function(task){
     if(!client||!window.NEXA_USER||!task)return;
     const uid=window.NEXA_USER.id;
     const paths=[];
-    if(task.proofPath)paths.push(task.proofPath);
-    if(!paths.length)paths.push(`${uid}/task-proof-${task.id}.jpg`);
-    const {error:storageError}=await client.storage.from('nexa-files').remove(paths);
+    if(task.proofPath){paths.push(task.proofPath);paths.push(proofThumbPath(task.proofPath));}
+    if(!paths.length)paths.push(`${uid}/task-proof-${task.id}.jpg`,`${uid}/task-proof-${task.id}-thumb.webp`);
+    const uniquePaths=[...new Set(paths.filter(Boolean))];
+    const {error:storageError}=await client.storage.from('nexa-files').remove(uniquePaths);
     if(storageError)throw storageError;
-    const {error:proofError}=await client.from('proofs').delete().eq('user_id',uid).in('file_path',paths);
+    const proofRowPaths=task.proofPath?[task.proofPath]:[`${uid}/task-proof-${task.id}.jpg`];
+    const {error:proofError}=await client.from('proofs').delete().eq('user_id',uid).in('file_path',proofRowPaths);
     if(proofError)throw proofError;
     // Keep the task record itself, but clear its proof_path.
     const {error:taskError}=await client.from('tasks').update({proof_path:null}).eq('id',task.id).eq('user_id',uid);
@@ -3366,16 +3413,27 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const currentPaths=new Set();
     for(const t of rows){
       if(!t.proofPath && !(t.proofDataUrl&&String(t.proofDataUrl).startsWith('data:image/')))continue;
-      let proofPath=t.proofPath||`${uid}/task-proof-${t.id}.jpg`;
+      let proofPath=t.proofPath||`${uid}/task-proof-${t.id}.webp`;
       let blob=null;
       if(t.proofDataUrl&&String(t.proofDataUrl).startsWith('data:image/')){
         try{blob=await (await fetch(t.proofDataUrl)).blob()}catch(e){blob=null}
         if(blob){
-          const up=await client.storage.from('nexa-files').upload(proofPath,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
+          const mime=blob.type||((proofPath||'').endsWith('.webp')?'image/webp':'image/jpeg');
+          const up=await client.storage.from('nexa-files').upload(proofPath,blob,{upsert:true,contentType:mime,cacheControl:'3600'});
           if(up.error)throw up.error;
+        }
+        if(!t.proofThumbDataUrl){
+          try{t.proofThumbDataUrl=(await compressProofImages(t.proofDataUrl,1600,0.80,500,0.76)).thumbDataUrl}catch(e){}
+        }
+        if(t.proofThumbDataUrl){
+          const thumbPath=proofThumbPath(proofPath);
+          const thumbBlob=await (await fetch(t.proofThumbDataUrl)).blob();
+          const thumbUp=await client.storage.from('nexa-files').upload(thumbPath,thumbBlob,{upsert:true,contentType:thumbBlob.type||'image/webp',cacheControl:'3600'});
+          if(thumbUp.error)throw thumbUp.error;
         }
       }
       currentPaths.add(proofPath);
+      if(proofThumbPath(proofPath))currentPaths.add(proofThumbPath(proofPath));
       await syncProofRecord(t,proofPath,blob);
     }
     const {data:remoteProofs,error:proofReadError}=await client.from('proofs').select('id,file_path').eq('user_id',uid);
@@ -3387,7 +3445,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
       const {error:deleteRowsError}=await client.from('proofs').delete().eq('user_id',uid).in('id',staleIds);
       if(deleteRowsError)throw deleteRowsError;
       if(stalePaths.length){
-        const {error:deleteFilesError}=await client.storage.from('nexa-files').remove(stalePaths);
+        const {error:deleteFilesError}=await client.storage.from('nexa-files').remove([...new Set(stalePaths.flatMap(x=>[x,proofThumbPath(x)]))]);
         if(deleteFilesError)console.warn('Stale proof file cleanup skipped',deleteFilesError);
       }
     }
@@ -3408,9 +3466,17 @@ document.querySelectorAll(".modal").forEach(modal=>{
       if(t.proofDataUrl&&String(t.proofDataUrl).startsWith('data:image/')&&!proofPath){
         try{
           const blob=await (await fetch(t.proofDataUrl)).blob();
-          proofPath=`${uid}/task-proof-${t.id}.jpg`;
-          const up=await client.storage.from('nexa-files').upload(proofPath,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
+          proofPath=`${uid}/task-proof-${t.id}.webp`;
+          const up=await client.storage.from('nexa-files').upload(proofPath,blob,{upsert:true,contentType:blob.type||'image/webp',cacheControl:'3600'});
           if(up.error)throw up.error;
+          if(!t.proofThumbDataUrl){
+            try{t.proofThumbDataUrl=(await compressProofImages(t.proofDataUrl,1600,0.80,500,0.76)).thumbDataUrl}catch(e){}
+          }
+          if(t.proofThumbDataUrl){
+            const thumbBlob=await (await fetch(t.proofThumbDataUrl)).blob();
+            const thumbUp=await client.storage.from('nexa-files').upload(proofThumbPath(proofPath),thumbBlob,{upsert:true,contentType:thumbBlob.type||'image/webp',cacheControl:'3600'});
+            if(thumbUp.error)throw thumbUp.error;
+          }
         }catch(e){console.warn('Task proof upload skipped',e)}
       }
       const row={id:t.id,user_id:uid,title:t.title||'Untitled',description:t.description||null,priority:priorityNorm(t.priority),status:statusNorm(t.status),due_date:t.dueDate||null,reminder_date:t.reminderDate||null,reminder_time:t.reminderTime||null,category:t.category||'Project',recurring:t.recurring||'none',subtasks:Array.isArray(t.subtasks)?t.subtasks:[],proof_path:proofPath,completed_at:t.status==='completed'?(t.completedAt||new Date().toISOString()):null,deleted_at:t.deletedAt||null,delete_reason:t.deleteReason||null,delete_reason_note:t.deleteReasonNote||null};
@@ -3490,7 +3556,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
   async function hydrate(){if(!client||!window.NEXA_USER)return;const uid=window.NEXA_USER.id;try{await purgeExpiredArchivedTasksCloud();}catch(error){console.warn('Expired archive cleanup skipped',error)}const [t,n,b,f,s]=await Promise.all([client.from('tasks').select('*').eq('user_id',uid).order('created_at',{ascending:false}),client.from('notes').select('*').eq('user_id',uid).order('updated_at',{ascending:false}),client.from('brainstorms').select('*').eq('user_id',uid).order('updated_at',{ascending:false}).limit(1).maybeSingle(),client.from('focus_sessions').select('id,duration_seconds,started_at,completed_at').eq('user_id',uid).eq('session_type','focus').order('started_at',{ascending:true}),client.from('settings').select('theme,preferences').eq('user_id',uid).maybeSingle()]);for(const r of [t,n,b,f,s])if(r.error)throw r.error;
     const hydratedTasks=(t.data||[]).map(mapTaskFromDb);
-    for(const task of hydratedTasks){if(task.proofPath){try{const signed=await client.storage.from('nexa-files').createSignedUrl(task.proofPath,3600);if(signed.data?.signedUrl)task.proofDataUrl=signed.data.signedUrl}catch(e){}}}
+    for(const task of hydratedTasks){if(task.proofPath){try{const signed=await client.storage.from('nexa-files').createSignedUrl(task.proofPath,3600);if(signed.data?.signedUrl)task.proofDataUrl=signed.data.signedUrl}catch(e){} try{const thumb=await client.storage.from('nexa-files').createSignedUrl(proofThumbPath(task.proofPath),3600);if(thumb.data?.signedUrl)task.proofThumbDataUrl=thumb.data.signedUrl}catch(e){}}}
     saveJson('naveen_spa_tasks_v3',hydratedTasks);
     const notesV2=(n.data||[]).map(x=>({id:x.id,title:x.title||'Untitled',tags:x.category||'',body:x.content||''}));saveJson('naveen_knowledge_notes_v1',notesV2);
     if(b.data?.canvas_data){const c=b.data.canvas_data;saveJson('naveen_spa_notes_v3',Array.isArray(c.notes)?c.notes:[]);saveJson('naveen_spa_connectors_v3',Array.isArray(c.connectors)?c.connectors:[]);saveJson('naveen_brainstorm_boards_v2',Array.isArray(c.boards)?c.boards:[]);if(c.currentBoardId)localStorage.setItem('naveen_current_board_v2',c.currentBoardId)}
@@ -4142,7 +4208,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
       ${task.proofDataUrl?`
         <div style="display:flex;align-items:center;gap:8px;margin-top:9px;color:#8f877b;font-size:9px">
           <span>Proof saved</span>
-          <img class="task-thumb" src="${task.proofDataUrl}" data-proof-view="${task.id}" alt="Proof">
+          <img class="task-thumb" src="${proofDisplaySrc(task)}" loading="lazy" decoding="async" data-proof-view="${task.id}" alt="Proof">
           <span class="proof-extra-v2">${task.completedAt?new Date(task.completedAt).toLocaleDateString():"Saved"}</span>
         </div>`:""}
 
@@ -5061,6 +5127,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   let activeTeamId=localStorage.getItem('nexa_active_team_id')||'';
   let teamProofTaskId='';
   let teamProofData='';
+  let teamProofThumbData='';
   let teamTaskView='all';
   let activeJoinCode='';
   let teamProofFilter='all';
@@ -5264,14 +5331,14 @@ document.querySelectorAll(".modal").forEach(modal=>{
     panel.style.display='block'; $('teamProofWallCount').textContent=String(items.length);
     list.innerHTML=items.length?items.map(t=>{
       const status=TEAM_STATUSES[t.status]||t.status;
-      return `<article class="team-proof-wall-card"><div class="team-proof-wall-meta"><strong>${esc(assigneeName(t.assigned_to))}</strong><span>${esc(t.title)}</span><small>${t.submitted_at?new Date(t.submitted_at).toLocaleString():''} · ${esc(status)}</small></div><button class="team-proof-wall-image" type="button" data-wall-proof="${esc(t.id)}"><img alt="Proof for ${esc(t.title)}" data-wall-src="${esc(t.id)}"></button><div class="team-task-actions">${t.status==='submitted'?`<button class="team-task-btn approve" data-wall-approve="${esc(t.id)}">Approve</button><button class="team-task-btn changes" data-wall-changes="${esc(t.id)}">Request changes</button>`:''}</div></article>`;
+      return `<article class="team-proof-wall-card"><div class="team-proof-wall-meta"><strong>${esc(assigneeName(t.assigned_to))}</strong><span>${esc(t.title)}</span><small>${t.submitted_at?new Date(t.submitted_at).toLocaleString():''} · ${esc(status)}</small></div><button class="team-proof-wall-image" type="button" data-wall-proof="${esc(t.id)}"><img alt="Proof for ${esc(t.title)}" loading="lazy" decoding="async" data-wall-src="${esc(t.id)}"></button><div class="team-task-actions">${t.status==='submitted'?`<button class="team-task-btn approve" data-wall-approve="${esc(t.id)}">Approve</button><button class="team-task-btn changes" data-wall-changes="${esc(t.id)}">Request changes</button>`:''}</div></article>`;
     }).join(''):`<div class="team-empty-mini">No proof matches this filter yet.</div>`;
     list.querySelectorAll('[data-wall-proof]').forEach(b=>b.onclick=()=>openTeamProof(b.dataset.wallProof));
     list.querySelectorAll('[data-wall-approve]').forEach(b=>b.onclick=()=>reviewTeamTask(b.dataset.wallApprove,'approved'));
     list.querySelectorAll('[data-wall-changes]').forEach(b=>b.onclick=()=>reviewTeamTask(b.dataset.wallChanges,'changes_requested'));
     for(const img of list.querySelectorAll('[data-wall-src]')){
       const t=teamTasks.find(x=>x.id===img.dataset.wallSrc); if(!t?.proof_path) continue;
-      try{const r=await client().storage.from('nexa-files').createSignedUrl(t.proof_path,3600);if(r.data?.signedUrl)img.src=r.data.signedUrl;}catch(e){console.warn('Proof wall preview failed',e)}
+      try{const thumb=await client().storage.from('nexa-files').createSignedUrl(proofThumbPath(t.proof_path),3600);if(thumb.data?.signedUrl)img.src=thumb.data.signedUrl;else{const r=await client().storage.from('nexa-files').createSignedUrl(t.proof_path,3600);if(r.data?.signedUrl)img.src=r.data.signedUrl;}}catch(e){try{const r=await client().storage.from('nexa-files').createSignedUrl(t.proof_path,3600);if(r.data?.signedUrl)img.src=r.data.signedUrl;}catch(_){} console.warn('Proof wall preview failed',e)}
     }
   }
   function renderTeamAttention(){
@@ -5459,7 +5526,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
   async function openTeamProof(id){
     const t=teamTasks.find(x=>x.id===id);if(!t)return;
-    teamProofTaskId=id;teamProofData='';$('teamProofTaskName').textContent=t.title;$('teamProofFile').value='';$('teamProofNote').value=t.proof_note||'';$('teamProofPreview').style.display='none';$('teamProofSubmit').disabled=true;openModal('teamProofModal');
+    teamProofTaskId=id;teamProofData='';teamProofThumbData='';$('teamProofTaskName').textContent=t.title;$('teamProofFile').value='';$('teamProofNote').value=t.proof_note||'';$('teamProofPreview').style.display='none';$('teamProofSubmit').disabled=true;openModal('teamProofModal');
     if(t.proof_path && currentRole()==='head'){
       try{const s=await client().storage.from('nexa-files').createSignedUrl(t.proof_path,3600);if(s.data?.signedUrl){$('teamProofPreview').src=s.data.signedUrl;$('teamProofPreview').style.display='block';}}catch(e){}
       $('teamProofSubmit').style.display='none';
@@ -5467,15 +5534,18 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
   $('teamProofFile')?.addEventListener('change',async e=>{
     const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){toast('Choose an image proof.','error');e.target.value='';return;}if(file.size>5*1024*1024){toast('Keep the proof image below 5 MB.','error');e.target.value='';return;}
-    try{teamProofData=await compressProofImage(await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)}));$('teamProofPreview').src=teamProofData;$('teamProofPreview').style.display='block';$('teamProofSubmit').disabled=false;}catch(err){console.error(err);toast('Could not read that image.','error');}
+    try{const raw=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});const compressed=await compressProofImages(raw,1600,0.80,500,0.76);teamProofData=compressed.fullDataUrl;teamProofThumbData=compressed.thumbDataUrl;$('teamProofPreview').src=teamProofData;$('teamProofPreview').style.display='block';$('teamProofSubmit').disabled=false;}catch(err){console.error(err);toast('Could not read that image.','error');}
   });
   async function submitTeamProof(){
     const c=client(),u=user(),t=currentTeam(),task=teamTasks.find(x=>x.id===teamProofTaskId);if(!c||!u||!t||!task||!teamProofData)return;
     const btn=$('teamProofSubmit');btn.disabled=true;btn.textContent='Saving…';
     try{
-      const response=await fetch(teamProofData);const blob=await response.blob();const path=`${u.id}/team/${t.id}/${task.id}.jpg`;
-      const up=await c.storage.from('nexa-files').upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});if(up.error)throw up.error;
+      const oldProofPath=task.proof_path||null;
+      const response=await fetch(teamProofData);const blob=await response.blob();const path=`${u.id}/team/${t.id}/${task.id}-${Date.now()}.webp`;
+      const up=await c.storage.from('nexa-files').upload(path,blob,{upsert:true,contentType:blob.type||'image/webp',cacheControl:'3600'});if(up.error)throw up.error;
+      if(teamProofThumbData){const thumbBlob=await (await fetch(teamProofThumbData)).blob();const thumbUp=await c.storage.from('nexa-files').upload(proofThumbPath(path),thumbBlob,{upsert:true,contentType:thumbBlob.type||'image/webp',cacheControl:'3600'});if(thumbUp.error)throw thumbUp.error;}
       const {error}=await c.from('nexa_team_tasks').update({proof_path:path,proof_note:$('teamProofNote').value.trim()||null,status:'submitted',submitted_at:new Date().toISOString(),review_note:null,updated_at:new Date().toISOString()}).eq('id',task.id);if(error)throw error;
+      if(oldProofPath&&oldProofPath!==path){try{await c.storage.from('nexa-files').remove([oldProofPath,proofThumbPath(oldProofPath)].filter(Boolean));}catch(cleanErr){console.warn('Previous team proof cleanup skipped',cleanErr)}}
       closeModal('teamProofModal');toast('Proof submitted. It is now waiting for review.');await refreshCurrentTeam();
     }catch(error){console.error(error);toast(typeof friendlyCloudError==='function'?friendlyCloudError(error):'Proof could not be submitted.','error');btn.disabled=false;btn.textContent='Submit proof';}
   }
@@ -5522,7 +5592,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
       const ok=await nexaConfirm(`This permanently deletes <strong>${esc(t.name||'this team')}</strong>, its members, tasks, activity, notifications and access history. This cannot be undone.`,{title:'Delete team permanently',kicker:'DANGER ZONE',danger:true,confirmText:'Delete permanently',cancelText:'Keep team'});
       if(!ok)return;
     }
-    const proofPaths=[...new Set(teamTasks.map(x=>x.proof_path).filter(Boolean))];
+    const proofPaths=[...new Set(teamTasks.map(x=>x.proof_path).filter(Boolean).flatMap(x=>[x,proofThumbPath(x)]))];
     const {error}=await c.rpc('delete_nexa_team_permanently',{p_team_id:t.id});
     if(error){console.error('Permanent team deletion failed',error);toast(error.message||'Could not delete the team.','error');return;}
     if(proofPaths.length){try{await c.storage.from('nexa-files').remove(proofPaths);}catch(e){console.warn('Team proof cleanup skipped',e);}}
