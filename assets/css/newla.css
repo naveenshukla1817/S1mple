@@ -12577,3 +12577,116 @@ body.light .github-star-btn:hover { background: #201d19; }
   .github-star-btn { width: 36px; min-height: 36px; }
 }
 \n\n/* =========================================================\n   NEWLA — Final header polish\n   - Logo lives only inside the curved topbar card.\n   - Sidebar top slot carries the live clock.\n   - GitHub CTA uses a real GitHub mark and grows slightly on hover.\n   ========================================================= */\n.sidebar .brand.brand-clock-only {\n  box-sizing: border-box !important;\n  width: 100% !important;\n  height: 88px !important;\n  min-height: 88px !important;\n  margin: 0 !important;\n  padding: 0 12px 18px !important;\n  display: flex !important;\n  align-items: center !important;\n  justify-content: center !important;\n  border-bottom: 1px solid #292621 !important;\n}\n\n.sidebar .brand.brand-clock-only .sidebar-clock {\n  font-size: 19px !important;\n  line-height: 1 !important;\n  letter-spacing: .09em !important;\n  font-variant-numeric: tabular-nums !important;\n  color: #e8dfd0 !important;\n  white-space: nowrap !important;\n}\n\nbody.light .sidebar .brand.brand-clock-only {\n  border-bottom-color: #ddd0c0 !important;\n}\n\nbody.light .sidebar .brand.brand-clock-only .sidebar-clock {\n  color: #3d352c !important;\n}\n\n.github-star-btn .github-mark {\n  width: 16px !important;\n  height: 16px !important;\n  flex: 0 0 auto !important;\n  display: block !important;\n}\n\n.github-star-btn {\n  transform: scale(1) !important;\n  transform-origin: center !important;\n  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease, background-color .18s ease !important;\n}\n\n.github-star-btn:hover,\n.github-star-btn:focus-visible {\n  transform: scale(1.055) !important;\n  box-shadow: 0 8px 20px rgba(0,0,0,.20) !important;\n}\n\n.github-star-btn:active {\n  transform: scale(1.02) !important;\n}\n\n@media (max-width: 700px) {\n  .sidebar .brand.brand-clock-only {\n    height: 74px !important;\n    min-height: 74px !important;\n    padding-bottom: 12px !important;\n  }\n  .sidebar .brand.brand-clock-only .sidebar-clock {\n    font-size: 16px !important;\n  }\n}\n
+
+/* ---------- SIDEBAR ICON MICRO-ACCENTS ---------- */
+.nav-icon {
+  position: relative;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+}
+
+.nav-icon i,
+.nav-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.nav-icon .icon-accent {
+  position: absolute;
+  display: block;
+  z-index: 2;
+  background: #D8A84E;
+  box-shadow: 0 0 8px rgba(216,168,78,.24);
+  pointer-events: none;
+  opacity: .95;
+  transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease;
+}
+
+.nav-dashboard .icon-accent {
+  width: 3px;
+  height: 3px;
+  right: 2px;
+  top: 3px;
+  border-radius: 1px;
+}
+
+.nav-tasks .icon-accent {
+  width: 3px;
+  height: 3px;
+  right: 1px;
+  top: 4px;
+  border-radius: 50%;
+}
+
+.nav-brainstorm .icon-accent {
+  width: 2px;
+  height: 7px;
+  right: 2px;
+  top: 2px;
+  border-radius: 2px;
+  transform: rotate(28deg);
+}
+
+.nav-proofs .icon-accent {
+  width: 3px;
+  height: 3px;
+  right: 1px;
+  bottom: 3px;
+  border-radius: 1px;
+}
+
+.nav-teams .icon-accent {
+  width: 3px;
+  height: 3px;
+  left: 3px;
+  top: 4px;
+  border-radius: 50%;
+}
+
+.nav-calendar .icon-accent {
+  width: 3px;
+  height: 3px;
+  right: 2px;
+  bottom: 3px;
+  border-radius: 1px;
+}
+
+.nav-knowledge .icon-accent {
+  width: 2px;
+  height: 7px;
+  right: 2px;
+  top: 7px;
+  border-radius: 2px;
+}
+
+.nav-settings .icon-accent {
+  width: 3px;
+  height: 3px;
+  right: 1px;
+  top: 4px;
+  border-radius: 50%;
+}
+
+.nav-btn:hover .icon-accent,
+.nav-btn:focus-visible .icon-accent {
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(216,168,78,.38);
+  transform: scale(1.18);
+}
+
+.nav-btn.active .icon-accent {
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(216,168,78,.42);
+}
+
+body.light .nav-icon .icon-accent {
+  background: #B9822F;
+  box-shadow: 0 0 7px rgba(185,130,47,.2);
+}
