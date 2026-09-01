@@ -1,18 +1,17 @@
-# Newla — Your Space. Your Workflow.
+Newla — Your Space. Your Workflow.
 
-> **Plan it. Make it. Prove it. Keep moving.**
+Plan it. Do it. Prove it. Keep moving.
 
-Newla is a personal productivity workspace built around a simple idea:
+Newla is a simple productivity workspace for getting work done and keeping track of what matters.
 
-> **Most things worth doing leave a trace.**
+Good work leaves a trace.
 
-Tasks should not end with only a checkbox. When the work matters, keep the result with it.
+A task should end with a result, not only a checkbox.
 
-```text
-Task → Work → Proof → Completed
+Task → Work → Proof → Done
 What is Newla?
 
-Newla brings everyday work into one quiet workspace:
+Newla brings your everyday work into one focused workspace.
 
 Tasks
 Proofs
@@ -22,49 +21,59 @@ Calendar
 Knowledge & Notes
 Teams
 
-The goal is simple:
+The idea is simple:
 
-See what matters. Do the work. Keep the result.
+Know the work. Do the work. Keep the result.
 
 Proof
 
-Proof is the record of the work.
+Proof is the record of your work.
 
-A photo, screenshot, finished design or any useful evidence can stay attached to the task instead of disappearing into your camera roll, downloads or old messages.
+Attach a photo, screenshot, design, document, or any useful evidence directly to a task.
 
-A checkbox says you finished. A proof shows that you did.
+Your work stays with the task instead of getting lost across your camera roll, downloads, or old messages.
+
+A checkbox says it is done. Proof shows the work.
 
 Teams
 
-Newla Teams brings the same proof-based workflow to shared work.
+Newla Teams brings this same workflow to shared work.
 
 Create Team
-   ↓
+    ↓
 Invite / Join
-   ↓
+    ↓
 Assign
-   ↓
-Start
-   ↓
+    ↓
+Work
+    ↓
 Proof
-   ↓
+    ↓
 Review
-   ↓
+    ↓
 Approve / Changes
 
-One user becomes the Head, while other Newla users join as Members.
+One person becomes the Head. Others join as Members.
 
-Teams include task assignment, proof submission, review, activity history, notifications, invite controls and team management.
+Heads can assign work, track progress, review proofs, manage members, control invites, and manage the team from one place.
 
-No team chat. Communication stays inside tasks, proofs and reviews.
+There is no separate team chat.
+
+Keep communication where the work happens — inside tasks, proofs, and reviews.
 
 Local-first
 
-Newla keeps important workspace data locally so the app can remain responsive while authenticated data syncs with Supabase.
+Newla keeps important workspace data locally so the app stays fast and responsive while authenticated data syncs with Supabase.
 
-You → Newla → Local Workspace → Cloud Sync
+You
+ ↓
+Newla
+ ↓
+Local Workspace
+ ↓
+Cloud Sync
 
-Temporary network issues should not make your work feel lost.
+A temporary network problem should not interrupt your workflow.
 
 Security
 
@@ -88,7 +97,7 @@ Supabase PostgreSQL
 Supabase Storage
 Vercel
 
-The project is intentionally lightweight and easy to inspect and maintain.
+Newla is intentionally lightweight, easy to understand, and easy to maintain.
 
 Live
 
@@ -98,17 +107,14 @@ Built by
 
 Naveen Shukla
 
-LinkedIn 
 LinkedIn: https://www.linkedin.com/in/naveenshukla99/
-
 
 Do the work. Keep the proof. Keep moving.
 
-
-## License
+License
 
 Copyright © 2026 Naveen Shukla. All rights reserved.
 
 This repository is publicly available for viewing and reference.
-No permission is granted to copy, modify, distribute, publish, or use
-this code or any substantial portion of it without prior written permission.
+
+No permission is granted to copy, modify, distribute, publish, or use this code or any substantial portion of it without prior written permission.
