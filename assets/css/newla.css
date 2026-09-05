@@ -12599,288 +12599,73 @@ body.light .github-star-btn:hover { background: #201d19; }
   z-index: 10050;
 }
 
-
-
-/* ---- Brainstorm inline pen controls ----
-   The Pen controls now sit exactly where the old More button lived.
-   They are shown only when Pen is the active tool.
-*/
-.brain-ref-toolbar .brain-draw-toolbar {
+.brain-ref-more-menu {
+  position: absolute;
+  top: 122px;
+  right: 24px;
+  z-index: 10060;
   display: none;
-  align-items: center;
-  gap: 8px;
-  margin-left: 8px;
-  padding: 0 0 0 12px;
-  min-height: 44px;
-  flex: 0 1 auto;
-  flex-wrap: nowrap;
-  background: transparent;
-  border: 0;
-  border-left: 1px solid #51483b;
+  width: min(260px, calc(100vw - 32px));
+  padding: 12px;
+  gap: 5px;
+  flex-direction: column;
+  background: #fbf6ec;
+  color: #3f372e;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(40, 31, 21, .24);
 }
 
-.brain-ref-toolbar .brain-draw-toolbar.show {
+.brain-ref-more-menu.show {
   display: flex;
 }
 
-.brain-ref-toolbar .brain-draw-toolbar .draw-label {
-  white-space: nowrap;
-  margin-right: -1px;
+.brain-ref-more-menu strong {
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: #7a6c5b;
+  margin-bottom: 2px;
 }
 
-.brain-ref-toolbar .brain-draw-toolbar .draw-swatch {
-  width: 22px;
-  height: 22px;
-  flex: 0 0 auto;
+.brain-ref-more-menu button,
+.brain-ref-more-menu span {
+  display: block;
+  padding: 8px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  text-align: left;
 }
 
-.brain-ref-toolbar .brain-draw-toolbar .draw-width-btn {
-  flex: 0 0 auto;
+.brain-ref-more-menu button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }
 
-.brain-ref-toolbar .brain-draw-toolbar .brain-ref-chrome-btn {
-  min-height: 40px;
-  flex: 0 0 auto;
+.brain-ref-more-menu button:hover {
+  background: #eee5d8;
+  border-color: #d5c6b3;
 }
 
-.brain-ref-toolbar .brain-draw-toolbar .brain-icon-btn {
-  width: 40px;
-  padding: 0;
+.brain-ref-more-menu span {
+  color: #756a5f;
+  font-size: 10px;
 }
 
-.brain-ref-shell:fullscreen .brain-ref-toolbar .brain-draw-toolbar {
-  position: relative;
-  z-index: 1010;
-}
-
-@media (max-width: 1050px) {
-  .brain-ref-toolbar .brain-draw-toolbar {
-    flex-wrap: wrap;
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-}
-
-@media (max-width: 700px) {
-  .brain-ref-toolbar .brain-draw-toolbar {
-    margin-left: 0;
-    padding-left: 8px;
-    max-width: 100%;
-    border-left: 0;
-    border-top: 1px solid #51483b;
-  }
-}
-body.light .brain-ref-toolbar .brain-draw-toolbar {
-  border-left-color: #cdbda9;
-}
-@media (max-width: 700px) {
-  body.light .brain-ref-toolbar .brain-draw-toolbar {
-    border-left: 0;
-    border-top-color: #cdbda9;
-  }
-}
-
-
-/* ---- Brainstorm toolbar layout hardening ----
-   Keep the header, toolbar, and canvas in a strict vertical flow.
-   Pen controls occupy the slot immediately after Color (the old More slot).
-*/
-.brain-ref-shell {
-  display: block !important;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.brain-ref-topbar {
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.brain-ref-toolbar {
-  position: relative !important;
-  inset: auto !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  min-height: 60px !important;
-  height: auto !important;
-  box-sizing: border-box !important;
-  flex: none !important;
-  align-content: center;
-}
-
-.brain-ref-workspace {
-  position: relative !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  clear: both;
-}
-
-.brain-ref-toolbar .brain-draw-toolbar {
-  position: static !important;
-  inset: auto !important;
-  float: none !important;
-  width: auto !important;
-  max-width: none !important;
-  box-sizing: border-box !important;
-  flex: 0 1 auto !important;
-  margin: 0 0 0 2px !important;
-  padding: 0 0 0 10px !important;
-  border: 0 !important;
-  border-left: 1px solid #51483b !important;
-}
-
-.brain-ref-toolbar .brain-draw-toolbar.show {
-  display: flex !important;
+.brain-ref-shell:fullscreen .brain-ref-more-menu {
+  top: 122px;
+  right: 24px;
 }
 
 @media (max-width: 760px) {
-  .brain-ref-toolbar {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
+  .brain-ref-more-menu {
+    top: 110px;
+    right: 12px;
   }
 
-  .brain-ref-toolbar .brain-draw-toolbar {
-    margin-left: 0 !important;
-    padding-left: 8px !important;
-    border-left: 0 !important;
+  .brain-ref-shell:fullscreen .brain-ref-more-menu {
+    top: 110px;
+    right: 12px;
   }
-}
-
-body.light .brain-ref-toolbar .brain-draw-toolbar {
-  border-left-color: #cdbda9 !important;
-}
-
-/* =========================================================
-   NEWLA — Brainstorm board final layout
-   Toolbar stays in a compact full-width top row.
-   The board/workspace owns the entire width underneath.
-   ========================================================= */
-#view-brainstorm {
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0 !important;
-}
-
-#view-brainstorm .brain-ref-shell {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-}
-
-#view-brainstorm .brain-ref-topbar {
-  position: relative !important;
-  inset: auto !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  flex: 0 0 auto !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-}
-
-#view-brainstorm .brain-ref-toolbar {
-  position: relative !important;
-  inset: auto !important;
-  display: flex !important;
-  flex: 0 0 auto !important;
-  align-items: center !important;
-  align-content: center !important;
-  justify-content: flex-start !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  height: auto !important;
-  min-height: 60px !important;
-  margin: 0 !important;
-  float: none !important;
-  box-sizing: border-box !important;
-}
-
-#view-brainstorm .brain-ref-workspace {
-  position: relative !important;
-  display: block !important;
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  min-height: 560px !important;
-  height: calc(100vh - 310px) !important;
-  margin: 0 !important;
-  float: none !important;
-  clear: both !important;
-  box-sizing: border-box !important;
-}
-
-#view-brainstorm .brain-ref-board,
-#view-brainstorm .brain-ref-canvas-grid {
-  width: 100% !important;
-  max-width: none !important;
-}
-
-#view-brainstorm .brain-ref-toolbar .brain-draw-toolbar {
-  position: static !important;
-  inset: auto !important;
-  float: none !important;
-}
-
-@media (max-width: 760px) {
-  #view-brainstorm .brain-ref-shell {
-    width: 100% !important;
-  }
-
-  #view-brainstorm .brain-ref-toolbar {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-  }
-
-  #view-brainstorm .brain-ref-workspace {
-    min-height: 500px !important;
-  }
-}
-
-/* =========================================================
-   NEWLA — FULLSCREEN BOARD HEIGHT FIX
-   In fullscreen, the board must consume every pixel below
-   the compact toolbar. The normal-page fixed viewport height
-   must never limit the fullscreen workspace.
-   ========================================================= */
-#view-brainstorm .brain-ref-shell:fullscreen {
-  width: 100vw !important;
-  height: 100vh !important;
-  min-height: 100vh !important;
-  max-height: 100vh !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-  border: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-}
-
-#view-brainstorm .brain-ref-shell:fullscreen .brain-ref-toolbar {
-  flex: 0 0 auto !important;
-}
-
-#view-brainstorm .brain-ref-shell:fullscreen .brain-ref-workspace {
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  margin: 0 !important;
-}
-
-#view-brainstorm .brain-ref-shell:fullscreen .brain-ref-board,
-#view-brainstorm .brain-ref-shell:fullscreen .brain-ref-canvas-grid {
-  width: 100% !important;
-  height: 100% !important;
-  inset: 0 !important;
 }
