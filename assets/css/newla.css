@@ -682,12 +682,15 @@ h3 {
 .kicker {
   font-size: 10px;
   letter-spacing: .17em;
-  font-wei
-  color
+  font-weight: 800;
+  color: #9f9588;
+}
+
 .hero-row {
   display: flex;
   margin-top: 8px;
-  font-size: 13px
+  font-size: 13px;
+}
 .quote-hero .mark {
   font: 34px/1 Georgia, serif;
   color: #c2a77a
@@ -12293,3 +12296,107 @@ body.light .team-loading-state{background:#f4ede3;border-color:#d8cbbb;color:#83
 .team-session-item{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:9px 10px;border:1px solid #38332c;border-radius:9px;background:#1c1a17}
 .team-sessim strong{display:block;font-size:10px;color:#eee5d6}
 .team-session-item 
+
+/* ---------- Stable brainstorm menus ---------- */
+.brain-ref-shell{
+  position:relative;
+}
+
+.brain-ref-shell .brain-ref-color-menu{
+  position:absolute;
+  z-index:900;
+}
+
+.brain-more-menu{
+  position:absolute;
+  z-index:901;
+  display:none;
+  width:210px;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--chrome-2);
+  box-shadow:0 18px 42px rgba(0,0,0,.28);
+}
+
+.brain-more-menu.show{
+  display:grid;
+  gap:4px;
+}
+
+.brain-more-menu-title{
+  padding:7px 9px 5px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.brain-more-menu button{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  padding:8px 9px;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:var(--cream);
+  text-align:left;
+}
+
+.brain-more-menu button:hover{
+  background:color-mix(in srgb,var(--chrome) 78%,var(--accent));
+  border-color:var(--dark-line);
+}
+
+.brain-more-menu kbd{
+  width:23px;
+  height:23px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--dark-line);
+  border-radius:6px;
+  background:var(--chrome);
+  color:var(--cream);
+  font-size:10px;
+  font-weight:700;
+}
+
+.brain-more-menu-hint{
+  padding:7px 9px 5px;
+  border-top:1px solid var(--dark-line);
+  color:var(--dark-muted);
+  font-size:9px;
+  line-height:1.5;
+}
+
+body.light .brain-more-menu{
+  background:var(--panel-soft);
+  border-color:var(--line);
+}
+
+body.light .brain-more-menu button{
+  color:var(--ink);
+}
+
+body.light .brain-more-menu button:hover{
+  background:var(--paper);
+  border-color:var(--line);
+}
+
+body.light .brain-more-menu kbd{
+  background:var(--panel);
+  color:var(--ink);
+  border-color:var(--line);
+}
+
+body.light .brain-more-menu-hint{
+  border-top-color:var(--line);
+  color:var(--muted);
+}
+
+.brain-ref-shell:fullscreen .brain-more-menu{
+  position:absolute;
+}
