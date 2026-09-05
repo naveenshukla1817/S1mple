@@ -1579,6 +1579,40 @@ document.querySelectorAll("[data-tool]").forEach(b=>{
 const brainShell=document.querySelector(".brain-ref-shell");
 const colorMenu=$("colorMenu");
 const colorMenuHome=colorMenu?.parentElement||null;
+let brainMoreMenu=null;
+
+function ensureBrainMoreMenu(){
+  if(brainMoreMenu||!brainShell)return;
+  brainMoreMenu=document.createElement("div");
+  brainMoreMenu.id="brainMoreMenu";
+  brainMoreMenu.className="brain-ref-more-menu";
+  brainMoreMenu.innerHTML=`
+    <strong>BRAINSTORM SHORTCUTS</strong>
+    <button type="button" data-brain-more-tool="pen">P · Pen</button>
+    <button type="button" data-brain-more-tool="text">T · Text</button>
+    <button type="button" data-brain-more-tool="eraser">E · Eraser</button>
+    <button type="button" data-brain-more-tool="select">V · Select</button>
+    <span>Mouse wheel · Zoom</span>
+    <span>Space / Hand · Pan</span>
+    <span>Double-click · Edit sticky</span>
+  `;
+  brainMoreMenu.querySelectorAll("[data-brain-more-tool]").forEach(btn=>{
+    btn.onclick=()=>{
+      if(typeof selectTool==="function")selectTool(btn.dataset.brainMoreTool);
+      brainMoreMenu?.classList.remove("show");
+      brainMoreMenu?.setAttribute("aria-hidden","true");
+    };
+  });
+  brainShell.appendChild(brainMoreMenu);
+}
+
+function toggleBrainMore(){
+  ensureBrainMoreMenu();
+  if(!brainMoreMenu||!brainShell)return;
+  const show=!brainMoreMenu.classList.contains("show");
+  brainMoreMenu.classList.toggle("show",show);
+  brainMoreMenu.setAttribute("aria-hidden",show?"false":"true");
+}
 
 $("colorButton").onclick=(event)=>{
   event.stopPropagation();
@@ -1590,12 +1624,21 @@ $("colorButton").onclick=(event)=>{
   openColorMenu(selectedId,r.left,r.bottom+6);
 };
 
+$("moreButton").onclick=(event)=>{
+  event.stopPropagation();
+  toggleBrainMore();
+};
+
 document.addEventListener("fullscreenchange",()=>{
   if(!colorMenu)return;
   if(document.fullscreenElement===brainShell){
     brainShell.appendChild(colorMenu);
   }else if(colorMenuHome && colorMenu.parentElement!==colorMenuHome){
     colorMenuHome.appendChild(colorMenu);
+  }
+  if(brainMoreMenu){
+    brainMoreMenu.classList.remove("show");
+    brainMoreMenu.setAttribute("aria-hidden","true");
   }
 });
 $("addSticky").onclick=addSticky;
@@ -2862,10 +2905,9 @@ document.querySelectorAll(".modal").forEach(modal=>{
     const bar = document.getElementById("drawOptionsBar");
     if(!canvas) return;
     const isDraw = SHAPE_TOOLS.includes(activeTool) || activeTool===ERASE_TOOL;
-    const showPenOptions = activeTool === "pen";
     canvas.classList.toggle("brain-draw-active", isDraw);
     canvas.classList.toggle("brain-draw-erase", activeTool===ERASE_TOOL);
-    if(bar) bar.classList.toggle("show", showPenOptions);
+    if(bar) bar.classList.toggle("show", isDraw);
   }
 
   /* ---------- hook into existing globals (safe: same pattern app already uses) ---------- */
