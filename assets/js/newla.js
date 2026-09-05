@@ -158,7 +158,7 @@ function openFocusModal(task){
 }
 
 function startFocusFromTask(){
-  const task=tasks.find(t=>t.status!=="completed");
+  const task=tasks.find(t=>!t.deletedAt && t.status!=="completed");
   if(!task){
     toast("No pending task to focus on.","error");
     return;
@@ -568,6 +568,9 @@ function openTaskModal(task=null) {
   $("taskDueDate").value = task?.dueDate || "";
   $("taskReminderDate").value = task?.reminderDate || "";
   $("taskReminderTime").value = task?.reminderTime || "";
+  $("taskCategory").value = task?.category || "Coding";
+  $("taskRecurring").value = task?.recurring || "none";
+  $("taskSubtasks").value = (task?.subtasks || []).map(s => typeof s === "string" ? s : (s.text || "")).join("\n");
 
   $("taskModal").style.display = "grid";
   setTimeout(() => $("taskTitle").focus(),40);
@@ -597,6 +600,14 @@ $("taskForm").addEventListener("submit",event => {
     dueDate: $("taskDueDate").value,
     reminderDate: $("taskReminderDate").value,
     reminderTime: $("taskReminderTime").value,
+    category: $("taskCategory").value || "Coding",
+    recurring: $("taskRecurring").value || "none",
+    subtasks: ($("taskSubtasks").value || "").split("\n").map(s => s.trim()).filter(Boolean).map((text,i) => {
+      const oldSub = existing?.subtasks?.[i];
+      return oldSub && typeof oldSub === "object"
+        ? { ...oldSub, text }
+        : { id: crypto.randomUUID(), text, done:false };
+    }),
     status: existing?.status || "pending",
     proofDataUrl: existing?.proofDataUrl || null,
     completedAt: existing?.completedAt || null,
@@ -1466,10 +1477,13 @@ function createTaskFromBrainNote(n){
 
 function openColorMenu(id,x,y){
   const menu=$("colorMenu");
+  if(!menu)return;
   menu.dataset.noteId=id;
   menu.style.display="flex";
-  menu.style.left=Math.min(x,window.innerWidth-180)+"px";
-  menu.style.top=Math.min(y,window.innerHeight-60)+"px";
+  const width=menu.offsetWidth||110;
+  const height=menu.offsetHeight||40;
+  menu.style.left=Math.max(6,Math.min(x,window.innerWidth-width-6))+"px";
+  menu.style.top=Math.max(6,Math.min(y,window.innerHeight-height-6))+"px";
 }
 
 function drawWires(){
@@ -1562,14 +1576,71 @@ document.querySelectorAll("[data-tool]").forEach(b=>{
   };
 });
 
-$("colorButton").onclick=()=>{
+const brainShell=document.querySelector(".brain-ref-shell");
+const colorMenu=$("colorMenu");
+const colorMenuHome=colorMenu?.parentElement||null;
+let brainMoreMenu=null;
+
+function ensureBrainMoreMenu(){
+  if(brainMoreMenu||!brainShell)return;
+  brainMoreMenu=document.createElement("div");
+  brainMoreMenu.id="brainMoreMenu";
+  brainMoreMenu.className="brain-ref-more-menu";
+  brainMoreMenu.innerHTML=`
+    <strong>BRAINSTORM SHORTCUTS</strong>
+    <button type="button" data-brain-more-tool="pen">P · Pen</button>
+    <button type="button" data-brain-more-tool="text">T · Text</button>
+    <button type="button" data-brain-more-tool="eraser">E · Eraser</button>
+    <button type="button" data-brain-more-tool="select">V · Select</button>
+    <span>Mouse wheel · Zoom</span>
+    <span>Space / Hand · Pan</span>
+    <span>Double-click · Edit sticky</span>
+  `;
+  brainMoreMenu.querySelectorAll("[data-brain-more-tool]").forEach(btn=>{
+    btn.onclick=()=>{
+      if(typeof selectTool==="function")selectTool(btn.dataset.brainMoreTool);
+      brainMoreMenu?.classList.remove("show");
+      brainMoreMenu?.setAttribute("aria-hidden","true");
+    };
+  });
+  brainShell.appendChild(brainMoreMenu);
+}
+
+function toggleBrainMore(){
+  ensureBrainMoreMenu();
+  if(!brainMoreMenu||!brainShell)return;
+  const show=!brainMoreMenu.classList.contains("show");
+  brainMoreMenu.classList.toggle("show",show);
+  brainMoreMenu.setAttribute("aria-hidden",show?"false":"true");
+}
+
+$("colorButton").onclick=(event)=>{
+  event.stopPropagation();
   if(!selectedId){toast("Select a sticky first.","error");return;}
   const r=$("colorButton").getBoundingClientRect();
+  if(colorMenu && document.fullscreenElement===brainShell && colorMenu.parentElement!==brainShell){
+    brainShell.appendChild(colorMenu);
+  }
   openColorMenu(selectedId,r.left,r.bottom+6);
 };
-$("moreButton").onclick=()=>{
-  void nexaAlert("E — Eraser\nT — Text\nMouse wheel — Zoom\nHand — Pan\nDouble-click — Edit sticky", {title:"Brainstorm shortcuts", kicker:"BRAINSTORM"});
+
+$("moreButton").onclick=(event)=>{
+  event.stopPropagation();
+  toggleBrainMore();
 };
+
+document.addEventListener("fullscreenchange",()=>{
+  if(!colorMenu)return;
+  if(document.fullscreenElement===brainShell){
+    brainShell.appendChild(colorMenu);
+  }else if(colorMenuHome && colorMenu.parentElement!==colorMenuHome){
+    colorMenuHome.appendChild(colorMenu);
+  }
+  if(brainMoreMenu){
+    brainMoreMenu.classList.remove("show");
+    brainMoreMenu.setAttribute("aria-hidden","true");
+  }
+});
 $("addSticky").onclick=addSticky;
 $("createTask").onclick=()=>{
   const n=brainNotes.find(x=>x.id===selectedId)||brainNotes[0];
@@ -1714,7 +1785,11 @@ document.querySelectorAll("[data-color]").forEach(b=>{
 });
 
 document.addEventListener("click",e=>{
-  if(!e.target.closest("#colorMenu")&&!e.target.closest('[data-action="color"]')){
+  if(
+    !e.target.closest("#colorMenu") &&
+    !e.target.closest("#colorButton") &&
+    !e.target.closest('[data-action="color"]')
+  ){
     $("colorMenu").style.display="none";
   }
 });
@@ -1794,7 +1869,7 @@ window.addEventListener("resize",drawMinimap);
 ============================================================ */
 
 function renderProofs() {
-  const done=tasks.filter(t=>t.status==="completed" && t.proofDataUrl);
+  const done=tasks.filter(t=>!t.deletedAt && t.status==="completed" && t.proofDataUrl);
   const grid=$("proofGrid");
   const empty=$("proofEmpty");
   if(!grid||!empty)return;
@@ -2131,27 +2206,24 @@ $("dashboardBrainstorm").onclick=()=>switchView("brainstorm");
 ============================================================ */
 
 document.addEventListener("keydown",event=>{
-  const tag=event.target.tagName;
-  const typing=
-    tag==="INPUT" ||
-    tag==="TEXTAREA" ||
-    tag==="SELECT";
-
-  if (typing) return;
+  const tag=(event.target?.tagName||"").toUpperCase();
+  const typing=tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT";
+  if(typing)return;
 
   const key=event.key.toLowerCase();
 
   if(key==="n"){
+    event.preventDefault();
     switchView("tasks");
     openTaskModal();
+    return;
   }
 
-  if(key==="e" && activeView==="brainstorm"){
-    brainTool="eraser";
-  }
-
-  if(key==="t" && activeView==="brainstorm"){
-    brainTool="text";
+  if(activeView==="brainstorm" && typeof selectTool==="function"){
+    if(key==="p"){ event.preventDefault(); selectTool("pen"); return; }
+    if(key==="t"){ event.preventDefault(); selectTool("text"); return; }
+    if(key==="e"){ event.preventDefault(); selectTool("eraser"); return; }
+    if(key==="v"){ event.preventDefault(); selectTool("select"); return; }
   }
 });
 
@@ -2178,11 +2250,6 @@ document.addEventListener("keydown",event=>{
   if(event.key==="Escape"){
     closeCommandPalette();
     return;
-  }
-
-  if(!typing && event.key.toLowerCase()==="n"){
-    switchView("tasks");
-    openTaskModal();
   }
 
   if(!typing && activeView==="brainstorm"){
@@ -2326,38 +2393,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
 
   function esc(v){return escapeHtml(v==null?"":v)}
 
-  /* -------- Rich task fields -------- */
-  const originalOpenTaskModal=window.openTaskModal;
-  window.openTaskModal=function(task=null){
-    originalOpenTaskModal(task);
-    setTimeout(()=>{
-      if($("taskCategory")) $("taskCategory").value=task?.category||"Coding";
-      if($("taskRecurring")) $("taskRecurring").value=task?.recurring||"none";
-      if($("taskSubtasks")) $("taskSubtasks").value=(task?.subtasks||[]).map(s=>typeof s==="string"?s:s.text).join("\n");
-    },0);
-  };
-
-  const taskForm=$("taskForm");
-  if(taskForm){
-    taskForm.addEventListener("submit",()=>{
-      setTimeout(()=>{
-        const id=window.editingTaskId || $("taskId")?.value || tasks[0]?.id;
-        const t=tasks.find(x=>x.id===id);
-        if(!t)return;
-        const lines=($("taskSubtasks")?.value||"").split("\n").map(x=>x.trim()).filter(Boolean);
-        const previous=t.subtasks||[];
-        t.category=$("taskCategory")?.value||"Coding";
-        t.recurring=$("taskRecurring")?.value||"none";
-        t.subtasks=lines.map((s,i)=>{
-          const old=previous[i];
-          return typeof old==="object"?{...old,text:s}:{id:crypto.randomUUID(),text:s,done:false};
-        });
-        save(KEYS.TASKS,tasks);
-        renderAll();
-        renderV2Dashboard();
-      },20);
-    });
-  }
+  /* Rich task fields are handled by the base task modal/save flow. */
 
   /* -------- Search + filters -------- */
   const search=$("taskSearch"), cat=$("taskCategoryFilter"), pri=$("taskPriorityFilter");
@@ -4121,6 +4157,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   window.filteredTasksStep4=function(){
     let list=Array.isArray(tasks)?tasks.slice():[];
     list=list.filter(task=>{
+      if(task.deletedAt)return false;
       if(taskFilter==="pending" && task.status==="completed")return false;
       if(taskFilter==="completed" && task.status!=="completed")return false;
       if(step4Filter==="today" && !isToday(task))return false;
@@ -4278,10 +4315,11 @@ document.querySelectorAll(".modal").forEach(modal=>{
       const summary=$("step4Summary");if(summary)summary.textContent=`Showing ${list.length} of ${tasks.length}`;
     }
     const today=todayKey();
-    if($("taskToday"))$("taskToday").textContent=tasks.filter(t=>t.dueDate===today||t.reminderDate===today).length;
-    if($("taskPending"))$("taskPending").textContent=tasks.filter(t=>t.status!=="completed").length;
-    if($("taskOverdue"))$("taskOverdue").textContent=tasks.filter(isOverdue).length;
-    if($("taskCompleted"))$("taskCompleted").textContent=tasks.filter(t=>t.status==="completed").length;
+    const activeTasks=tasks.filter(t=>!t.deletedAt);
+    if($("taskToday"))$("taskToday").textContent=activeTasks.filter(t=>t.dueDate===today||t.reminderDate===today).length;
+    if($("taskPending"))$("taskPending").textContent=activeTasks.filter(t=>t.status!=="completed").length;
+    if($("taskOverdue"))$("taskOverdue").textContent=activeTasks.filter(isOverdue).length;
+    if($("taskCompleted"))$("taskCompleted").textContent=activeTasks.filter(t=>t.status==="completed").length;
     syncFilterUI();
   };
 
@@ -4338,38 +4376,11 @@ document.querySelectorAll(".modal").forEach(modal=>{
         void nexaAlert("Choose both a reminder date and time, or leave both empty.",{title:"Reminder details",kicker:"TASK"});
         return;
       }
-      const id=typeof editingTaskId!=="undefined"?editingTaskId:null;
-      setTimeout(()=>{
-        const target=id?tasks.find(t=>t.id===id):tasks[0];
-        if(!target)return;
-        target.category=$("taskCategory")?.value||target.category||"Coding";
-        target.recurring=$("taskRecurring")?.value||target.recurring||"none";
-        const lines=($("taskSubtasks")?.value||"").split("\n").map(v=>v.trim()).filter(Boolean);
-        const prior=getSubtasks(target);
-        target.subtasks=lines.map((line,i)=>prior[i]?{...prior[i],text:line}:{id:crypto.randomUUID(),text:line,done:false});
-        save(KEYS.TASKS,tasks);
-        window.renderTasks();
-        window.renderV2Dashboard?.();
-        showTaskSavedState();
-      },40);
+      /* Base task submit now owns category, recurring and subtasks. */
     },true);
   }
 
-  /* Prevent partially entered reminder values from being persisted. */
-  const baseOpen=window.openTaskModal;
-  if(baseOpen&&!baseOpen.__step4Wrapped){
-    const wrapped=function(task=null){
-      baseOpen(task);
-      setTimeout(()=>{
-        if(!task)return;
-        $("taskCategory")&&($("taskCategory").value=task.category||"Coding");
-        $("taskRecurring")&&($("taskRecurring").value=task.recurring||"none");
-        $("taskSubtasks")&&($("taskSubtasks").value=getSubtasks(task).map(s=>s.text).join("\n"));
-      },0);
-    };
-    wrapped.__step4Wrapped=true;
-    window.openTaskModal=wrapped;
-  }
+  /* The base task modal now owns all task fields. */
 
   function init(){
     ensureStep4Controls();
