@@ -12845,3 +12845,42 @@ body.light .brain-ref-toolbar .brain-draw-toolbar {
     min-height: 500px !important;
   }
 }
+
+/* =========================================================
+   NEWLA — FULLSCREEN BOARD HEIGHT FIX
+   In fullscreen, the board must consume every pixel below
+   the compact toolbar. The normal-page fixed viewport height
+   must never limit the fullscreen workspace.
+   ========================================================= */
+#view-brainstorm .brain-ref-shell:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+#view-brainstorm .brain-ref-shell:fullscreen .brain-ref-toolbar {
+  flex: 0 0 auto !important;
+}
+
+#view-brainstorm .brain-ref-shell:fullscreen .brain-ref-workspace {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+}
+
+#view-brainstorm .brain-ref-shell:fullscreen .brain-ref-board,
+#view-brainstorm .brain-ref-shell:fullscreen .brain-ref-canvas-grid {
+  width: 100% !important;
+  height: 100% !important;
+  inset: 0 !important;
+}
