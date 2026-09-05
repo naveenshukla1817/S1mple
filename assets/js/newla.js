@@ -597,10 +597,25 @@ $("taskForm").addEventListener("submit",event => {
     dueDate: $("taskDueDate").value,
     reminderDate: $("taskReminderDate").value,
     reminderTime: $("taskReminderTime").value,
+    category: $("taskCategory")?.value || existing?.category || "Coding",
+    recurring: $("taskRecurring")?.value || existing?.recurring || "none",
+    subtasks: ($("taskSubtasks")?.value || "")
+      .split("\n")
+      .map(v => v.trim())
+      .filter(Boolean)
+      .map((text, i) => {
+        const old = existing?.subtasks?.[i];
+        return typeof old === "object" ? {...old, text} : {id: crypto.randomUUID(), text, done:false};
+      }),
     status: existing?.status || "pending",
     proofDataUrl: existing?.proofDataUrl || null,
+    proofThumbDataUrl: existing?.proofThumbDataUrl || null,
+    proofPath: existing?.proofPath || null,
     completedAt: existing?.completedAt || null,
     remindedAt: existing?.remindedAt || null,
+    deletedAt: existing?.deletedAt || null,
+    deleteReason: existing?.deleteReason || null,
+    deleteReasonNote: existing?.deleteReasonNote || null,
     createdAt: existing?.createdAt || new Date().toISOString()
   };
 
@@ -1466,10 +1481,48 @@ function createTaskFromBrainNote(n){
 
 function openColorMenu(id,x,y){
   const menu=$("colorMenu");
+  const shell=document.querySelector(".brain-ref-shell");
+  if(!menu)return;
   menu.dataset.noteId=id;
+  if(shell && !shell.contains(menu))shell.appendChild(menu);
+  if(shell){
+    const sr=shell.getBoundingClientRect();
+    menu.style.position="absolute";
+    menu.style.left=Math.max(8,Math.min(x-sr.left,sr.width-155))+"px";
+    menu.style.top=Math.max(8,y-sr.top)+"px";
+  }else{
+    menu.style.position="fixed";
+    menu.style.left=Math.min(x,window.innerWidth-180)+"px";
+    menu.style.top=Math.min(y,window.innerHeight-60)+"px";
+  }
   menu.style.display="flex";
-  menu.style.left=Math.min(x,window.innerWidth-180)+"px";
-  menu.style.top=Math.min(y,window.innerHeight-60)+"px";
+}
+
+function toggleBrainMoreMenu(){
+  const shell=document.querySelector(".brain-ref-shell");
+  const button=$("moreButton");
+  if(!shell||!button)return;
+  let menu=$("brainMoreMenu");
+  if(!menu){
+    menu=document.createElement("div");
+    menu.id="brainMoreMenu";
+    menu.className="brain-more-menu";
+    menu.innerHTML=`
+      <div class="brain-more-kicker">QUICK CONTROLS</div>
+      <div><kbd>N</kbd><span>New task</span></div>
+      <div><kbd>P</kbd><span>Pen</span></div>
+      <div><kbd>T</kbd><span>Text</span></div>
+      <div><kbd>E</kbd><span>Eraser</span></div>
+      <div><kbd>V</kbd><span>Select</span></div>
+      <div><kbd>Ctrl</kbd><kbd>Z</kbd><span>Undo</span></div>
+      <div class="brain-more-note">Mouse wheel to zoom · Hand to pan · Double-click a sticky to edit</div>
+    `;
+    shell.appendChild(menu);
+  }
+  const sr=shell.getBoundingClientRect(), br=button.getBoundingClientRect();
+  menu.style.left=Math.max(8,Math.min(br.left-sr.left,sr.width-245))+"px";
+  menu.style.top=Math.max(8,br.bottom-sr.top+7)+"px";
+  menu.classList.toggle("show");
 }
 
 function drawWires(){
@@ -1562,13 +1615,15 @@ document.querySelectorAll("[data-tool]").forEach(b=>{
   };
 });
 
-$("colorButton").onclick=()=>{
+$("colorButton").onclick=(e)=>{
+  e.stopPropagation();
   if(!selectedId){toast("Select a sticky first.","error");return;}
   const r=$("colorButton").getBoundingClientRect();
   openColorMenu(selectedId,r.left,r.bottom+6);
 };
-$("moreButton").onclick=()=>{
-  void nexaAlert("E — Eraser\nT — Text\nMouse wheel — Zoom\nHand — Pan\nDouble-click — Edit sticky", {title:"Brainstorm shortcuts", kicker:"BRAINSTORM"});
+$("moreButton").onclick=(e)=>{
+  e.stopPropagation();
+  toggleBrainMoreMenu();
 };
 $("addSticky").onclick=addSticky;
 $("createTask").onclick=()=>{
@@ -1714,8 +1769,11 @@ document.querySelectorAll("[data-color]").forEach(b=>{
 });
 
 document.addEventListener("click",e=>{
-  if(!e.target.closest("#colorMenu")&&!e.target.closest('[data-action="color"]')){
+  if(!e.target.closest("#colorMenu")&&!e.target.closest("#colorButton")){
     $("colorMenu").style.display="none";
+  }
+  if(!e.target.closest("#brainMoreMenu")&&!e.target.closest("#moreButton")){
+    $("brainMoreMenu")?.classList.remove("show");
   }
 });
 
@@ -2144,14 +2202,21 @@ document.addEventListener("keydown",event=>{
   if(key==="n"){
     switchView("tasks");
     openTaskModal();
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    return;
   }
 
-  if(key==="e" && activeView==="brainstorm"){
-    brainTool="eraser";
-  }
-
-  if(key==="t" && activeView==="brainstorm"){
-    brainTool="text";
+  if(activeView==="brainstorm"){
+    if((event.ctrlKey||event.metaKey) && key==="z"){
+      event.preventDefault();
+      $("undoButton")?.click();
+      return;
+    }
+    if(key==="p"){ selectTool("pen"); return; }
+    if(key==="t"){ selectTool("text"); return; }
+    if(key==="e"){ selectTool("eraser"); return; }
+    if(key==="v"){ selectTool("select"); return; }
   }
 });
 
@@ -2338,26 +2403,8 @@ document.querySelectorAll(".modal").forEach(modal=>{
   };
 
   const taskForm=$("taskForm");
-  if(taskForm){
-    taskForm.addEventListener("submit",()=>{
-      setTimeout(()=>{
-        const id=window.editingTaskId || $("taskId")?.value || tasks[0]?.id;
-        const t=tasks.find(x=>x.id===id);
-        if(!t)return;
-        const lines=($("taskSubtasks")?.value||"").split("\n").map(x=>x.trim()).filter(Boolean);
-        const previous=t.subtasks||[];
-        t.category=$("taskCategory")?.value||"Coding";
-        t.recurring=$("taskRecurring")?.value||"none";
-        t.subtasks=lines.map((s,i)=>{
-          const old=previous[i];
-          return typeof old==="object"?{...old,text:s}:{id:crypto.randomUUID(),text:s,done:false};
-        });
-        save(KEYS.TASKS,tasks);
-        renderAll();
-        renderV2Dashboard();
-      },20);
-    });
-  }
+  // The primary submit handler now persists the rich task fields synchronously.
+  // Avoid a delayed handler reading the reset form and overwriting a chosen category.
 
   /* -------- Search + filters -------- */
   const search=$("taskSearch"), cat=$("taskCategoryFilter"), pri=$("taskPriorityFilter");
@@ -4121,6 +4168,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   window.filteredTasksStep4=function(){
     let list=Array.isArray(tasks)?tasks.slice():[];
     list=list.filter(task=>{
+      if(task.deletedAt)return false;
       if(taskFilter==="pending" && task.status==="completed")return false;
       if(taskFilter==="completed" && task.status!=="completed")return false;
       if(step4Filter==="today" && !isToday(task))return false;
@@ -4278,10 +4326,10 @@ document.querySelectorAll(".modal").forEach(modal=>{
       const summary=$("step4Summary");if(summary)summary.textContent=`Showing ${list.length} of ${tasks.length}`;
     }
     const today=todayKey();
-    if($("taskToday"))$("taskToday").textContent=tasks.filter(t=>t.dueDate===today||t.reminderDate===today).length;
-    if($("taskPending"))$("taskPending").textContent=tasks.filter(t=>t.status!=="completed").length;
-    if($("taskOverdue"))$("taskOverdue").textContent=tasks.filter(isOverdue).length;
-    if($("taskCompleted"))$("taskCompleted").textContent=tasks.filter(t=>t.status==="completed").length;
+    if($("taskToday"))$("taskToday").textContent=tasks.filter(t=>!t.deletedAt&&(t.dueDate===today||t.reminderDate===today)).length;
+    if($("taskPending"))$("taskPending").textContent=tasks.filter(t=>!t.deletedAt&&t.status!=="completed").length;
+    if($("taskOverdue"))$("taskOverdue").textContent=tasks.filter(t=>!t.deletedAt&&isOverdue(t)).length;
+    if($("taskCompleted"))$("taskCompleted").textContent=tasks.filter(t=>!t.deletedAt&&t.status==="completed").length;
     syncFilterUI();
   };
 
@@ -4339,14 +4387,17 @@ document.querySelectorAll(".modal").forEach(modal=>{
         return;
       }
       const id=typeof editingTaskId!=="undefined"?editingTaskId:null;
+      // Capture these values before the primary submit handler closes/resets the modal.
+      const capturedCategory=$("taskCategory")?.value||"Coding";
+      const capturedRecurring=$("taskRecurring")?.value||"none";
+      const capturedLines=($("taskSubtasks")?.value||"").split("\n").map(v=>v.trim()).filter(Boolean);
       setTimeout(()=>{
         const target=id?tasks.find(t=>t.id===id):tasks[0];
         if(!target)return;
-        target.category=$("taskCategory")?.value||target.category||"Coding";
-        target.recurring=$("taskRecurring")?.value||target.recurring||"none";
-        const lines=($("taskSubtasks")?.value||"").split("\n").map(v=>v.trim()).filter(Boolean);
+        target.category=capturedCategory;
+        target.recurring=capturedRecurring;
         const prior=getSubtasks(target);
-        target.subtasks=lines.map((line,i)=>prior[i]?{...prior[i],text:line}:{id:crypto.randomUUID(),text:line,done:false});
+        target.subtasks=capturedLines.map((line,i)=>prior[i]?{...prior[i],text:line}:{id:crypto.randomUUID(),text:line,done:false});
         save(KEYS.TASKS,tasks);
         window.renderTasks();
         window.renderV2Dashboard?.();
