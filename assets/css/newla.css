@@ -666,7 +666,7 @@ h1 {
 h2 {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 28px;
-  font-weight: 60
+  font-weight: 600;
   color: var(--ink)
 }
 
@@ -682,15 +682,39 @@ h3 {
 .kicker {
   font-size: 10px;
   letter-spacing: .17em;
-  font-wei
-  color
+  font-weight: 800;
+  color: var(--muted)
+}
+
 .hero-row {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px
+}
+
+.hero-note {
+  color: #aa9f90;
   margin-top: 8px;
   font-size: 13px
+}
+
+.quote-hero {
+  margin: 23px 0 22px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  max-width: 850px
+}
+
 .quote-hero .mark {
   font: 34px/1 Georgia, serif;
   color: #c2a77a
+}
+
+.quote-hero .text {
+  font: 800 clamp(18px, 2vw, 24px)/1.35 Georgia, serif;
+  color: #f0e6d6
 }
 
 .quote-hero .source {
@@ -12291,5 +12315,265 @@ body.light .team-loading-state{background:#f4ede3;border-color:#d8cbbb;color:#83
 .team-session-list-wrap{display:grid;gap:8px}
 .team-session-list{display:grid;gap:6px;max-height:220px;overflow:auto}
 .team-session-item{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:9px 10px;border:1px solid #38332c;border-radius:9px;background:#1c1a17}
-.team-sessim strong{display:block;font-size:10px;color:#eee5d6}
-.team-session-item 
+.team-session-item strong{display:block;font-size:10px;color:#eee5d6}
+.team-session-item small{display:block;margin-top:2px;color:#8f877b;font-size:8px;line-height:1.35}
+.team-session-item.suspicious{border-color:#76514a}
+.team-session-flag{display:inline-block;margin-top:4px;padding:3px 5px;border-radius:999px;border:1px solid #76514a;color:#df9289!important;font-size:7px!important}
+body.light .team-invite-meta{color:#83776a}
+body.light .team-security-block{background:#f4ede3;border-color:#d8cbbb}
+body.light .team-security-block h3{color:#3f352b}
+body.light .team-session-item{background:#f9f3ea;border-color:#d8cbbb}
+body.light .team-session-item strong{color:#3f352b}
+@media(max-width:620px){
+  .team-security-grid{grid-template-columns:1fr}
+  .team-activity-actions{justify-content:flex-end}
+  .team-invite-meta{text-align:left}
+  .team-session-item{align-items:flex-start;flex-direction:column}
+}
+
+.team-team-danger-zone{margin-top:18px;border-top:1px solid rgba(190,95,82,.28);padding-top:18px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.team-team-danger-zone>div{display:grid;gap:4px}.team-team-danger-zone strong{color:#d18b80;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.team-team-danger-zone span{color:#8f867a;font-size:12px;line-height:1.5}
+.team-danger-action{color:#d4877c!important;border-color:rgba(184,88,77,.45)!important;background:transparent!important}
+.team-danger-action:hover{color:#ff8f80!important;border-color:rgba(221,108,94,.7)!important}
+@media(max-width:620px){.team-team-danger-zone{align-items:flex-start;flex-direction:column}.team-danger-action{width:100%}}
+
+.about-social-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.about-github{display:inline-flex;align-items:center;gap:8px;color:#cfc7b9;border:1px solid #473f34;border-radius:12px;padding:10px 14px;text-decoration:none;transition:color .18s ease,border-color .18s ease}
+.about-github svg{width:15px;height:15px;fill:currentColor}
+.about-github:hover,.about-github:focus-visible{color:#f0ebe1;border-color:#756755}
+@media (max-width:640px){.about-social-links{width:100%}.about-github,.about-linkedin{width:fit-content}}
+
+/* Final audit safeguards */
+html,body{max-width:100%;overflow-x:hidden;}
+img,video,canvas,svg{max-width:100%;}
+input,textarea,select,button{font:inherit;max-width:100%;}
+@media(max-width:760px){
+  .view{min-width:0!important;}
+  .team-layout,.team-grid,.team-stats,.stats-grid{min-width:0!important;grid-template-columns:minmax(0,1fr)!important;}
+  .team-panel,.team-card,.task-card{min-width:0;max-width:100%;}
+}
+
+/* ============================================================
+   LIGHT MODE BUTTON BLEND — warm paper accent only
+   Keep dark theme unchanged.
+============================================================ */
+body.light .team-members-trigger {
+  background: #e2c182;
+  border-color: #d2ae6d;
+  color: #2d281f;
+}
+body.light .team-members-trigger:hover,
+body.light .team-members-trigger[aria-expanded="true"] {
+  background: #e2c182;
+  border-color: #c39a58;
+  color: #2d281f;
+}
+
+body.light .team-count {
+  background: #e2c182;
+  border-color: #d2ae6d;
+  color: #2d281f;
+}
+
+body.light .team-view-btn.active {
+  background: #e2c182;
+  color: #2d281f;
+}
+
+body.light .team-task-btn {
+  background: #e2c182;
+  border-color: #d2ae6d;
+  color: #2d281f;
+}
+body.light .team-task-btn:hover {
+  background: #e8ca95;
+  border-color: #c39a58;
+  color: #2d281f;
+}
+body.light .team-task-btn.proof,
+body.light .team-task-btn.approve,
+body.light .team-task-btn.changes {
+  background: #e2c182;
+  color: #2d281f;
+}
+
+body.light .team-copy-btn {
+  background: #f7efe3;
+  border-color: #cfc0ad;
+  color: #4a4034;
+}
+
+body.light .brain-ref-board-menu button,
+body.light .brain-ref-zoom button,
+body.light .brain-ref-tool.active,
+body.light .brain-ref-chrome-btn.dark {
+  background: #e2c182 !important;
+  border-color: #d2ae6d !important;
+  color: #2d281f !important;
+}
+body.light .brain-ref-board-menu button:hover,
+body.light .brain-ref-zoom button:hover,
+body.light .brain-ref-tool.active:hover,
+body.light .brain-ref-chrome-btn.dark:hover {
+  background: #e8ca95 !important;
+  border-color: #c39a58 !important;
+  color: #2d281f !important;
+}
+
+body.light .theme-choice.active,
+body.light .calendar-mode-v11.active {
+  background: #e2c182;
+  color: #2d281f;
+}
+
+/* =========================================================
+   NEWLA — Curved workspace topbar + GitHub CTA
+   Inspired by the compact, rounded navigation card reference.
+   ========================================================= */
+.topbar {
+  box-sizing: border-box;
+  height: 72px !important;
+  margin: 12px clamp(12px, 1.5vw, 20px) 0 !important;
+  width: calc(100% - clamp(24px, 3vw, 40px)) !important;
+  padding: 0 clamp(12px, 1.2vw, 18px) !important;
+  border: 1px solid #302c27 !important;
+  border-radius: 18px !important;
+  background: linear-gradient(180deg, rgba(26, 24, 21, .96), rgba(22, 20, 18, .94)) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .16), inset 0 1px 0 rgba(255,255,255,.025) !important;
+  backdrop-filter: blur(16px);
+}
+
+.topbar-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-brand {
+  flex: 0 0 auto;
+  width: 126px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.topbar-logo {
+  display: block;
+  width: 126px;
+  height: 40px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.topbar-logo-light { display: none; }
+body.light .topbar-logo-dark { display: none; }
+body.light .topbar-logo-light { display: block; }
+
+.topbar-divider {
+  width: 1px;
+  height: 28px;
+  flex: 0 0 auto;
+  background: rgba(255,255,255,.08);
+}
+
+.topbar .breadcrumb {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.github-star-btn {
+  flex: 0 0 auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: #f7f5f1;
+  color: #27231f;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  box-shadow: 0 3px 9px rgba(0,0,0,.14);
+  transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+
+.github-star-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.1;
+}
+
+.github-star-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+  background: #fffdfa;
+}
+
+.github-star-btn:active { transform: translateY(0); }
+
+body.light .topbar {
+  background: linear-gradient(180deg, rgba(249,245,238,.96), rgba(241,234,224,.95)) !important;
+  border-color: #d2c6b6 !important;
+  box-shadow: 0 10px 26px rgba(81,57,32,.08), inset 0 1px 0 rgba(255,255,255,.5) !important;
+}
+
+body.light .topbar-divider {
+  background: rgba(91,70,46,.12);
+}
+
+body.light .github-star-btn {
+  background: #29251f;
+  color: #f6f1e8;
+  border-color: rgba(70,56,40,.2);
+}
+
+body.light .github-star-btn:hover { background: #201d19; }
+
+@media (max-width: 900px) {
+  .topbar {
+    margin-top: 10px !important;
+    border-radius: 16px !important;
+  }
+  .topbar-brand,
+  .topbar-logo { width: 108px; }
+  .topbar-logo { height: 36px; }
+  .github-star-btn { padding: 0 12px; }
+}
+
+@media (max-width: 700px) {
+  .topbar-left { gap: 8px; }
+  .topbar-brand,
+  .topbar-logo { width: 92px; }
+  .topbar-divider { display: none; }
+  .topbar .breadcrumb { display: none; }
+  .github-star-btn span { display: none; }
+  .github-star-btn { width: 40px; padding: 0; }
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    margin: 8px 8px 0 !important;
+    width: calc(100% - 16px) !important;
+    padding: 0 8px !important;
+    height: 64px !important;
+    border-radius: 15px !important;
+  }
+  .topbar-brand,
+  .topbar-logo { width: 84px; }
+  .topbar .top-actions { gap: 5px; }
+  .topbar .top-btn { padding: 7px 8px; }
+  .topbar .top-btn#quickAddTop { font-size: 10px; }
+  .topbar .clock { font-size: 11px; letter-spacing: .04em; }
+  .github-star-btn { width: 36px; min-height: 36px; }
+}
+\n\n/* =========================================================\n   NEWLA — Final header polish\n   - Logo lives only inside the curved topbar card.\n   - Sidebar top slot carries the live clock.\n   - GitHub CTA uses a real GitHub mark and grows slightly on hover.\n   ========================================================= */\n.sidebar .brand.brand-clock-only {\n  box-sizing: border-box !important;\n  width: 100% !important;\n  height: 88px !important;\n  min-height: 88px !important;\n  margin: 0 !important;\n  padding: 0 12px 18px !important;\n  display: flex !important;\n  align-items: center !important;\n  justify-content: center !important;\n  border-bottom: 1px solid #292621 !important;\n}\n\n.sidebar .brand.brand-clock-only .sidebar-clock {\n  font-size: 19px !important;\n  line-height: 1 !important;\n  letter-spacing: .09em !important;\n  font-variant-numeric: tabular-nums !important;\n  color: #e8dfd0 !important;\n  white-space: nowrap !important;\n}\n\nbody.light .sidebar .brand.brand-clock-only {\n  border-bottom-color: #ddd0c0 !important;\n}\n\nbody.light .sidebar .brand.brand-clock-only .sidebar-clock {\n  color: #3d352c !important;\n}\n\n.github-star-btn .github-mark {\n  width: 16px !important;\n  height: 16px !important;\n  flex: 0 0 auto !important;\n  display: block !important;\n}\n\n.github-star-btn {\n  transform: scale(1) !important;\n  transform-origin: center !important;\n  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease, background-color .18s ease !important;\n}\n\n.github-star-btn:hover,\n.github-star-btn:focus-visible {\n  transform: scale(1.055) !important;\n  box-shadow: 0 8px 20px rgba(0,0,0,.20) !important;\n}\n\n.github-star-btn:active {\n  transform: scale(1.02) !important;\n}\n\n@media (max-width: 700px) {\n  .sidebar .brand.brand-clock-only {\n    height: 74px !important;\n    min-height: 74px !important;\n    padding-bottom: 12px !important;\n  }\n  .sidebar .brand.brand-clock-only .sidebar-clock {\n    font-size: 16px !important;\n  }\n}\n
