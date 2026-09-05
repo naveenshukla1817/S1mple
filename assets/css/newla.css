@@ -12752,3 +12752,96 @@ body.light .brain-ref-toolbar .brain-draw-toolbar {
 body.light .brain-ref-toolbar .brain-draw-toolbar {
   border-left-color: #cdbda9 !important;
 }
+
+/* =========================================================
+   NEWLA — Brainstorm board final layout
+   Toolbar stays in a compact full-width top row.
+   The board/workspace owns the entire width underneath.
+   ========================================================= */
+#view-brainstorm {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+#view-brainstorm .brain-ref-shell {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#view-brainstorm .brain-ref-topbar {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#view-brainstorm .brain-ref-toolbar {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  align-content: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 60px !important;
+  margin: 0 !important;
+  float: none !important;
+  box-sizing: border-box !important;
+}
+
+#view-brainstorm .brain-ref-workspace {
+  position: relative !important;
+  display: block !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  min-height: 560px !important;
+  height: calc(100vh - 310px) !important;
+  margin: 0 !important;
+  float: none !important;
+  clear: both !important;
+  box-sizing: border-box !important;
+}
+
+#view-brainstorm .brain-ref-board,
+#view-brainstorm .brain-ref-canvas-grid {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+#view-brainstorm .brain-ref-toolbar .brain-draw-toolbar {
+  position: static !important;
+  inset: auto !important;
+  float: none !important;
+}
+
+@media (max-width: 760px) {
+  #view-brainstorm .brain-ref-shell {
+    width: 100% !important;
+  }
+
+  #view-brainstorm .brain-ref-toolbar {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  #view-brainstorm .brain-ref-workspace {
+    min-height: 500px !important;
+  }
+}
