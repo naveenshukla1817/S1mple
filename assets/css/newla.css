@@ -12599,73 +12599,83 @@ body.light .github-star-btn:hover { background: #201d19; }
   z-index: 10050;
 }
 
-.brain-ref-more-menu {
-  position: absolute;
-  top: 122px;
-  right: 24px;
-  z-index: 10060;
+
+
+/* ---- Brainstorm inline pen controls ----
+   The Pen controls now sit exactly where the old More button lived.
+   They are shown only when Pen is the active tool.
+*/
+.brain-ref-toolbar .brain-draw-toolbar {
   display: none;
-  width: min(260px, calc(100vw - 32px));
-  padding: 12px;
-  gap: 5px;
-  flex-direction: column;
-  background: #fbf6ec;
-  color: #3f372e;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 18px 40px rgba(40, 31, 21, .24);
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  padding: 0 0 0 12px;
+  min-height: 44px;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid #51483b;
 }
 
-.brain-ref-more-menu.show {
+.brain-ref-toolbar .brain-draw-toolbar.show {
   display: flex;
 }
 
-.brain-ref-more-menu strong {
-  font-size: 10px;
-  letter-spacing: .08em;
-  color: #7a6c5b;
-  margin-bottom: 2px;
+.brain-ref-toolbar .brain-draw-toolbar .draw-label {
+  white-space: nowrap;
+  margin-right: -1px;
 }
 
-.brain-ref-more-menu button,
-.brain-ref-more-menu span {
-  display: block;
-  padding: 8px 9px;
-  border-radius: 8px;
-  font-size: 11px;
-  text-align: left;
+.brain-ref-toolbar .brain-draw-toolbar .draw-swatch {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
 }
 
-.brain-ref-more-menu button {
-  border: 1px solid transparent;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
+.brain-ref-toolbar .brain-draw-toolbar .draw-width-btn {
+  flex: 0 0 auto;
 }
 
-.brain-ref-more-menu button:hover {
-  background: #eee5d8;
-  border-color: #d5c6b3;
+.brain-ref-toolbar .brain-draw-toolbar .brain-ref-chrome-btn {
+  min-height: 40px;
+  flex: 0 0 auto;
 }
 
-.brain-ref-more-menu span {
-  color: #756a5f;
-  font-size: 10px;
+.brain-ref-toolbar .brain-draw-toolbar .brain-icon-btn {
+  width: 40px;
+  padding: 0;
 }
 
-.brain-ref-shell:fullscreen .brain-ref-more-menu {
-  top: 122px;
-  right: 24px;
+.brain-ref-shell:fullscreen .brain-ref-toolbar .brain-draw-toolbar {
+  position: relative;
+  z-index: 1010;
 }
 
-@media (max-width: 760px) {
-  .brain-ref-more-menu {
-    top: 110px;
-    right: 12px;
+@media (max-width: 1050px) {
+  .brain-ref-toolbar .brain-draw-toolbar {
+    flex-wrap: wrap;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
+}
 
-  .brain-ref-shell:fullscreen .brain-ref-more-menu {
-    top: 110px;
-    right: 12px;
+@media (max-width: 700px) {
+  .brain-ref-toolbar .brain-draw-toolbar {
+    margin-left: 0;
+    padding-left: 8px;
+    max-width: 100%;
+    border-left: 0;
+    border-top: 1px solid #51483b;
+  }
+}
+body.light .brain-ref-toolbar .brain-draw-toolbar {
+  border-left-color: #cdbda9;
+}
+@media (max-width: 700px) {
+  body.light .brain-ref-toolbar .brain-draw-toolbar {
+    border-left: 0;
+    border-top-color: #cdbda9;
   }
 }
