@@ -12577,3 +12577,95 @@ body.light .github-star-btn:hover { background: #201d19; }
   .github-star-btn { width: 36px; min-height: 36px; }
 }
 \n\n/* =========================================================\n   NEWLA — Final header polish\n   - Logo lives only inside the curved topbar card.\n   - Sidebar top slot carries the live clock.\n   - GitHub CTA uses a real GitHub mark and grows slightly on hover.\n   ========================================================= */\n.sidebar .brand.brand-clock-only {\n  box-sizing: border-box !important;\n  width: 100% !important;\n  height: 88px !important;\n  min-height: 88px !important;\n  margin: 0 !important;\n  padding: 0 12px 18px !important;\n  display: flex !important;\n  align-items: center !important;\n  justify-content: center !important;\n  border-bottom: 1px solid #292621 !important;\n}\n\n.sidebar .brand.brand-clock-only .sidebar-clock {\n  font-size: 19px !important;\n  line-height: 1 !important;\n  letter-spacing: .09em !important;\n  font-variant-numeric: tabular-nums !important;\n  color: #e8dfd0 !important;\n  white-space: nowrap !important;\n}\n\nbody.light .sidebar .brand.brand-clock-only {\n  border-bottom-color: #ddd0c0 !important;\n}\n\nbody.light .sidebar .brand.brand-clock-only .sidebar-clock {\n  color: #3d352c !important;\n}\n\n.github-star-btn .github-mark {\n  width: 16px !important;\n  height: 16px !important;\n  flex: 0 0 auto !important;\n  display: block !important;\n}\n\n.github-star-btn {\n  transform: scale(1) !important;\n  transform-origin: center !important;\n  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease, background-color .18s ease !important;\n}\n\n.github-star-btn:hover,\n.github-star-btn:focus-visible {\n  transform: scale(1.055) !important;\n  box-shadow: 0 8px 20px rgba(0,0,0,.20) !important;\n}\n\n.github-star-btn:active {\n  transform: scale(1.02) !important;\n}\n\n@media (max-width: 700px) {\n  .sidebar .brand.brand-clock-only {\n    height: 74px !important;\n    min-height: 74px !important;\n    padding-bottom: 12px !important;\n  }\n  .sidebar .brand.brand-clock-only .sidebar-clock {\n    font-size: 16px !important;\n  }\n}\n
+
+/* ---- Newla bug-fix safety layer ---- */
+.brain-ref-shell:fullscreen {
+  overflow: visible !important;
+  position: relative;
+}
+
+.brain-ref-shell:fullscreen .brain-ref-toolbar,
+.brain-ref-shell:fullscreen .brain-ref-topbar,
+.brain-ref-shell:fullscreen .brain-draw-toolbar {
+  position: relative;
+  z-index: 1000;
+}
+
+.brain-ref-shell:fullscreen .brain-ref-workspace {
+  z-index: 1;
+}
+
+.brain-ref-shell:fullscreen .brain-ref-color-menu {
+  z-index: 10050;
+}
+
+.brain-ref-more-menu {
+  position: absolute;
+  top: 122px;
+  right: 24px;
+  z-index: 10060;
+  display: none;
+  width: min(260px, calc(100vw - 32px));
+  padding: 12px;
+  gap: 5px;
+  flex-direction: column;
+  background: #fbf6ec;
+  color: #3f372e;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(40, 31, 21, .24);
+}
+
+.brain-ref-more-menu.show {
+  display: flex;
+}
+
+.brain-ref-more-menu strong {
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: #7a6c5b;
+  margin-bottom: 2px;
+}
+
+.brain-ref-more-menu button,
+.brain-ref-more-menu span {
+  display: block;
+  padding: 8px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  text-align: left;
+}
+
+.brain-ref-more-menu button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.brain-ref-more-menu button:hover {
+  background: #eee5d8;
+  border-color: #d5c6b3;
+}
+
+.brain-ref-more-menu span {
+  color: #756a5f;
+  font-size: 10px;
+}
+
+.brain-ref-shell:fullscreen .brain-ref-more-menu {
+  top: 122px;
+  right: 24px;
+}
+
+@media (max-width: 760px) {
+  .brain-ref-more-menu {
+    top: 110px;
+    right: 12px;
+  }
+
+  .brain-ref-shell:fullscreen .brain-ref-more-menu {
+    top: 110px;
+    right: 12px;
+  }
+}
