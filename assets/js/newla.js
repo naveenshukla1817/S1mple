@@ -568,6 +568,9 @@ function openTaskModal(task=null) {
   $("taskDueDate").value = task?.dueDate || "";
   $("taskReminderDate").value = task?.reminderDate || "";
   $("taskReminderTime").value = task?.reminderTime || "";
+  if($("taskCategory")) $("taskCategory").value = task?.category || "Coding";
+  if($("taskRecurring")) $("taskRecurring").value = task?.recurring || "none";
+  if($("taskSubtasks")) $("taskSubtasks").value = (task?.subtasks || []).map(s => typeof s === "string" ? s : s.text).join("\n");
 
   $("taskModal").style.display = "grid";
   setTimeout(() => $("taskTitle").focus(),40);
@@ -589,6 +592,11 @@ $("taskForm").addEventListener("submit",event => {
     ? tasks.find(t => t.id === editingTaskId)
     : null;
 
+  const subtaskLines = $("taskSubtasks")
+    ? $("taskSubtasks").value.split("\n").map(x => x.trim()).filter(Boolean)
+    : [];
+  const previousSubtasks = existing?.subtasks || [];
+
   const task = {
     id: existing?.id || crypto.randomUUID(),
     title,
@@ -599,14 +607,10 @@ $("taskForm").addEventListener("submit",event => {
     reminderTime: $("taskReminderTime").value,
     category: $("taskCategory")?.value || existing?.category || "Coding",
     recurring: $("taskRecurring")?.value || existing?.recurring || "none",
-    subtasks: ($("taskSubtasks")?.value || "")
-      .split("\n")
-      .map(v => v.trim())
-      .filter(Boolean)
-      .map((text, i) => {
-        const old = existing?.subtasks?.[i];
-        return typeof old === "object" ? {...old, text} : {id: crypto.randomUUID(), text, done:false};
-      }),
+    subtasks: subtaskLines.map((text,i) => {
+      const old = previousSubtasks[i];
+      return typeof old === "object" ? {...old,text} : {id:crypto.randomUUID(),text,done:false};
+    }),
     status: existing?.status || "pending",
     proofDataUrl: existing?.proofDataUrl || null,
     proofThumbDataUrl: existing?.proofThumbDataUrl || null,
@@ -644,6 +648,7 @@ $("tasksAdd").onclick = () => openTaskModal();
 
 function filteredTasks() {
   let result = tasks.filter(task => {
+    if (task?.deletedAt) return false;
     if (taskFilter === "pending") return task.status !== "completed";
     if (taskFilter === "completed") return task.status === "completed";
     return true;
@@ -1479,50 +1484,19 @@ function createTaskFromBrainNote(n){
   toast("Idea loaded into Create Task.");
 }
 
-function openColorMenu(id,x,y){
+function openColorMenu(id){
   const menu=$("colorMenu");
   const shell=document.querySelector(".brain-ref-shell");
-  if(!menu)return;
+  const button=$("colorButton");
+  if(!menu||!shell||!button)return;
+  if(menu.parentElement!==shell)shell.appendChild(menu);
   menu.dataset.noteId=id;
-  if(shell && !shell.contains(menu))shell.appendChild(menu);
-  if(shell){
-    const sr=shell.getBoundingClientRect();
-    menu.style.position="absolute";
-    menu.style.left=Math.max(8,Math.min(x-sr.left,sr.width-155))+"px";
-    menu.style.top=Math.max(8,y-sr.top)+"px";
-  }else{
-    menu.style.position="fixed";
-    menu.style.left=Math.min(x,window.innerWidth-180)+"px";
-    menu.style.top=Math.min(y,window.innerHeight-60)+"px";
-  }
   menu.style.display="flex";
-}
-
-function toggleBrainMoreMenu(){
-  const shell=document.querySelector(".brain-ref-shell");
-  const button=$("moreButton");
-  if(!shell||!button)return;
-  let menu=$("brainMoreMenu");
-  if(!menu){
-    menu=document.createElement("div");
-    menu.id="brainMoreMenu";
-    menu.className="brain-more-menu";
-    menu.innerHTML=`
-      <div class="brain-more-kicker">QUICK CONTROLS</div>
-      <div><kbd>N</kbd><span>New task</span></div>
-      <div><kbd>P</kbd><span>Pen</span></div>
-      <div><kbd>T</kbd><span>Text</span></div>
-      <div><kbd>E</kbd><span>Eraser</span></div>
-      <div><kbd>V</kbd><span>Select</span></div>
-      <div><kbd>Ctrl</kbd><kbd>Z</kbd><span>Undo</span></div>
-      <div class="brain-more-note">Mouse wheel to zoom · Hand to pan · Double-click a sticky to edit</div>
-    `;
-    shell.appendChild(menu);
-  }
-  const sr=shell.getBoundingClientRect(), br=button.getBoundingClientRect();
-  menu.style.left=Math.max(8,Math.min(br.left-sr.left,sr.width-245))+"px";
-  menu.style.top=Math.max(8,br.bottom-sr.top+7)+"px";
-  menu.classList.toggle("show");
+  const rect=button.getBoundingClientRect();
+  const shellRect=shell.getBoundingClientRect();
+  const width=menu.offsetWidth||170;
+  menu.style.left=Math.max(8,Math.min(shellRect.width-width-8,rect.left-shellRect.left))+"px";
+  menu.style.top=Math.max(8,rect.bottom-shellRect.top+6)+"px";
 }
 
 function drawWires(){
@@ -1615,16 +1589,48 @@ document.querySelectorAll("[data-tool]").forEach(b=>{
   };
 });
 
-$("colorButton").onclick=(e)=>{
-  e.stopPropagation();
+$("colorButton").onclick=()=>{
   if(!selectedId){toast("Select a sticky first.","error");return;}
-  const r=$("colorButton").getBoundingClientRect();
-  openColorMenu(selectedId,r.left,r.bottom+6);
+  openColorMenu(selectedId);
 };
-$("moreButton").onclick=(e)=>{
-  e.stopPropagation();
-  toggleBrainMoreMenu();
-};
+function toggleBrainMoreMenu(){
+  const button=$("moreButton");
+  const shell=document.querySelector(".brain-ref-shell");
+  if(!button||!shell)return;
+  let menu=$("brainMoreMenu");
+  if(!menu){
+    menu=document.createElement("div");
+    menu.id="brainMoreMenu";
+    menu.className="brain-more-menu";
+    menu.innerHTML=`
+      <div class="brain-more-menu-title">Quick controls</div>
+      <button type="button" data-more-tool="p"><kbd>P</kbd><span>Pen</span></button>
+      <button type="button" data-more-tool="t"><kbd>T</kbd><span>Text</span></button>
+      <button type="button" data-more-tool="e"><kbd>E</kbd><span>Eraser</span></button>
+      <button type="button" data-more-tool="v"><kbd>V</kbd><span>Select</span></button>
+      <div class="brain-more-menu-hint">Mouse wheel · Zoom &nbsp; Hand · Pan &nbsp; Double-click · Edit</div>`;
+    shell.appendChild(menu);
+    menu.querySelectorAll("[data-more-tool]").forEach(item=>{
+      item.addEventListener("click",ev=>{
+        ev.stopPropagation();
+        const map={p:"pen",t:"text",e:"eraser",v:"select"};
+        const tool=map[item.dataset.moreTool];
+        if(tool&&typeof selectTool==="function")selectTool(tool);
+        menu.classList.remove("show");
+      });
+    });
+  }
+  const rect=button.getBoundingClientRect();
+  const shellRect=shell.getBoundingClientRect();
+  menu.style.left=Math.max(8,rect.right-shellRect.left-menu.offsetWidth)+"px";
+  menu.style.top=(rect.bottom-shellRect.top+8)+"px";
+  menu.classList.toggle("show");
+}
+$("moreButton").onclick=e=>{e.preventDefault();e.stopPropagation();toggleBrainMoreMenu();};
+document.addEventListener("click",e=>{
+  const menu=$("brainMoreMenu");
+  if(menu&&!e.target.closest("#brainMoreMenu")&&!e.target.closest("#moreButton"))menu.classList.remove("show");
+});
 $("addSticky").onclick=addSticky;
 $("createTask").onclick=()=>{
   const n=brainNotes.find(x=>x.id===selectedId)||brainNotes[0];
@@ -1769,11 +1775,8 @@ document.querySelectorAll("[data-color]").forEach(b=>{
 });
 
 document.addEventListener("click",e=>{
-  if(!e.target.closest("#colorMenu")&&!e.target.closest("#colorButton")){
+  if(!e.target.closest("#colorMenu")&&!e.target.closest('[data-action="color"]')&&!e.target.closest("#colorButton")){
     $("colorMenu").style.display="none";
-  }
-  if(!e.target.closest("#brainMoreMenu")&&!e.target.closest("#moreButton")){
-    $("brainMoreMenu")?.classList.remove("show");
   }
 });
 
@@ -2189,34 +2192,24 @@ $("dashboardBrainstorm").onclick=()=>switchView("brainstorm");
 ============================================================ */
 
 document.addEventListener("keydown",event=>{
-  const tag=event.target.tagName;
-  const typing=
-    tag==="INPUT" ||
-    tag==="TEXTAREA" ||
-    tag==="SELECT";
-
-  if (typing) return;
+  const tag=(event.target?.tagName||"").toUpperCase();
+  const typing=tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT";
+  if(typing || event.ctrlKey || event.metaKey || event.altKey) return;
 
   const key=event.key.toLowerCase();
-
   if(key==="n"){
+    event.preventDefault();
     switchView("tasks");
     openTaskModal();
-    event.preventDefault();
-    event.stopImmediatePropagation();
     return;
   }
 
-  if(activeView==="brainstorm"){
-    if((event.ctrlKey||event.metaKey) && key==="z"){
-      event.preventDefault();
-      $("undoButton")?.click();
-      return;
-    }
-    if(key==="p"){ selectTool("pen"); return; }
-    if(key==="t"){ selectTool("text"); return; }
-    if(key==="e"){ selectTool("eraser"); return; }
-    if(key==="v"){ selectTool("select"); return; }
+  if(activeView!=="brainstorm") return;
+  const map={p:"pen",t:"text",e:"eraser",v:"select"};
+  const tool=map[key];
+  if(tool && typeof selectTool==="function"){
+    event.preventDefault();
+    selectTool(tool);
   }
 });
 
@@ -2391,20 +2384,9 @@ document.querySelectorAll(".modal").forEach(modal=>{
 
   function esc(v){return escapeHtml(v==null?"":v)}
 
-  /* -------- Rich task fields -------- */
-  const originalOpenTaskModal=window.openTaskModal;
-  window.openTaskModal=function(task=null){
-    originalOpenTaskModal(task);
-    setTimeout(()=>{
-      if($("taskCategory")) $("taskCategory").value=task?.category||"Coding";
-      if($("taskRecurring")) $("taskRecurring").value=task?.recurring||"none";
-      if($("taskSubtasks")) $("taskSubtasks").value=(task?.subtasks||[]).map(s=>typeof s==="string"?s:s.text).join("\n");
-    },0);
-  };
-
-  const taskForm=$("taskForm");
-  // The primary submit handler now persists the rich task fields synchronously.
-  // Avoid a delayed handler reading the reset form and overwriting a chosen category.
+    /* -------- Rich task fields -------- */
+  // Rich task fields are handled by the core task modal/save flow.
+  // No delayed submit patch runs here, so form.reset() cannot overwrite the saved category.
 
   /* -------- Search + filters -------- */
   const search=$("taskSearch"), cat=$("taskCategoryFilter"), pri=$("taskPriorityFilter");
@@ -4158,7 +4140,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
     document.querySelectorAll("[data-step4-filter]").forEach(btn=>btn.classList.toggle("active",btn.dataset.step4Filter===step4Filter));
     const summary=$("step4Summary");
     if(summary){
-      const all=tasks.length;
+      const all=tasks.filter(t=>t&&!t.deletedAt).length;
       const shown=window.filteredTasksStep4?window.filteredTasksStep4().length:all;
       summary.textContent=`Showing ${shown} of ${all}`;
     }
@@ -4168,7 +4150,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   window.filteredTasksStep4=function(){
     let list=Array.isArray(tasks)?tasks.slice():[];
     list=list.filter(task=>{
-      if(task.deletedAt)return false;
+      if(task?.deletedAt)return false;
       if(taskFilter==="pending" && task.status==="completed")return false;
       if(taskFilter==="completed" && task.status!=="completed")return false;
       if(step4Filter==="today" && !isToday(task))return false;
@@ -4326,10 +4308,10 @@ document.querySelectorAll(".modal").forEach(modal=>{
       const summary=$("step4Summary");if(summary)summary.textContent=`Showing ${list.length} of ${tasks.length}`;
     }
     const today=todayKey();
-    if($("taskToday"))$("taskToday").textContent=tasks.filter(t=>!t.deletedAt&&(t.dueDate===today||t.reminderDate===today)).length;
-    if($("taskPending"))$("taskPending").textContent=tasks.filter(t=>!t.deletedAt&&t.status!=="completed").length;
-    if($("taskOverdue"))$("taskOverdue").textContent=tasks.filter(t=>!t.deletedAt&&isOverdue(t)).length;
-    if($("taskCompleted"))$("taskCompleted").textContent=tasks.filter(t=>!t.deletedAt&&t.status==="completed").length;
+    if($("taskToday"))$("taskToday").textContent=tasks.filter(t=>t.dueDate===today||t.reminderDate===today).length;
+    if($("taskPending"))$("taskPending").textContent=tasks.filter(t=>t.status!=="completed").length;
+    if($("taskOverdue"))$("taskOverdue").textContent=tasks.filter(isOverdue).length;
+    if($("taskCompleted"))$("taskCompleted").textContent=tasks.filter(t=>t.status==="completed").length;
     syncFilterUI();
   };
 
@@ -4386,41 +4368,11 @@ document.querySelectorAll(".modal").forEach(modal=>{
         void nexaAlert("Choose both a reminder date and time, or leave both empty.",{title:"Reminder details",kicker:"TASK"});
         return;
       }
-      const id=typeof editingTaskId!=="undefined"?editingTaskId:null;
-      // Capture these values before the primary submit handler closes/resets the modal.
-      const capturedCategory=$("taskCategory")?.value||"Coding";
-      const capturedRecurring=$("taskRecurring")?.value||"none";
-      const capturedLines=($("taskSubtasks")?.value||"").split("\n").map(v=>v.trim()).filter(Boolean);
-      setTimeout(()=>{
-        const target=id?tasks.find(t=>t.id===id):tasks[0];
-        if(!target)return;
-        target.category=capturedCategory;
-        target.recurring=capturedRecurring;
-        const prior=getSubtasks(target);
-        target.subtasks=capturedLines.map((line,i)=>prior[i]?{...prior[i],text:line}:{id:crypto.randomUUID(),text:line,done:false});
-        save(KEYS.TASKS,tasks);
-        window.renderTasks();
-        window.renderV2Dashboard?.();
-        showTaskSavedState();
-      },40);
+      // The core submit handler now saves category, recurring, and subtasks synchronously.
     },true);
   }
 
-  /* Prevent partially entered reminder values from being persisted. */
-  const baseOpen=window.openTaskModal;
-  if(baseOpen&&!baseOpen.__step4Wrapped){
-    const wrapped=function(task=null){
-      baseOpen(task);
-      setTimeout(()=>{
-        if(!task)return;
-        $("taskCategory")&&($("taskCategory").value=task.category||"Coding");
-        $("taskRecurring")&&($("taskRecurring").value=task.recurring||"none");
-        $("taskSubtasks")&&($("taskSubtasks").value=getSubtasks(task).map(s=>s.text).join("\n"));
-      },0);
-    };
-    wrapped.__step4Wrapped=true;
-    window.openTaskModal=wrapped;
-  }
+  /* Rich task fields are owned by the core task flow above. */
 
   function init(){
     ensureStep4Controls();
