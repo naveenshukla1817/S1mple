@@ -5656,5 +5656,3 @@ document.querySelectorAll(".modal").forEach(modal=>{
   }
   window.renderTeams=renderTeams;
 })();
-
-
