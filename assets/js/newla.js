@@ -5476,12 +5476,36 @@ document.querySelectorAll(".modal").forEach(modal=>{
     toast('Completed task deleted.');
     await refreshCurrentTeam();
   }
+  async function deleteUnassignedTeamTask(){
+    const c=client(),t=currentTeam(),id=$('teamEditId')?.value,task=teamTasks.find(x=>x.id===id);
+    if(!c||!t||!task||currentRole()!=='head')return;
+    if(task.assigned_to){
+      toast('Only unassigned team tasks can be deleted here.','error');
+      return;
+    }
+    let confirmed=true;
+    if(typeof nexaConfirm==='function'){
+      confirmed=await nexaConfirm(`Delete “${task.title}”? This unassigned team task will be removed.`,{
+        title:'Delete task',kicker:'DANGER ZONE',danger:true
+      });
+    }
+    if(!confirmed)return;
+    const {error}=await c.rpc('delete_nexa_team_task',{p_task_id:id});
+    if(error){
+      console.error(error);
+      toast(error.message||'Could not delete the task.','error');
+      return;
+    }
+    closeModal('teamEditModal');
+    toast('Unassigned task deleted.');
+    await refreshCurrentTeam();
+  }
   function openTeamEdit(id){
     const role=currentRole(),t=currentTeam(),task=teamTasks.find(x=>x.id===id);if(role!=='head'||!t||!task)return;
     if(task.status==='submitted'){toast('Submitted work is locked until review.','error');return;}
     $('teamEditId').value=task.id;$('teamEditTaskTitle').value=task.title||'';$('teamEditTaskDescription').value=task.description||'';$('teamEditPriority').value=task.priority||'medium';$('teamEditDueDate').value=task.due_date||'';
     const sel=$('teamEditAssignee');sel.innerHTML=`<option value="">Unassigned</option>`+teamMembers.filter(m=>m.role!=='head').map(m=>`<option value="${esc(m.user_id)}">${esc(m.display_name||'Member')}</option>`).join('');sel.value=task.assigned_to||'';
-    $('teamEditLockNote').textContent=task.status==='submitted'?'This task is waiting for review and cannot be edited.':'';openModal('teamEditModal');
+    $('teamEditLockNote').textContent=task.status==='submitted'?'This task is waiting for review and cannot be edited.':(task.assigned_to?'':'No member is assigned to this task. You can delete it here.');$('teamEditDeleteUnassigned').style.display=(!task.assigned_to&&task.status!=='submitted')?'inline-flex':'none';openModal('teamEditModal');
   }
   async function saveTeamEdit(e){
     e.preventDefault();const c=client(),t=currentTeam(),id=$('teamEditId').value,task=teamTasks.find(x=>x.id===id);if(!c||!t||!task||currentRole()!=='head')return;
@@ -5652,7 +5676,7 @@ document.querySelectorAll(".modal").forEach(modal=>{
   $('teamLeaveCancel')?.addEventListener('click',()=>closeModal('teamLeaveModal'));
   $('teamLeaveConfirm')?.addEventListener('click',leaveTeam);
   $('teamCreateClose')?.addEventListener('click',()=>closeModal('teamCreateModal'));$('teamJoinClose')?.addEventListener('click',()=>closeModal('teamJoinModal'));$('teamProofClose')?.addEventListener('click',()=>closeModal('teamProofModal'));
-  $('teamCreateForm')?.addEventListener('submit',createTeam);$('teamJoinForm')?.addEventListener('submit',e=>{e.preventDefault();joinTeam()});$('teamTaskForm')?.addEventListener('submit',createTeamTask);$('teamProofSubmit')?.addEventListener('click',submitTeamProof);$('teamEditForm')?.addEventListener('submit',saveTeamEdit);$('teamEditClose')?.addEventListener('click',()=>closeModal('teamEditModal'));$('teamViewMyWork')?.addEventListener('click',()=>{teamTaskView='mine';renderTeamTasks()});$('teamViewAll')?.addEventListener('click',()=>{teamTaskView='all';renderTeamTasks()});
+  $('teamCreateForm')?.addEventListener('submit',createTeam);$('teamJoinForm')?.addEventListener('submit',e=>{e.preventDefault();joinTeam()});$('teamTaskForm')?.addEventListener('submit',createTeamTask);$('teamProofSubmit')?.addEventListener('click',submitTeamProof);$('teamEditForm')?.addEventListener('submit',saveTeamEdit);$('teamEditDeleteUnassigned')?.addEventListener('click',deleteUnassignedTeamTask);$('teamEditClose')?.addEventListener('click',()=>closeModal('teamEditModal'));$('teamViewMyWork')?.addEventListener('click',()=>{teamTaskView='mine';renderTeamTasks()});$('teamViewAll')?.addEventListener('click',()=>{teamTaskView='all';renderTeamTasks()});
   $('teamCopyCode')?.addEventListener('click',async()=>{const code=activeJoinCode||'';if(!code)return;try{await navigator.clipboard.writeText(code);toast('Team code copied.')}catch{toast('Could not copy the code.','error')}});
   $('teamCopyLink')?.addEventListener('click',async()=>{const link=$('teamJoinCode')?.dataset?.inviteLink;if(!link)return;try{await navigator.clipboard.writeText(link);toast('Invite link copied.')}catch{toast('Could not copy the invite link.','error')}});
   ['teamCreateModal','teamJoinModal','teamProofModal','teamEditModal','teamLeaveModal','teamRenameModal'].forEach(id=>$(id)?.addEventListener('click',e=>{if(e.target===$(id))closeModal(id)}));
