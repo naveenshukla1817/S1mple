@@ -755,7 +755,10 @@ Write your notes here..."></textarea>
 <label>Due date<input aria-label="Edit team task due date" id="teamEditDueDate" type="date"/></label>
 </div>
 <p class="team-modal-note" id="teamEditLockNote"></p>
-<button class="btn-accent" type="submit">Save changes</button>
+<div class="team-edit-footer">
+  <button class="btn-danger-soft" id="teamEditDeleteUnassigned" type="button" style="display:none">Delete task</button>
+  <button class="btn-accent" type="submit">Save changes</button>
+</div>
 </form>
 </div>
 </div>
