@@ -12669,3 +12669,9 @@ body.light .github-star-btn:hover { background: #201d19; }
     right: 12px;
   }
 }
+
+\n/* Unassigned team-task delete action */\n
+.team-edit-footer{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:4px}
+.btn-danger-soft{appearance:none;border:1px solid var(--border,rgba(255,255,255,.14));background:transparent;color:var(--muted,#aaa);padding:11px 15px;border-radius:12px;font:inherit;cursor:pointer;transition:color .18s ease,border-color .18s ease,transform .18s ease}
+.btn-danger-soft:hover{color:#d98f87;border-color:rgba(190,100,90,.55);transform:translateY(-1px)}
+@media (max-width:640px){.team-edit-footer{flex-direction:column-reverse;align-items:stretch}.team-edit-footer button{width:100%}}
